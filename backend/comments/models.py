@@ -7,4 +7,4 @@ class Comments(models.Model):
     size = models.IntegerField()
     #TODO: Update post and also update id generation
     # post = models.OneToOneField(Post, on_delete=models.CASCADE)
-    id = models.CharField(max_length=250, primary_key=True, editable=True, default='replacewithpost'+'/'+str(uuid.uuid4()))
+    id = models.CharField(max_length=250, primary_key=True)
