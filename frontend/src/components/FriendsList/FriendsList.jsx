@@ -5,13 +5,13 @@ import "./FriendsList.css"
 export const User = (props) => {
     let displayName = props.data.displayName
     let github = props.data.github
-    let profileImage = props.data.profileImage ? props.data.profileImage : "https://imgur.com/gallery/AizUHEf"
+    let profileImage = props.data.profileImage ? props.data.profileImage : "https://i.imgur.com/w3UEu8o.jpeg"
     return (
         <Grid>
-            <Card className='hoverCard' style={{margin:3, padding:"5% 5%", cursor:"pointer"}} elevation={15} onClick={() => {window.open(props.data.url)}}>
-                <img style={{borderRadius:"50%", height:"150px", width:"150px", objectPosition:"center", objectFit:"cover", marginBottom:"1em"}} src={profileImage} /> 
-                <Typography variant="h4">{displayName}</Typography>
-                <Typography variant="h6">{github}</Typography>
+            <Card className='hoverCard' style={{margin:3, padding:"2% 2%", cursor:"pointer"}} elevation={15} onClick={() => {window.open(props.data.url)}}>
+                <img style={{borderRadius:"50%", height:"100px", width:"100px", objectPosition:"center", objectFit:"cover"}} src={profileImage}/> 
+                <Typography variant="h4" style={{display:"inline", padding:"0% 5%"}}>{displayName}</Typography>
+                <Typography variant="h6" style={{display:"inline"}}>{github}</Typography>
             </Card>
         </Grid>
     )
@@ -47,7 +47,15 @@ export const FriendsList = () => {
                 url:"http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908f1658e",
                 github: "http://github.com/byrontung",
                 profileImage: "https://i.imgur.com/LRoLTlK.jpeg"
-            }
+            },
+            {
+                type:"author",
+                id:"http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908fff1658e",
+                host:"http://127.0.0.1:8000/",
+                displayName:"Tyron Bung",
+                url:"http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908fff1658e",
+                github: "http://github.com/tyronbung",
+            },
         ]
     }
     let users = data.items
