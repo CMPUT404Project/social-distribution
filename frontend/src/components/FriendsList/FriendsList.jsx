@@ -1,4 +1,4 @@
-import { Box, Container, Card, Typography, CardMedia, Row, Grid} from '@mui/material'
+import {Card, Typography, Grid} from '@mui/material'
 import React from 'react'
 import "./FriendsList.css"
 
