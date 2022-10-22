@@ -1,8 +1,13 @@
+import { FriendsList } from "../components/FriendsList";
 
 
 function FriendsPage() {
     return(
-        <div>FriendsPage</div>
+        <div>
+            FriendsPage
+            <FriendsList />
+        </div>
+        
     )
 }
 
