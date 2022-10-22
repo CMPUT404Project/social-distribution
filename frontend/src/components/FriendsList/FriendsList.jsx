@@ -6,16 +6,33 @@ export const User = (props) => {
     let displayName = props.data.displayName
     let github = props.data.github
     let profileImage = props.data.profileImage ? props.data.profileImage : "https://i.imgur.com/w3UEu8o.jpeg"
+    // var colours = ["red", "blue", "green"] // for future implementation
+    var status = ["Friend", "True Friend", "Real Friend"]
     return (
         <Grid>
             <Card className='hoverCard' style={{margin:3, padding:"2% 2%", cursor:"pointer"}} elevation={15} onClick={() => {window.open(props.data.url)}}>
                 <img style={{borderRadius:"50%", height:"100px", width:"100px", objectPosition:"center", objectFit:"cover"}} src={profileImage}/> 
                 <Typography variant="h4" style={{display:"inline", padding:"0% 5%"}}>{displayName}</Typography>
                 <Typography variant="h6" style={{display:"inline"}}>{github}</Typography>
+                {/* Status of relationship is currently random for display */}
+                <Typography variant="h7" style={{display:"inline", float:"right"}}>{status[Math.floor(Math.random() * status.length)]}</Typography> 
             </Card>
         </Grid>
     )
 }
+
+
+
+{/*
+ get request for friend should AT LEAST return 
+ {
+    type: string // friend, true friend, real friend
+    id: str      // url at where their profile originates from (could be from a different node?)
+    host: str    // where the user originally had their user
+    displayName str // 
+ }type (of friend), id, host, displayName,  
+ dasd
+*/}
 
 export const FriendsList = () => {
     var data = {
