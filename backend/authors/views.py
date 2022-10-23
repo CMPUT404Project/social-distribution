@@ -15,10 +15,13 @@ def author(request):
         serializer = AuthorSerializer(authors, many=True)
         return JsonResponse(serializer.data, safe=False)
 
-    #may want to add extra logic to create a new author
-    #ex: id should use the host with a uuid appended to it
+    
+    # POST request
+    # Fields from client payload are: displayName, github, profileImage
+    # Fields filled in by server: host, url, id
     elif request.method == 'POST':
         data = JSONParser().parse(request)
+        data = fillAuthorJSONPayload(request, data)
         serializer = AuthorSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -40,6 +43,7 @@ def author_id(request, id):
         #we are using the request url as the id
         authorID = request.build_absolute_uri()
         author = Author.objects.get(pk=authorID)
+        print(author)
     except Author.DoesNotExist:
         return HttpResponse(status=404)
 
@@ -52,3 +56,10 @@ def author_id(request, id):
         author.delete()
         return HttpResponse(status=204)
 
+def fillAuthorJSONPayload(request, jsonPayload):
+    """
+    Fills in the JSON payload with the host and url from the request
+    """
+    jsonPayload['host'] = request.build_absolute_uri('/')
+    jsonPayload['url'] = request.build_absolute_uri()
+    return jsonPayload
