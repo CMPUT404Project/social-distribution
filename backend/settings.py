@@ -12,7 +12,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 
 import os
 from pathlib import Path
+<<<<<<< HEAD:backend/settings.py
 import django_on_heroku
+=======
+from datetime import timedelta
+>>>>>>> fe4f2d7 (Update timeout period for access/refresh token to be 1/3 months respectively):backend/backend/settings.py
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -137,4 +141,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     )
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=90),
 }

@@ -9,7 +9,7 @@ class UserList(ListAPIView):
     """
     Returns a list of all users in the system.
     """
-    permission_classes = (permissions.IsAuthenticated, permissions.IsAdminUser)
+    permission_classes = [permissions.IsAuthenticated&permissions.IsAdminUser]
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
@@ -17,8 +17,8 @@ class UserDetail(RetrieveAPIView):
     """
     Returns the current authenticated user.
     """
-    permission_classes = (permissions.IsAuthenticated)
+    permission_classes = [permissions.IsAuthenticated]
     serializer_class = UserSerializer
 
-    def get_object(self, username):
+    def get_object(self):
         return self.request.user
