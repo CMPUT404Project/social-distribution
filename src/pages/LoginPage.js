@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 // Import Material UI Icons
@@ -18,6 +19,7 @@ import "./LoginPage.css";
 
 
 function LoginPage() {
+    const navigate = useNavigate();
     const [values, setValues] = useState({
         username: "",
         password: "",
@@ -43,13 +45,15 @@ function LoginPage() {
         event.preventDefault();
 
         try {
-            const response = await axios.post('http://localhost:8000/auth/token/',
+            const response = await axios.post('api/auth/token/',
                 {
                     username: values.username,
                     password: values.password
                 }
             ).then(function (response) {
+                // temp
                 alert('Login Successful')
+                navigate('/homepage')
             }
             ).catch(function (error) {
                 alert('Login Failed')
