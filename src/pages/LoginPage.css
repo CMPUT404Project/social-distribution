@@ -1,0 +1,239 @@
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+}
+
+a {
+    text-decoration: none; 
+}
+
+input {
+    outline: none;
+    border: none;
+}
+
+button {
+    border: none;
+}
+
+button:hover {
+    cursor: pointer;
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+.container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    padding: 15px;
+    background: #0250c5;
+    background: linear-gradient(-45deg, #012a68,#912d60, #05b37f);
+    background-size: 800% 800%;
+    animation: Gradient 17.5s ease-in-out infinite;
+    position: relative;
+    z-index: 1;
+}
+
+@keyframes Gradient {
+    0% {
+        background-position: 0% 50%;
+    }
+    50% {
+        background-position: 100% 50%;
+    }
+    100% {
+        background-position: 0% 50%;
+    }
+  }
+
+.login-card {
+    padding: 50px 50px 30px 50px;
+    width: 450px;
+    background: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.login-form {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.login-title {
+    padding-bottom: 40px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 40px;
+    color: #333;
+    text-align: center;
+    width: 100%;
+    display: block;
+}
+
+.input-container {
+    margin-bottom: 16px;
+    position: relative;
+    width: 100%;
+    z-index: 1;
+}
+
+.input-field {
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #272727;
+    display: block;
+    width: 100%;
+    height: 60px;
+    background: #e6e6e6;
+    border: 3px solid transparent;
+    border-radius: 3px;
+    padding: 0 35px 0 75px;
+}
+
+.username {
+    padding: 0 10px 0 75px;
+}
+
+.password {
+    font-weight: bold;
+}
+
+.input-field::placeholder {
+    font-family: Arial, Helvetica, sans-serif;
+    color: rgba(0, 0, 0, 0.42);
+}
+.input-field:focus {
+    border: 3px solid #e0127c;
+}
+
+.input-field-focus {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    box-shadow: 0 0;
+    color: rgb(155, 47, 103, 0.6);
+}
+
+.input-field:focus+.input-field-focus {
+    animation: anim-shadow .5s ease-in-out forwards;
+}
+
+@keyframes anim-shadow {
+    to {
+        box-shadow: 0 0 60px 20px;
+        opacity: 0;
+    }
+}
+
+/* CSS for MUI textfield that might be used */
+/* .input-field div {
+    font-size: 18px;
+    color: #686868;
+    width: 100%;
+    background: #e6e6e6;
+    border-radius: 3px;
+    padding: 0 10px 0 40px;
+}
+
+.input-field label {
+    font-size: 18px;
+    width: 100%;
+    border-radius: 3px;
+    padding: 0 0px 0 50px;
+}
+
+.css-1sumxir-MuiFormLabel-root-MuiInputLabel-root {
+    transform: translate(-23px, -9px) scale(0.75)!important;
+} */
+
+.input-icon {
+    height: 100%;
+    color: rgb(66, 66, 66);
+    background-color: rgba(170, 170, 170, 0.274);
+    display: flex;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    padding-left: 15px;
+    padding-right: 15px;
+    box-shadow: 5px 0px 10px rgba(0, 0, 0, 0.285);
+    pointer-events: none;
+    transition: all .4s;
+}
+
+.show-password-icon {
+    height: 100%;
+    color: rgb(66, 66, 66);
+    display: flex;
+    align-items: center;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.input-field:focus+.input-field-focus+.input-icon {
+    color: #e0127c;
+}
+
+.MuiTouchRipple-root {
+    color: #e0127c;
+}
+
+.login-btn-container {
+    width: 100%;
+    padding-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.login-btn {
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    width: 100%;
+    height: 60px;
+    border-radius: 3px;
+    background: #dc4191;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all .4s;
+}
+
+.login-btn:hover {
+    background: #e0127c;
+}
+
+.register-link-container {
+    width: 100%;
+    padding-top: 50px;
+    text-align: center;
+}
+.register-link {
+    color: #000;
+    font-family: Arial, Helvetica, sans-serif;
+    border-bottom: 1px solid #000;
+    transition: all .4s;
+}
+
+.register-link:hover {
+    color: #e0127c;
+    border-color: #e0127c;
+}
