@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from 'axios';
 
 // Import Material UI Icons
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
@@ -40,6 +41,24 @@ function LoginPage() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        try {
+            const response = await axios.post('http://localhost:8000/auth/token/',
+                {
+                    username: values.username,
+                    password: values.password
+                }
+            ).then(function (response) {
+                alert('Login Successful')
+            }
+            ).catch(function (error) {
+                alert('Login Failed')
+            });
+            
+        } catch (err) {
+
+        }
+
     };
 
     return (
