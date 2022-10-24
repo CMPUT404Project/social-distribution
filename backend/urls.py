@@ -15,7 +15,7 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.views.generic import TemplateView
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -38,10 +38,10 @@ schema_view = get_schema_view(
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('users.urls')),
-    path('', TemplateView.as_view(template_name='index.html')),
-    path('auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('swagger/', schema_view.with_ui('swagger'), name='schema-swagger-ui'),
-    path('redoc/', schema_view.with_ui('redoc'), name='schema-redoc'),
+    path('api/', include('users.urls')),
+    path('api/auth/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/swagger/', schema_view.with_ui('swagger'), name='schema-swagger-ui'),
+    path('api/redoc/', schema_view.with_ui('redoc'), name='schema-redoc'),
+    re_path('', TemplateView.as_view(template_name='index.html')),
 ]
