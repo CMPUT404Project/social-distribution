@@ -11,7 +11,7 @@ export const User = (props) => {
     return (
         <Grid>
             <Card className='hoverCard' style={{margin:3, padding:"2% 2%", cursor:"pointer"}} elevation={15} onClick={() => {window.open(props.data.url)}}>
-                <img style={{borderRadius:"50%", height:"100px", width:"100px", objectPosition:"center", objectFit:"cover"}} src={profileImage}/> 
+                <img style={{borderRadius:"50%", height:"100px", width:"100px", objectPosition:"center", objectFit:"cover"}} src={profileImage} alt="profile"/> 
                 <Typography variant="h4" style={{display:"inline", padding:"0% 5%"}}>{displayName}</Typography>
                 <Typography variant="h6" style={{display:"inline"}}>{github}</Typography>
                 {/* Status of relationship is currently random for display */}
@@ -21,22 +21,11 @@ export const User = (props) => {
     )
 }
 
-
-
-{/*
- get request for friend should AT LEAST return 
- {
-    type: string // friend, true friend, real friend
-    id: str      // url at where their profile originates from (could be from a different node?)
-    host: str    // where the user originally had their user
-    displayName str // 
- }type (of friend), id, host, displayName,  
- dasd
-*/}
-
 export const FriendsList = () => {
+    // type -> "followers"
+    // items.type -> [follower, friend, true friend, real friend]
     var data = {
-        type: "authors",      
+        type: "followers",      
         items:[
             {
                 type:"author",
@@ -80,7 +69,6 @@ export const FriendsList = () => {
     return (
         < >
             {users.map((d) => {
-                // return (<Card style={{margin:20}}>{d.displayName}</Card>)
                 return(<User key={d.id} data={d}></User>)
             })}
         </>
