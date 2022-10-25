@@ -1,8 +1,9 @@
 from django.urls import path
-from . import views
+from . import views 
+from .views import AuthorView, AuthorIDView
 
 urlpatterns = [
-  path('', views.author),
-  path('<str:id>', views.author_id),
+  path('', AuthorView.as_view()),
+  path('<str:aid>', AuthorIDView.as_view()),
 ]
 

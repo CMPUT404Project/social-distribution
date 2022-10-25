@@ -3,9 +3,14 @@ from rest_framework import serializers
 from .models import Author
 
 class AuthorSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Author
-        fields = "__all__"
+        fields = ['type', 'id', 'host', 'url', 'displayName', 'github', 'profileImage']
+
+    def get_type(self, obj):
+        return 'author'
 
     # transform the id field to be the url
     def to_representation(self, obj):
@@ -13,7 +18,7 @@ class AuthorSerializer(serializers.ModelSerializer):
         print(representation)
         uuidStr = str(representation['id'])
         representation['id'] = obj.url + str(uuidStr)
-        #url stored in database will not have uuid appended to it
-        #TODO will need to check if this will cause issues
-        representation['url'] = obj.url + str(uuidStr)
         return representation
+
+    def to_internal_value(self, data):
+        return super().to_internal_value(data)

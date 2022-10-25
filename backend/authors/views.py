@@ -1,60 +1,65 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
+from rest_framework.pagination import PageNumberPagination
 from rest_framework.parsers import JSONParser
+from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from authors.models import Author 
 from authors.serializers import AuthorSerializer
+from authors.pagination import PaginationHandlerMixin
 
-@csrf_exempt
-def author(request):
-    """
-    List all authors, or create a new author
-    """
-    if request.method == 'GET':
+class AuthorView(GenericAPIView):
+    pagination_class = PageNumberPagination
+
+    def get(self, request):
+        # PAGINATION WIP
+        # authors = Author.objects.all()
+        # print(authors)
+        # result_page = PageNumberPagination.paginate_queryset(authors, request)
+        # print(result_page)
+        # if result_page is not None:
+        #     serializer = AuthorSerializer(result_page, many=True)
+        #     return Response(self.get_paginated_response(serializer.data))
+        # return HttpResponse(status=404)
+
         authors = Author.objects.all()
         serializer = AuthorSerializer(authors, many=True)
-        return JsonResponse(serializer.data, safe=False)
-
-    
+        return Response(serializer.data)
     # POST request
     # Fields from client payload are: displayName, github, profileImage
     # Fields filled in by server: host, url, id
-    elif request.method == 'POST':
+    def post(self, request):
         data = JSONParser().parse(request)
         data = fillAuthorJSONPayload(request, data)
         serializer = AuthorSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    elif request.method == 'DELETE':
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+    
+    def delete(self, request):
         authors = Author.objects.all()
         authors.delete()
         return HttpResponse(status=204)
 
 
-@csrf_exempt
-def author_id(request, id):
-    """
-    Retrieve, update or delete a code snippet.
-    """
-    try:
-        #we are using the request url as the id
-        authorID = request.build_absolute_uri()
-        author = Author.objects.get(pk=authorID)
-        print(author)
-    except Author.DoesNotExist:
-        return HttpResponse(status=404)
-
-    if request.method == 'GET':
+class AuthorIDView(APIView):
+    def get(self, request, aid):
+        """
+        Retrieve, update or delete a code snippet.
+        """
+        try:
+            author = Author.objects.get(pk=aid)
+        except Author.DoesNotExist:
+            return HttpResponse(status=404)
         serializer = AuthorSerializer(author)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data)
 
-    #only for testing purposes/ should be removed
-    elif request.method == 'DELETE':
+    def delete(self, request, aid):
         author.delete()
         return HttpResponse(status=204)
+
 
 def fillAuthorJSONPayload(request, jsonPayload):
     """
