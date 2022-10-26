@@ -7,21 +7,13 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from authors.models import Author 
 from authors.serializers import AuthorSerializer
-from authors.pagination import PaginationHandlerMixin
 
 class AuthorView(GenericAPIView):
     pagination_class = PageNumberPagination
+    serializer_class = AuthorSerializer
+    queryset = Author.objects.all()
 
     def get(self, request):
-        # PAGINATION WIP
-        # authors = Author.objects.all()
-        # print(authors)
-        # result_page = PageNumberPagination.paginate_queryset(authors, request)
-        # print(result_page)
-        # if result_page is not None:
-        #     serializer = AuthorSerializer(result_page, many=True)
-        #     return Response(self.get_paginated_response(serializer.data))
-        # return HttpResponse(status=404)
 
         authors = Author.objects.all()
         serializer = AuthorSerializer(authors, many=True)
@@ -45,6 +37,9 @@ class AuthorView(GenericAPIView):
 
 
 class AuthorIDView(APIView):
+    serializer_class = AuthorSerializer
+    queryset = Author.objects.all()
+
     def get(self, request, aid):
         """
         Retrieve, update or delete a code snippet.

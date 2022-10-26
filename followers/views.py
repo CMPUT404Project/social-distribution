@@ -9,12 +9,15 @@ from authors.models import Author
 import json
 
 class FollowerView(GenericAPIView):
+    serializer_class = FollowerSerializer
+    queryset = Follower.objects.all()
+
     def get(self, request, aid):
         """
         List followers for a given author
         """
         #get all followers for author
-        followers = Follower.objects.filter(followed=aid)
+        followers = Author.objects.get(pk=aid).follower.all()
         serializer = FollowerSerializer(followers, many=True)
         return JsonResponse(serializer.data, safe=False)
 
@@ -34,6 +37,8 @@ def createFollowerJSONPayload(request, aid, fid):
     return jsonData
 
 class FollowerIDView(GenericAPIView):
+    serializer_class = FollowerSerializer
+    queryset = Follower.objects.all()
     def get(self, request, aid, fid):
         """
         Retrieve a follower

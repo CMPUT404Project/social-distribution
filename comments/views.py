@@ -9,6 +9,9 @@ from comments.models import Comment
 from comments.serializers import CommentSerializer
 
 class CommentView(GenericAPIView):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
+
     def get(self, request, aid, pid):
         """
         List comments for a given post
@@ -36,6 +39,9 @@ class CommentView(GenericAPIView):
 
 #used for testing purposes, not set in url.py
 class CommentIDView(GenericAPIView):
+    serializer_class = CommentSerializer
+    queryset = Comment.objects.all()
+
     def get(self, request, aid, pid, cid):
         """
         Retrieve a comment
@@ -44,7 +50,7 @@ class CommentIDView(GenericAPIView):
             comment = Comment.objects.get(pk=cid)
         except Comment.DoesNotExist:
             return HttpResponse(status=404)
-        serializer = CommentSerializer(comment)
+        serializer = self.serializer_class(comment)
         return JsonResponse(serializer.data)
 
     def put(self, request, aid, pid, cid):

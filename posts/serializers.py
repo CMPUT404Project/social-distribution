@@ -6,7 +6,7 @@ from authors.serializers import AuthorSerializer
 from comments.serializers import CommentSerializer
 
 class PostSerializer(serializers.ModelSerializer):
-    categories = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name')
+    categories = serializers.ListSerializer(child=serializers.CharField(), required=False)
     count = serializers.SerializerMethodField(read_only=True)
     comments = serializers.SerializerMethodField(read_only=True)
     class Meta:
@@ -21,9 +21,6 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
-
-    def get_categories(self, obj):
-        return CategorySerializer(Category.objects.filter(post=obj), many=True).data
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

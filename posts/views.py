@@ -8,6 +8,10 @@ from authors.models import Author
 from posts.serializers import PostSerializer
 
 class PostView(GenericAPIView):
+
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
     def get(self, request, aid):
         """
         List posts for a given author
@@ -35,6 +39,10 @@ class PostView(GenericAPIView):
         return HttpResponse(status=204)
 
 class PostIDView(GenericAPIView):
+
+    serializer_class = PostSerializer
+    queryset = Post.objects.all()
+
     def get(self, request, aid, pid):
         """
         Retrieve a post

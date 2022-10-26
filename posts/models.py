@@ -22,6 +22,7 @@ class Post(models.Model):
     contentType = models.CharField(max_length=200, choices = CONTENT_TYPES, default= "text/plain")
     author = models.ForeignKey(Author, on_delete = models.SET_NULL, null=True)
     published = models.DateTimeField(auto_now_add=True, blank=True)
+    categories = models.CharField(max_length=200, blank=True)
     visibility = models.CharField(max_length=200, choices = VISIBILITY_TYPES, default= "PUBLIC")
     unlisted = models.BooleanField(default=False)
 

@@ -17,7 +17,7 @@ class AuthorSerializer(serializers.ModelSerializer):
         representation = super().to_representation(obj)
         print(representation)
         uuidStr = str(representation['id'])
-        representation['id'] = obj.url + str(uuidStr)
+        representation['id'] = obj.url + "/" + str(uuidStr)
         return representation
 
     def to_internal_value(self, data):
