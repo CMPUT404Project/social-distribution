@@ -4,9 +4,9 @@ import axios from 'axios';
 
 // Import Material UI Icons
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 
 // Import Material UI Components
@@ -102,7 +102,7 @@ function LoginPage() {
                         />
                         <span className="input-field-focus"></span>
                         <span className="input-icon">
-                            <PersonOutlineIcon fontSize="large"/>
+                            <PersonIcon fontSize="large"/>
                         </span>
                     </div>
                     <div className="input-container password">

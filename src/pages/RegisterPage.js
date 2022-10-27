@@ -3,10 +3,11 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 // Import Material UI Icons
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import PersonIcon from '@mui/icons-material/Person';
 import GitHubIcon from '@mui/icons-material/GitHub';
+import ImageIcon from '@mui/icons-material/Image';
 import LockIcon from '@mui/icons-material/Lock';
 
 // Import Material UI Components
@@ -19,6 +20,7 @@ function RegisterPage() {
     const [values, setValues] = useState({
         username: sessionStorage.getItem('username'),
         git: "",
+        imageUrl: "",
         password: "",
         confirmPassword: "",
     });
@@ -51,33 +53,58 @@ function RegisterPage() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        var imageError = false;
 
-        for (const value in values) {
-            if (!values[value]) {
-                setShowValues({ ...showValues, showError: true });
-                setErrorMessage("Please fill in all the fields");
-                return;
-            }
+        try {
+            for (const value in values) {
+                if (!values[value]) {
+                    setErrorMessage("Please fill in all the fields")
+                    throw("emptyError")
+                };
+            };
+
+            if (!usernamePattern.test(values.username)) {
+                setErrorMessage("Username can only contain letters and numbers");
+                throw("usernameError")
+            };
+            if (!gitPattern.test(values.git)) {
+                setErrorMessage("Invalid Git username");
+                throw("gitError")
+            };
+            if (values.password !== values.confirmPassword) {
+                setErrorMessage("Passwords do not match");
+                throw("passMatchError")
+            };
+
+            await doesImageExist(values.imageUrl).then((value) => {
+                if (!value) {imageError = true};
+            });
+            if (imageError) {
+                setErrorMessage("Bad Image URL.");
+                throw("imageError")
+            };
+    
+            const gitUrl = "https://github.com/" + values.git;
+
+            // TODO:
+            // AXIOS FOR REGISTER USER
+        
+        } catch (error) {
+            setShowValues({ ...showValues, showError: true });
         }
 
-        if (!usernamePattern.test(values.username)) {
-            setShowValues({ ...showValues, showError: true });
-            setErrorMessage("Username can only contain letters and numbers");
-            return;
-        }
-        if (!gitPattern.test(values.git)) {
-            setShowValues({ ...showValues, showError: true });
-            setErrorMessage("Invalid Git username");
-            return;
-        }
-        if (values.password !== values.confirmPassword) {
-            setShowValues({ ...showValues, showError: true });
-            setErrorMessage("Passwords do not match");
-            return;
-        }
-        // TODO:
-        // AXIOS FOR REGISTER USER
     };
+
+    /**
+     * Code from https://stackoverflow.com/a/68333175
+     * By Caleb Taylor
+     */
+    const doesImageExist = (url) => new Promise((resolve) => {
+        const img = new Image();
+        img.src = url;
+        img.onload = () => resolve(true);
+        img.onerror = () => resolve(false);
+    });
 
     return (
         <div className="container">
@@ -99,7 +126,7 @@ function RegisterPage() {
                             onChange={handleInputChange("username")} />
                         <span className="input-field-focus"></span>
                         <span className="input-icon">
-                            <PersonOutlineIcon fontSize="large" />
+                            <PersonIcon fontSize="large" />
                         </span>
                     </div>
                     <div className="input-container git-username">
@@ -113,6 +140,20 @@ function RegisterPage() {
                         <span className="input-field-focus"></span>
                         <span className="input-icon">
                             <GitHubIcon fontSize="large"/>
+                        </span>
+                    </div>
+                    {/* Possibly implement image choosing in the future */}
+                    <div className="input-container image-url">
+                        <input
+                            className="input-field image-url"
+                            type="text"
+                            name="image-url"
+                            placeholder="Profile Image URL"
+                            value={values.imageUrl}
+                            onChange={handleInputChange("imageUrl")} />
+                        <span className="input-field-focus"></span>
+                        <span className="input-icon">
+                            <ImageIcon fontSize="large"/>
                         </span>
                     </div>
                     <div className="input-container">
