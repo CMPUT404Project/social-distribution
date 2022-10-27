@@ -4,6 +4,7 @@ from .models import Author
 
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField(read_only=True)
+    id = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Author
@@ -12,13 +13,6 @@ class AuthorSerializer(serializers.ModelSerializer):
     def get_type(self, obj):
         return 'author'
 
-    # transform the id field to be the url
-    def to_representation(self, obj):
-        representation = super().to_representation(obj)
-        print(representation)
-        uuidStr = str(representation['id'])
-        representation['id'] = obj.url + "/" + str(uuidStr)
-        return representation
+    def get_id(self, obj):
+        return obj.url + "/" + str(obj.id)
 
-    def to_internal_value(self, data):
-        return super().to_internal_value(data)

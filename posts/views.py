@@ -27,7 +27,6 @@ class PostView(GenericAPIView):
         """
         data = JSONParser().parse(request)
         serializer = PostSerializer(data=data)
-        print(serializer)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)

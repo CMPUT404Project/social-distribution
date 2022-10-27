@@ -21,9 +21,3 @@ class CommentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['type', 'comment', 'published', 'id', 'author']
-
-    def to_representation(self, obj):
-        representation = super().to_representation(obj)
-        representation['author'] = AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
-        return representation
-        

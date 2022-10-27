@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.generics import GenericAPIView
 from followers.models import Follower
-from followers.serializers import FollowerSerializer
+from followers.serializers import FollowerSerializer, FollowersSerializer
 from authors.models import Author
 import json
 
@@ -31,9 +31,10 @@ def createFollowerJSONPayload(request, aid, fid):
     """
     Create a JSON payload for a follower
     """
-    jsonData = json.dumps({})
-    jsonData['follower'] = fid
-    jsonData['followed'] = aid
+    data = {}
+    data['follower'] = fid
+    data['followed'] = aid
+    jsonData = json.dumps(data)
     return jsonData
 
 class FollowerIDView(GenericAPIView):
@@ -54,9 +55,7 @@ class FollowerIDView(GenericAPIView):
         """
         Create a new follower
         """
-        data = createFollowerJSONPayload(request, aid, fid)
-        serializer = FollowerSerializer(data=data)
-        print(serializer)
+        serializer = FollowerSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)

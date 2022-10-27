@@ -10,5 +10,5 @@ class Author(models.Model):
     profileImage = models.URLField(max_length=200)
 
     def update_url(self):
-        self.url = self.host + "/" + self.id
+        self.url = self.host + self.id
         self.save()

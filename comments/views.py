@@ -26,7 +26,6 @@ class CommentView(GenericAPIView):
         """
         data = JSONParser().parse(request)
         serializer = CommentSerializer(data=data)
-        print(serializer)
         if serializer.is_valid():
             serializer.save()
             return JsonResponse(serializer.data)
