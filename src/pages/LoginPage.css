@@ -8,6 +8,7 @@ html, body {
 
 a {
     text-decoration: none; 
+    cursor: pointer;
 }
 
 input {
@@ -88,6 +89,10 @@ button:hover {
     z-index: 1;
 }
 
+.input-container.password {
+    margin-bottom: 0px;
+}
+
 .input-field {
     font-size: 18px;
     font-family: Arial, Helvetica, sans-serif;
@@ -101,11 +106,12 @@ button:hover {
     padding: 0 35px 0 75px;
 }
 
-.username {
+.input-field.username,
+.input-field.git-link {
     padding: 0 10px 0 75px;
 }
 
-.password {
+.input-field.password {
     font-weight: bold;
 }
 
@@ -194,6 +200,24 @@ button:hover {
 .MuiTouchRipple-root {
     color: #e0127c;
 }
+
+.error-container {
+    position: relative;
+    width: 100%;
+    z-index: 1;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.error-message {
+    color: red;
+    margin: 0;
+}
+
+/* .remember-container {
+    margin-top: 20px;
+} */
 
 .login-btn-container {
     width: 100%;

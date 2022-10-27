@@ -1,0 +1,80 @@
+.register-card {
+    padding: 50px 50px 30px 50px;
+    width: 450px;
+    background: #fff;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.register-form {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+}
+
+.register-title {
+    padding-bottom: 20px;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 40px;
+    color: #333;
+    text-align: center;
+    width: 100%;
+    display: block;
+}
+
+.input-container.confirm-password {
+    margin-bottom: 0px;
+    margin-left: 65px;
+}
+
+.input-field.confirm-password {
+    padding-left: 10px;
+    font-weight: bold;
+}
+
+.register-btn-container {
+    width: 100%;
+    padding-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.register-btn {
+    font-size: 18px;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #fff;
+    width: 100%;
+    height: 60px;
+    border-radius: 3px;
+    background: #dc4191;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all .4s;
+}
+
+.register-btn:hover {
+    background: #e0127c;
+}
+
+.signin-link-container {
+    width: 100%;
+    padding-top: 50px;
+    text-align: center;
+    background: transparent;
+}
+.signin-link {
+    color: #000;
+    font-size: 16px;
+    font-family: Arial, Helvetica, sans-serif;
+    border-bottom: 1px solid #000;
+    transition: all .4s;
+    background: transparent;
+}
+
+.signin-link:hover {
+    color: #e0127c;
+    border-color: #e0127c;
+}
