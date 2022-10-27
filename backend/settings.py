@@ -44,6 +44,10 @@ INSTALLED_APPS = [
     'users',
     'drf_yasg',
     'corsheaders',
+    'authors',
+    'posts',
+    'comments',
+    'followers',
 ]
 
 MIDDLEWARE = [
@@ -57,6 +61,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+
+CORS_ORIGIN_WHITELIST = ['http://localhost:3000']
 
 ROOT_URLCONF = 'backend.urls'
 
