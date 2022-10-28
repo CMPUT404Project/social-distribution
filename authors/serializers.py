@@ -26,8 +26,14 @@ class AuthorsSerializer(serializers.ModelSerializer):
         model = Author
         fields = ['type', 'items']
 
-    def get_items(self, obj):
+    def get_items(self, obj): 
         return AuthorSerializer(obj, many=True).data
 
     def get_type(self, obj):
         return 'authors'
+
+
+class AuthorCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Author
+        fields = ['host', 'user']

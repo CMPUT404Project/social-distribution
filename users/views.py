@@ -1,11 +1,11 @@
 from django.shortcuts import render
+from authors.serializers import AuthorCreationSerializer
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
-from users.serializers import UserSerializer
+from users.serializers import UserSerializer, UserCreationSerializer
 from django.contrib.auth.models import User
 from authors.models import Author
 from backend.serializers import MyTokenObtainPairSerializer
@@ -33,12 +33,14 @@ class UserCreation(APIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     def post(self, request, format=None):
-        try:
-            user = User(username=request.data['username'])
-            user.set_password(request.data['password'])
-            author = Author(user=user, host=request.scheme + "://" + request.get_host())
-            user.save()
-            author.save()
-        except Exception as e:
-            return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        return Response(get_tokens_for_user(user), status=status.HTTP_201_CREATED)
+        user_serializer = UserCreationSerializer(data=request.data)
+        if user_serializer.is_valid():
+            user = user_serializer.save()
+            new_author_data = {"host": request.scheme + "://" + request.get_host(), "user":user.id, }
+            author_serializer = AuthorCreationSerializer(data=new_author_data)
+            if author_serializer.is_valid():
+                author_serializer.save()
+                return Response(get_tokens_for_user(user), status=200)
+            user.delete()
+            return Response(author_serializer.errors, status=400)
+        return Response(user_serializer.errors, status=400)

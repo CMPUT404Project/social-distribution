@@ -8,13 +8,17 @@ from authors.models import Author
 from django.http import HttpResponse
 from authors.serializers import AuthorSerializer, AuthorsSerializer
 
-
 class AuthorView(ListAPIView):
     """
     Retrieve all authors on server.
     """
-    serializer_class = AuthorSerializer
+    serializer_class = AuthorsSerializer
     queryset = Author.objects.all()
+    def get(self, request):
+        author = Author.objects.all()
+        serializer = AuthorsSerializer(author)
+        return Response(serializer.data)
+    
 
 class AuthorDetail(APIView):
     serializer_class = AuthorSerializer
