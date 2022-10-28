@@ -11,10 +11,11 @@ from authors.models import Author
 from backend.serializers import MyTokenObtainPairSerializer
 
 def get_tokens_for_user(user):
-    access = MyTokenObtainPairSerializer().get_token(user)
-
+    refresh = MyTokenObtainPairSerializer().get_token(user)
+    
     return {
-        'access': str(access),
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
     }
 
 class UserList(ListAPIView):

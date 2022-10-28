@@ -6,6 +6,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
 
         # Add custom claims
-        token['author_id'] = str(user.author.id)
+        token['author_id'] = str(user.author.url)
 
         return token

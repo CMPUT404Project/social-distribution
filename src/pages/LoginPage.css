@@ -107,6 +107,7 @@ button:hover {
 }
 
 .input-field.username,
+.input-field.display-name,
 .input-field.git-link {
     padding: 0 10px 0 75px;
 }

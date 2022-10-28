@@ -60,28 +60,31 @@ function LoginPage() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        if (values.username && values.password) {
-            try {
-                await axios.post('api/auth/token/',
+        try {
+            if (values.username && values.password) {
+                const response = await axios.post('api/auth/token/',
                     {
                         username: values.username,
                         password: values.password
                     }
-                ).then(function (response) {
-                    setAccessToken(response.data.access);
-                    setRefreshToken(response.data.refresh);
-                }
-                ).catch(function (error) {
-                    alert('Login Failed')
-                });
-                
-            } catch (error) {
-    
+                );
+                setAccessToken(response.data.access);
+                setRefreshToken(response.data.refresh);
+            } else {
+                throw new Error("emptyField")
             }
-        } else {
+        } catch (error) {
             setShowValues({ ...showValues, showError: true });
-            setErrorMessage("Please fill in the fields");
-        }
+            if (error.message === "emptyField") {
+                setErrorMessage("Please fill in the fields");
+            } else if (!error.response) {
+                setErrorMessage("Server did not respond");
+            } else if (error.response.status === 401) {
+                setErrorMessage("Username/password is incorrect");
+            } else {
+                setErrorMessage("Failed to login. Try again");
+            }
+        };
     };
 
     return (
