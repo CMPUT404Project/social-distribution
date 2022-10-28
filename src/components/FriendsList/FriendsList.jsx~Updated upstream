@@ -1,13 +1,12 @@
 import {Card, Typography, Grid} from '@mui/material'
-import axios from 'axios'
-import React, { useEffect, useState} from 'react'
-import { Navigate, redirect } from 'react-router-dom'
+import React from 'react'
 import "./FriendsList.css"
 
 export const User = (props) => {
     let displayName = props.data.displayName
     let github = props.data.github
     let profileImage = props.data.profileImage ? props.data.profileImage : "https://i.imgur.com/w3UEu8o.jpeg"
+    // var colours = ["red", "blue", "green"] // for future implementation
     var status = ["Friend", "True Friend", "Real Friend"]
     return (
         <Grid>
@@ -22,25 +21,24 @@ export const User = (props) => {
     )
 }
 
+<<<<<<< Updated upstream:src/components/FriendsList/FriendsList.jsx
+=======
+
+
+{/*
+ get request for friend should AT LEAST return 
+ {
+    type: string // friend, true friend, real friend unless we have another parameter that gives relationship from get friends API
+    id: str      // url at where their profile originates from (could be from a different node?)
+    host: str    // where the user originally had their user created ?
+    displayName str // name to display
+ }
+*/}
+
+>>>>>>> Stashed changes:frontend/src/components/FriendsList/FriendsList.jsx
 export const FriendsList = () => {
-    const [accessToken, setAccessToken] = (localStorage.getItem('access_token') || sessionStorage.getItem('access_token') || "");
-    const [refreshToken, setRefreshToken] = (localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token') || "");
-    const [followers, setFollowers] = useState([])
-
-    // Need to confirm how JWT token is sent
-    // useEffect(() => {
-    //     if (!accessToken) {
-    //         redirect("/")
-    //     }
-    //     else {
-    //         try {
-    //             await axios.get('/service/authors/' + 
-
-    //             )
-    //         }
-    //     }
-    // })
-
+    // type -> "followers"
+    // items.type -> [follower, friend, true friend, real friend]
     var data = {
         type: "followers",      
         items:[
