@@ -1,9 +1,22 @@
 from django.shortcuts import render
-from rest_framework.generics import RetrieveAPIView, ListAPIView
+from authors.serializers import AuthorCreationSerializer
+from rest_framework.generics import ListAPIView
+from rest_framework.views import APIView
 from rest_framework import permissions
-from users.serializers import UserSerializer
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from users.serializers import UserSerializer, UserCreationSerializer
 from django.contrib.auth.models import User
-# Create your views here.
+from authors.models import Author
+from backend.serializers import MyTokenObtainPairSerializer
+
+def get_tokens_for_user(user):
+    refresh = MyTokenObtainPairSerializer().get_token(user)
+    
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }
 
 class UserList(ListAPIView):
     """
@@ -13,12 +26,21 @@ class UserList(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class UserDetail(RetrieveAPIView):
+class UserCreation(APIView):
     """
-    Returns the current authenticated user.
+    Create a new auth user and an author, and returns an access token upon success
     """
-    permission_classes = [permissions.IsAuthenticated]
+    queryset = User.objects.all()
     serializer_class = UserSerializer
-
-    def get_object(self):
-        return self.request.user
+    def post(self, request, format=None):
+        user_serializer = UserCreationSerializer(data=request.data)
+        if user_serializer.is_valid():
+            user = user_serializer.save()
+            new_author_data = {"host": request.scheme + "://" + request.get_host(), "user":user.id, }
+            author_serializer = AuthorCreationSerializer(data=new_author_data)
+            if author_serializer.is_valid():
+                author_serializer.save()
+                return Response(get_tokens_for_user(user), status=200)
+            user.delete()
+            return Response(author_serializer.errors, status=400)
+        return Response(user_serializer.errors, status=400)
