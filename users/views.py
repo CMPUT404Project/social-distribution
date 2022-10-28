@@ -8,7 +8,14 @@ from rest_framework import status
 from users.serializers import UserSerializer
 from django.contrib.auth.models import User
 from authors.models import Author
-# Create your views here.
+from backend.serializers import MyTokenObtainPairSerializer
+
+def get_tokens_for_user(user):
+    access = MyTokenObtainPairSerializer().get_token(user)
+
+    return {
+        'access': str(access),
+    }
 
 class UserList(ListAPIView):
     """
@@ -20,16 +27,17 @@ class UserList(ListAPIView):
 
 class UserCreation(APIView):
     """
-    Create a new auth user.
+    Create a new auth user and an author, and returns an access token upon success
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     def post(self, request, format=None):
         try:
-            user = User(username=request.data['username'], password=request.data['password'])
+            user = User(username=request.data['username'])
+            user.set_password(request.data['password'])
             author = Author(user=user, host=request.scheme + "://" + request.get_host())
             user.save()
             author.save()
         except Exception as e:
             return Response(str(e), status=status.HTTP_400_BAD_REQUEST)
-        return Response(UserSerializer(user).data, status=status.HTTP_201_CREATED)
+        return Response(get_tokens_for_user(user), status=status.HTTP_201_CREATED)
