@@ -1,15 +1,17 @@
 import { AppBar, Box, IconButton, Toolbar, Typography } from '@mui/material'
 import React, { useEffect, useState } from 'react'
+import jwt_decode from "jwt-decode";
 
 function NavBar() {
-    // const [data, setData] = useState(null)
-    // useEffect(() => {
-    //     const url = ""
-    //     fetch(url).then(data => 
-    //         {
-    //             setData(data);
-    //         })
-    // }, [])
+    const [host, setHost] = useState("")
+    const [authorID, setauthorID] = useState("")
+    useEffect(() => {
+        const token = sessionStorage.getItem("access_token") || localStorage.getItem("access_token")
+        const decode = jwt_decode(token, {payload:true})["author_id"].split("/authors")
+        setHost(decode[0])
+        setauthorID(decode[1])
+        console.log(decode)
+    }, [])
     
     return (
     <AppBar color='primary' position='static'>
@@ -17,7 +19,7 @@ function NavBar() {
             <Typography variant='h4' style={{marginRight:"40%", whiteSpace:"nowrap"}}>Social Distribution</Typography>
             <Box sx={{display:"flex", width:"100%", justifyContent:"space-evenly"}}>
                 <IconButton 
-                    href='home'
+                    href='/'
                     sx={{color:'white', mx:"2em"}}>
                     <Typography variant='h6'>Home</Typography>
                 </IconButton>
@@ -28,7 +30,7 @@ function NavBar() {
                 </IconButton>
                 {/* use User.profileImage when User is done */}
                 <IconButton 
-                    href='profile'
+                    href={'authors' + authorID}
                     sx={{color:'white', mx:"2em"}}>
                     <Typography variant='h6'>Profile</Typography>
                 </IconButton>
