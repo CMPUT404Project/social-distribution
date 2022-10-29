@@ -4,6 +4,7 @@ import {
     Box,
     IconButton,
     Toolbar,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import React, { useEffect, useState } from "react";
@@ -54,12 +55,14 @@ function NavBar() {
                     >
                         <Typography variant="h6">Friends</Typography>
                     </IconButton>
-                    <IconButton
-                        href="profile"
-                        sx={{ color: "white", mx: "2em" }}
-                    >
-                        <Avatar alt="user image" src={user["profileImage"]} />
-                    </IconButton>
+                    <Tooltip title="Profile">
+                        <IconButton
+                            href="profile"
+                            sx={{ color: "white", mx: "2em" }}
+                        >
+                            <Avatar alt="user image" src={user["profileImage"]} />
+                        </IconButton>
+                    </Tooltip>
                 </Box>
             </Toolbar>
         </AppBar>
