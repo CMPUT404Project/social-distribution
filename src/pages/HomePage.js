@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import NavBar from "../components/NavBar/NavBar";
 // import axios from 'axios';
 
 function HomePage() {
@@ -24,16 +25,19 @@ function HomePage() {
 
     return (
         // TEMPORARY HTML USED FOR TESTING
-        <div className="container">
-            <div style={{width:'450px',wordWrap: 'break-word'}}>
-                Access Token: {accessToken}
+        <>
+            <NavBar />
+            <div className="container">
+                <div style={{width:'450px',wordWrap: 'break-word'}}>
+                    Access Token: {accessToken}
+                </div>
+                <div className="logout-btn-continer">
+                    <button className="logout-btn" onClick={handleLogout}>
+                        LOGOUT
+                    </button>
+                </div>
             </div>
-            <div className="logout-btn-continer">
-                <button className="logout-btn" onClick={handleLogout}>
-                    LOGOUT
-                </button>
-            </div>
-        </div>
+        </>
     )
 }
 
