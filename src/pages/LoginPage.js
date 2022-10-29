@@ -1,35 +1,50 @@
 import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 // Import Material UI Icons
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
-import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
 
 // Import Material UI Components
 import FormControlLabel from '@mui/material/FormControlLabel';
 import IconButton from '@mui/material/IconButton';
 import Checkbox from '@mui/material/Checkbox';
-// import TextField from '@mui/material/TextField';
-
-import "./LoginPage.css";
-
 
 function LoginPage() {
+    const navigate = useNavigate();
     const [values, setValues] = useState({
-        username: "",
+        username: sessionStorage.getItem('username') || "",
         password: "",
+    });
+    const [rememberMe, setRememberMe] = useState(false);
+    const [showValues, setShowValues] = useState({
         showPassword: false,
-      });
-    // const [username, setUsername] = useState("");
-    // const [password, setPassword] = useState("");
-    // const [showPassword, setShowPassword] = useState(false);
+        showError: false,
+    })
+    const [errorMessage, setErrorMessage] = useState('Please fill in all the fields');
+    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
+    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token'))
 
     useEffect(() => {
-        console.log(values.username);
-    }, [values.username]);
+        if (accessToken) {
+            if (rememberMe) {
+                localStorage.setItem('access_token', accessToken);
+                localStorage.setItem('refresh_token', refreshToken);
+            } else {
+                sessionStorage.setItem('access_token', accessToken);
+                sessionStorage.setItem('refresh_token', refreshToken);
+            }
+            navigate('/homepage');
+        } 
+    }, [accessToken, refreshToken, rememberMe, navigate]);
+
+    useEffect(() => {
+        sessionStorage.setItem('username', values.username)
+    }, [values.username])
 
     const handleClickShowPassword = () => {
         setValues({ ...values, showPassword: !values.showPassword });
@@ -39,106 +54,108 @@ function LoginPage() {
         setValues({ ...values, [prop]: event.target.value });
     };
 
+    const handleRememberChange = (event) => {
+        setRememberMe(event.target.checked)
+    }
+
     const handleSubmit = async (event) => {
         event.preventDefault();
-
         try {
-            const response = await axios.post('api/auth/token/',
-                {
-                    username: values.username,
-                    password: values.password
-                }
-            ).then(function (response) {
-                alert('Login Successful')
+            if (values.username && values.password) {
+                const response = await axios.post('api/auth/token/',
+                    {
+                        username: values.username,
+                        password: values.password
+                    }
+                );
+                setAccessToken(response.data.access);
+                setRefreshToken(response.data.refresh);
+            } else {
+                throw new Error("emptyField")
             }
-            ).catch(function (error) {
-                alert('Login Failed')
-            });
-            
-        } catch (err) {
-
-        }
-
+        } catch (error) {
+            setShowValues({ ...showValues, showError: true });
+            if (error.message === "emptyField") {
+                setErrorMessage("Please fill in the fields");
+            } else if (!error.response) {
+                setErrorMessage("Server did not respond");
+            } else if (error.response.status === 401) {
+                setErrorMessage("Username/password is incorrect");
+            } else {
+                setErrorMessage("Failed to login. Try again");
+            }
+        };
     };
 
     return (
-        <div class="container">
-            <div class="login-card">
-                <span class="login-title">
+        <div className="container">
+            <div className="login-card">
+                <span className="login-title">
                     LOGIN
                 </span>
-                <form class="login-form" onSubmit={handleSubmit}>
-                    {/* <div class="input-container">
-                        <TextField class="input-field"
-                            required 
-                            style={{padding: "0"}}
-                            rows={1}
-                            variant="outlined"
-                            label="Username"
-                            name="username" 
-                            type="text"
-                            onChange={e => outputter(e.target.value)}>
-                        </TextField>
-                        <span class="focus-input100"></span>
-                        <span class="symbol-input100">
-                            <PersonOutlineIcon fontSize="large"/>
-                        </span>
-                    </div> */}
-                    <div class="input-container">
+                <form className="login-form" onSubmit={handleSubmit}>
+                    <div className="input-container username">
                         <input 
-                            class="input-field username"
+                            className="input-field username"
                             type="text"
                             name="username"
                             placeholder="Username"
                             value={values.username}
-                            onChange={handleInputChange("username")}/>
-                        <span class="input-field-focus"></span>
-                        <span class="input-icon">
-                            <PersonOutlineIcon fontSize="large"/>
+                            onChange={handleInputChange("username")}
+                        />
+                        <span className="input-field-focus"></span>
+                        <span className="input-icon">
+                            <PersonIcon fontSize="large"/>
                         </span>
                     </div>
-                    <div class="input-container">
+                    <div className="input-container password">
                         <input 
-                            class="input-field password"
+                            className="input-field password"
                             type={values.showPassword ? "text" : "password"}
                             name="password"
                             placeholder="Password"
                             value={values.password}
                             onChange={handleInputChange("password")}
                         />
-                        <span class="input-field-focus"></span>
-                        <span class="input-icon">
+                        <span className="input-field-focus"></span>
+                        <span className="input-icon">
                             <LockIcon fontSize="large"/>
                         </span>
-                        <span class="show-password-icon">
+                        <span className="show-password-icon">
                             <IconButton onClick={handleClickShowPassword}>
                                 {values.showPassword ? <VisibilityIcon /> : <VisibilityOffIcon />}
                             </IconButton>
                         </span>
                     </div>
-                    <div class="remember-container">
+                    <div className="error-container" style={showValues.showError ? {visibility: "visible"} : {visibility: "hidden"}}>
+                        <p className="error-message">{errorMessage}</p>
+                    </div>
+                    <div className="remember-container">
                         <FormControlLabel
                             control={<Checkbox
-                                        checkedIcon={<CheckBoxOutlinedIcon sx={{color: "#bb397c"}}/>}
+                                        checkedIcon={
+                                            <CheckBoxOutlinedIcon sx={{color: "#bb397c"}}/>
+                                        }
+                                        checked={rememberMe}
                                     />}
                             label="Remember Me"
                             sx={{
                                 fontFamily: "Arial, Helvetica, sans-serif"
                             }}
-                            onChange={() => {}}
+                            onChange={handleRememberChange}
                         />
                     </div>
-                    <div class="login-btn-container">
-                        <button class="login-btn">
+                    <div className="login-btn-container">
+                        <button className="login-btn">
                             LOGIN
                         </button>
                     </div>
-                    <div class="register-link-container">
-                        <a class="register-link" href="#">
-                            Register
-                        </a>
-                    </div>
                 </form>
+                <div className="register-link-container">
+                    <Link className="register-link" to="/register">
+                        Register
+                    </Link>
+                </div>
             </div>
         </div>
     )

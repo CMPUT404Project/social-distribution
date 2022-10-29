@@ -11,3 +11,12 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'username', 'author', 'password')
+
+class UserCreationSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ('username', 'password')
+
+    def create(self, validated_data):
+        if self.is_valid():
+            return User.objects.create_user(username=validated_data.get("username"), password=validated_data.get("password"))
