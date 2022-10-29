@@ -1,8 +1,12 @@
+import NavBar from "../components/NavBar/NavBar";
 
 
 function FriendsPage() {
     return(
-        <div>FriendsPage</div>
+        <div>
+            <NavBar />
+            FriendsPage
+        </div>
     )
 }
 
