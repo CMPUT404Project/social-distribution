@@ -1,12 +1,15 @@
+import { Container } from "@mui/material";
+import { FriendsList } from "../components/FriendsList/FriendsList";
 import NavBar from "../components/NavBar/NavBar";
 
 
 function FriendsPage() {
     return(
-        <div>
+        <Container>
             <NavBar />
-            FriendsPage
-        </div>
+            <h1>Friends Page</h1> <br/>
+            <FriendsList />
+        </Container>
     )
 }
 
