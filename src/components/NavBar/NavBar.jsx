@@ -2,6 +2,7 @@ import {
     AppBar,
     Avatar,
     Box,
+    Grid,
     IconButton,
     Toolbar,
     Tooltip,
@@ -14,7 +15,9 @@ import axios from "axios";
 function NavBar() {
     const [user, setUser] = useState({});
     useEffect(() => {
-        const token = sessionStorage.getItem("access_token") || localStorage.getItem("access_token");
+        const token =
+            sessionStorage.getItem("access_token") ||
+            localStorage.getItem("access_token");
         const decode = jwt_decode(token)["author_id"].split("/authors");
         axios
             .get("/authors" + decode[1], {
@@ -31,39 +34,30 @@ function NavBar() {
     }, []);
 
     return (
-        <AppBar color="primary">
+        <AppBar color="primary" position="relative">
             <Toolbar>
                 <Typography
                     variant="h4"
-                    style={{ marginRight: "40%", whiteSpace: "nowrap" }}
+                    style={{ whiteSpace: "nowrap", flex: 1 }}
                 >
                     Social Distribution
                 </Typography>
-                <Box
-                    sx={{
-                        display: "flex",
-                        width: "100%",
-                        justifyContent: "space-evenly",
-                    }}
-                >
-                    <IconButton href="/" sx={{ color: "white", mx: "2em" }}>
-                        <Typography variant="h6">Home</Typography>
-                    </IconButton>
+                <IconButton href="/" sx={{ color: "white", mx: "2em" }}>
+                    <Typography variant="h6">
+                        Home
+                    </Typography>
+                </IconButton>
+                <IconButton href="friends" sx={{ color: "white", mx: "2em" }}>
+                    <Typography variant="h6">Friends</Typography>
+                </IconButton>
+                <Tooltip title="Profile">
                     <IconButton
-                        href="friends"
+                        href="profile"
                         sx={{ color: "white", mx: "2em" }}
                     >
-                        <Typography variant="h6">Friends</Typography>
+                        <Avatar alt="user image" src={user["profileImage"]} />
                     </IconButton>
-                    <Tooltip title="Profile">
-                        <IconButton
-                            href="profile"
-                            sx={{ color: "white", mx: "2em" }}
-                        >
-                            <Avatar alt="user image" src={user["profileImage"]} />
-                        </IconButton>
-                    </Tooltip>
-                </Box>
+                </Tooltip>
             </Toolbar>
         </AppBar>
     );
