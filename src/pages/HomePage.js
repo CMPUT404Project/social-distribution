@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavBar from "../components/NavBar/NavBar";
+import Stream from "../components/Stream/Stream";
 // import axios from 'axios';
 
 function HomePage() {
@@ -27,6 +28,7 @@ function HomePage() {
         // TEMPORARY HTML USED FOR TESTING
         <>
             <NavBar />
+            <Stream />
             <div className="container">
                 <div style={{width:'450px',wordWrap: 'break-word'}}>
                     Access Token: {accessToken}
