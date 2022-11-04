@@ -27,9 +27,9 @@ function HomePage() {
     return (
         // TEMPORARY HTML USED FOR TESTING
         <>
-            <NavBar />
-            <Stream />
+        <NavBar />
             <div className="container">
+            <Stream />
                 <div style={{width:'450px',wordWrap: 'break-word'}}>
                     Access Token: {accessToken}
                 </div>
