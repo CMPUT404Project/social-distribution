@@ -1,4 +1,15 @@
-import { Box, Card, Grid, Typography } from "@mui/material";
+import {
+    Avatar,
+    Box,
+    Button,
+    Card,
+    Dialog,
+    Grid,
+    Menu,
+    MenuItem,
+    TextField,
+    Typography,
+} from "@mui/material";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
@@ -83,6 +94,28 @@ let data = [
                     // ISO 8601 TIMESTAMP
                     published: "2015-03-09T13:07:04+00:00",
                     // ID of the Comment (UUID)
+                    id: "http://127.0.0.1:5454/authors/9de17f29c12ed8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments/f6255bb01c648fe967714d52a89e8e9c",
+                },
+                {
+                    type: "comment",
+                    author: {
+                        type: "author",
+                        // ID of the Author (UUID)
+                        id: "http://127.0.0.1:5454/authors/1d698d2d5ff008f7538453c120f581471",
+                        // url to the authors information
+                        url: "http://127.0.0.1:5454/authors/1d698d2d5ff008f7538453c120f581471",
+                        host: "http://127.0.0.1:5454/",
+                        displayName: "Greg asdad",
+                        // HATEOS url for Github API
+                        github: "http://github.com/gjasadohnson",
+                        // Image from a public domain
+                        profileImage: "https://i.imgur.com/k7XVwpB.jpeg",
+                    },
+                    comment: "Sick asdasdsd English",
+                    contentType: "text/markdown",
+                    // ISO 8601 TIMESTAMP
+                    published: "2015-03-09T13:07:04+00:00",
+                    // ID of the Comment (UUID)
                     id: "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e/posts/de305d54-75b4-431b-adb2-eb6b9e546013/comments/f6255bb01c648fe967714d52a89e8e9c",
                 },
             ],
@@ -127,7 +160,7 @@ let data = [
             // the home host of the author
             host: "http://127.0.0.1:5454/",
             // the display name of the author
-            displayName: "Lara Croft",
+            displayName: "byron tung",
             // url to the authors profile
             url: "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
             // HATEOS url for Github API
@@ -192,32 +225,116 @@ let data = [
 ];
 
 export const Post = (props) => {
-    console.log(props);
+    const [show, setShow] = useState(false);
+    const [anchor, setAnchor] = useState(null);
+    const [post, setPost] = useState("");
+
+    let comments = props.data.commentsSrc.comments;
+
+    const onClickHandler = (e) => {
+        setAnchor(e.currentTarget);
+        setShow(!show);
+    };
+
+    // const handleChange = (e) => {
+    //     setPost(e.target.value);
+    //     console.log(e.target.value);
+    // };
+
+    const handleEnter = (e) => {
+        if (e.key === "Enter" && e.target.value !== "") {
+            e.preventDefault()
+            const postTextBox = document.getElementById("commentData")
+            console.log(props.data)
+            let split = (props.data.id).split("/")
+            let aID = split[4]
+            let pID = split[6]
+            // get data to match https://cdn.discordapp.com/attachments/1032761020717993994/1038019682013290536/unknown.png
+            let data = {type: "comment", }
+            console.log(aID, pID)
+            console.log("service/authors/" + aID + "/posts/" + pID + "/comments")
+            // wait until this is confirmed with backend
+            // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", )
+            postTextBox.value = ""
+        }
+    }
+
     return (
-        <Box style={{ display: "flex", flexDirection: "column", width:"70%"}}>
+        <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
+            {show && (
+                <Menu
+                    onClose={() => setShow(!show)}
+                    open={show}
+                    anchorEl={anchor}
+                >
+                    <MenuItem>Follow</MenuItem>
+                    <MenuItem>Send Friend Request</MenuItem>
+                </Menu>
+            )}
             <Card
                 style={{
                     textAlign: "center",
                     padding: "2em",
                     margin: "2em 0 0",
-                    borderRadius: "10px 10px 0 0"
+                    borderRadius: "10px 10px 0 0",
                 }}
                 elevation={10}
             >
+                <Box
+                    style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        alignItems: "center",
+                    }}
+                    onClick={onClickHandler}
+                >
+                    <Avatar
+                        alt="user image"
+                        src={props.data.author.profileImage}
+                        style={{ margin: "1ex 1ex" }}
+                    />
+                    <Typography variant="h5">
+                        {props.data.author.displayName}
+                    </Typography>
+                </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
                 <Typography variant="h6">{props.data.content}</Typography>
             </Card>
-            <Card
-                elevation={10}
-                style={{ backgroundColor: "#D3D3D3"}}
-            >
-                <Typography variant="body1" border="1px solid" padding="1em">
-                    Posted comment
-                </Typography>
-                <Typography variant="body1" border="1px solid" padding="1em">
-                    Posted comment
-                </Typography>
-            </Card>
+            {comments.map((com) => {
+                return (
+                    <Card
+                        key={com.id}
+                        elevation={10}
+                        style={{
+                            backgroundColor: "#D3D3D3",
+                            borderRadius: "0",
+                            display: "flex",
+                        }}
+                    >
+                        <Avatar
+                            alt="user image"
+                            src={com["author"]["profileImage"]}
+                            style={{ margin: "1ex 1ex" }}
+                        />
+                        <Typography variant="body1" padding="1em">
+                            {com["comment"]}
+                        </Typography>
+                    </Card>
+                );
+            })}
+            <TextField
+                id="commentData"
+                // onChange={handleChange}
+                onKeyDown={handleEnter}
+                label="Post a comment!"
+                variant="filled"
+                style={{
+                    backgroundColor: "#E5E5E5",
+                    borderRadius: "0 0 5px 5px",
+                    border: "1px solid",
+                }}
+            />
+            <Button style={{display: "inline"}}>Hello</Button>
         </Box>
     );
 };
