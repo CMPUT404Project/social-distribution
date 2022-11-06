@@ -238,17 +238,17 @@ export const Post = (props) => {
         if (e.key === "Enter" && e.target.value !== "") {
             e.preventDefault();
             const postTextBox = document.getElementById("commentData");
-            console.log(props.data);
+            // console.log(props.data);
             let split = props.data.id.split("/");
             let aID = split[4];
             let pID = split[6];
             // TODO: data variable should be sent
             let data = { type: "comment" };
-            console.log(aID, pID);
-            console.log(
-                "service/authors/" + aID + "/posts/" + pID + "/comments"
-            );
-            console.log(props)
+            // console.log(aID, pID);
+            // console.log(
+            //     "service/authors/" + aID + "/posts/" + pID + "/comments"
+            // );
+            console.log(props.accessToken)
             // console.log({
             //     headers: {
             //         Authorization: "Bearer " + props.accessToken,
@@ -337,8 +337,6 @@ export const Post = (props) => {
                 variant="filled"
                 style={{
                     backgroundColor: "#E5E5E5",
-                    borderRadius: "0 0 5px 5px",
-                    border: "1px solid",
                 }}
             />
         </Box>
