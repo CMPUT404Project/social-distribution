@@ -229,11 +229,19 @@ export const Post = (props) => {
 
     let comments = props.data.commentsSrc.comments;
 
+
+    /* 
+    Not implemented yet, but will check if you can follow/send friend request to user.
+    */
     const onClickHandler = (e) => {
         setAnchor(e.currentTarget);
         setShow(!show);
     };
 
+    /* 
+
+    When making a comment, pressing the "Enter" key will be the trigger for posting a comment.
+    */
     const handleEnter = (e) => {
         if (e.key === "Enter" && e.target.value !== "") {
             e.preventDefault();
@@ -244,21 +252,17 @@ export const Post = (props) => {
             let pID = split[6];
             // TODO: data variable should be sent
             let data = { type: "comment" };
-            // console.log(aID, pID);
-            // console.log(
-            //     "service/authors/" + aID + "/posts/" + pID + "/comments"
-            // );
-            console.log(props.accessToken)
             // console.log({
             //     headers: {
             //         Authorization: "Bearer " + props.accessToken,
             //     },
             //     data,
             // });
+
             // TODO: uncomment out once variable data is done
             // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
             //     headers: {
-            //         Authorization: "Bearer " + token,
+            //         Authorization: "Bearer " + props.accessToken,
             //     },
             //     data,
             // })
@@ -331,27 +335,24 @@ export const Post = (props) => {
             })}
             <TextField
                 id="commentData"
-                // onChange={handleChange}
                 onKeyDown={handleEnter}
                 label="Post a comment!"
-                variant="filled"
+                variant="outlined"
                 style={{
                     backgroundColor: "#E5E5E5",
+                    borderRadius: "0 0 5px 5px",
                 }}
             />
         </Box>
     );
 };
 
-
 function Stream() {
     const [post, setPost] = useState({});
-    // const [accessToken, setAccessToken] = useState(
-    //     sessionStorage.getItem("access_token") ||
-    //         localStorage.getItem("access_token")
-    // );
-    
-    var accessToken = sessionStorage.getItem("access_token") ||localStorage.getItem("access_token")
+
+    var accessToken =
+        sessionStorage.getItem("access_token") ||
+        localStorage.getItem("access_token");
 
     useEffect(() => {
         const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
@@ -370,7 +371,7 @@ function Stream() {
     return (
         <Grid container justifyContent="center" minHeight={"100%"}>
             {fakeData.map((d) => {
-                return <Post key={d.id} data={d} accessToken={accessToken}/>;
+                return <Post key={d.id} data={d} accessToken={accessToken} />;
             })}
         </Grid>
     );
