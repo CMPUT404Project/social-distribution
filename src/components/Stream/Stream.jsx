@@ -1,9 +1,7 @@
 import {
     Avatar,
     Box,
-    Button,
     Card,
-    Dialog,
     Grid,
     Menu,
     MenuItem,
@@ -236,28 +234,37 @@ export const Post = (props) => {
         setShow(!show);
     };
 
-    // const handleChange = (e) => {
-    //     setPost(e.target.value);
-    //     console.log(e.target.value);
-    // };
-
     const handleEnter = (e) => {
         if (e.key === "Enter" && e.target.value !== "") {
-            e.preventDefault()
-            const postTextBox = document.getElementById("commentData")
-            console.log(props.data)
-            let split = (props.data.id).split("/")
-            let aID = split[4]
-            let pID = split[6]
-            // get data to match https://cdn.discordapp.com/attachments/1032761020717993994/1038019682013290536/unknown.png
-            let data = {type: "comment", }
-            console.log(aID, pID)
-            console.log("service/authors/" + aID + "/posts/" + pID + "/comments")
-            // wait until this is confirmed with backend
-            // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", )
-            postTextBox.value = ""
+            e.preventDefault();
+            const postTextBox = document.getElementById("commentData");
+            console.log(props.data);
+            let split = props.data.id.split("/");
+            let aID = split[4];
+            let pID = split[6];
+            // TODO: data variable should be sent
+            let data = { type: "comment" };
+            console.log(aID, pID);
+            console.log(
+                "service/authors/" + aID + "/posts/" + pID + "/comments"
+            );
+            console.log(props)
+            // console.log({
+            //     headers: {
+            //         Authorization: "Bearer " + props.accessToken,
+            //     },
+            //     data,
+            // });
+            // TODO: uncomment out once variable data is done
+            // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
+            //     headers: {
+            //         Authorization: "Bearer " + token,
+            //     },
+            //     data,
+            // })
+            postTextBox.value = "";
         }
-    }
+    };
 
     return (
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
@@ -334,21 +341,25 @@ export const Post = (props) => {
                     border: "1px solid",
                 }}
             />
-            <Button style={{display: "inline"}}>Hello</Button>
         </Box>
     );
 };
 
+
 function Stream() {
     const [post, setPost] = useState({});
+    // const [accessToken, setAccessToken] = useState(
+    //     sessionStorage.getItem("access_token") ||
+    //         localStorage.getItem("access_token")
+    // );
+    
+    var accessToken = sessionStorage.getItem("access_token") ||localStorage.getItem("access_token")
+
     useEffect(() => {
-        const token =
-            sessionStorage.getItem("access_token") ||
-            localStorage.getItem("access_token");
-        const aID = jwtDecode(token)["author_id"].split("/authors")[1];
+        const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
         axios
             .get("services/authors/" + aID + "posts", {
-                headers: { Authorization: "Bearer " + token },
+                headers: { Authorization: "Bearer " + accessToken },
             })
             .then((res) => {
                 setPost(res.data);
@@ -356,12 +367,12 @@ function Stream() {
             .catch((err) => {
                 console.log(err);
             });
-    }, []);
+    });
     let fakeData = data;
     return (
         <Grid container justifyContent="center" minHeight={"100%"}>
             {fakeData.map((d) => {
-                return <Post key={d.id} data={d} />;
+                return <Post key={d.id} data={d} accessToken={accessToken}/>;
             })}
         </Grid>
     );
