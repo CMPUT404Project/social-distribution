@@ -8,7 +8,9 @@ from rest_framework.response import Response
 from users.serializers import UserSerializer, UserCreationSerializer
 from django.contrib.auth.models import User
 from authors.models import Author
+from inbox.serializers import InboxCreationSerializer
 from backend.serializers import MyTokenObtainPairSerializer
+from inbox.models import Inbox
 
 def get_tokens_for_user(user):
     refresh = MyTokenObtainPairSerializer().get_token(user)
@@ -28,19 +30,29 @@ class UserList(ListAPIView):
 
 class UserCreation(APIView):
     """
-    Create a new auth user and an author, and returns an access token upon success
+    Create a new auth user and an author and an inbox, and returns an access token upon success
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
     def post(self, request, format=None):
+        #user creation
         user_serializer = UserCreationSerializer(data=request.data)
         if user_serializer.is_valid():
-            user = user_serializer.save()
-            new_author_data = {"host": request.scheme + "://" + request.get_host(), "user":user.id, }
+            self.user = user_serializer.save()
+            #author creation
+            new_author_data = {"host": request.scheme + "://" + request.get_host(), "user":self.user.id, }
             author_serializer = AuthorCreationSerializer(data=new_author_data)
             if author_serializer.is_valid():
-                author_serializer.save()
-                return Response(get_tokens_for_user(user), status=200)
-            user.delete()
+                self.author = author_serializer.save()
+                #inbox creation
+                new_inbox_data = {"id": self.author.id}
+                inbox_serializer = InboxCreationSerializer(data=new_inbox_data)
+                if inbox_serializer.is_valid():
+                    self.inbox = inbox_serializer.save()
+                    return Response(get_tokens_for_user(self.user), status=200)
+            #if fails delete all the successful previous steps
+            self.inbox.delete()
+            self.author.delete()
+            self.user.delete()
             return Response(author_serializer.errors, status=400)
         return Response(user_serializer.errors, status=400)
