@@ -36,10 +36,7 @@ class AuthorDetail(APIView):
         """
         Retrieve a single author.
         """
-        try:
-            author = Author.objects.get(pk=aid)
-        except Author.DoesNotExist:
-            return HttpResponse(status=404)
+        author = self.get_object(aid)
         serializer = AuthorSerializer(author)
         return Response(serializer.data)
 
