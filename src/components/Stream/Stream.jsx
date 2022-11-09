@@ -250,14 +250,9 @@ export const Post = (props) => {
             let split = props.data.id.split("/");
             let aID = split[4];
             let pID = split[6];
-            // TODO: data variable should be sent
+            // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
             let data = { type: "comment" };
-            // console.log({
-            //     headers: {
-            //         Authorization: "Bearer " + props.accessToken,
-            //     },
-            //     data,
-            // });
+            console.log("postTextBox -> " + postTextBox.value);
 
             // TODO: uncomment out once variable data is done
             // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
@@ -337,7 +332,7 @@ export const Post = (props) => {
                 id="commentData"
                 onKeyDown={handleEnter}
                 label="Post a comment!"
-                variant="outlined"
+                variant="filled"
                 style={{
                     backgroundColor: "#E5E5E5",
                     borderRadius: "0 0 5px 5px",
