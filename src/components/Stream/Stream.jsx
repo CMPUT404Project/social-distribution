@@ -1,16 +1,19 @@
 import {
     Avatar,
     Box,
+    Button,
     Card,
     Grid,
     Menu,
     MenuItem,
+    SvgIcon,
     TextField,
     Typography,
 } from "@mui/material";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
+import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
 let data = [
     {
@@ -50,7 +53,7 @@ let data = [
             // HATEOS url for Github API
             github: "http://github.com/laracroft",
             // Image from a public domain (optional, can be missing)
-            profileImage: "https://i.imgur.com/k7XVwpB.jpeg",
+            profileImage: "https://i.imgur.com/UH5RrFK.jpeg",
         },
         // categories this post fits into (a list of strings
         categories: ["web", "tutorial"],
@@ -222,13 +225,77 @@ let data = [
     },
 ];
 
+export const Comment = (props) => {
+    const [likeableComment, setLikeableComment] = useState(true);
+    const handleLikeOnClick = (e) => {
+        setLikeableComment(!likeableComment);
+        const aID = props.data.author.id.split("/authors/")[1];
+        // TODO: Get the current users name. Maybe put in useContext, or add it JWT access token
+        // I think I should get it in a API call because the author key contains all the information.
+        let data = {
+            type: "like",
+            summary: "Likes your comment",
+            object: props.data.id,
+        };
+        // console.log(data)
+        // axios.post("/service/authors/" + {aID} + "/inbox/", data)
+    };
+    return (
+        <Card
+            elevation={10}
+            style={{
+                backgroundColor: "#D3D3D3",
+                borderRadius: "0",
+                display: "flex",
+                alignItems: "center",
+            }}
+        >
+            <Avatar
+                alt="user image"
+                src={props.data["author"]["profileImage"]}
+                style={{ margin: "1ex 1ex" }}
+            />
+            <Typography variant="body1" padding="1em">
+                {props.data["comment"]}
+            </Typography>
+            {/* TODO: I need to get ACTUAL likes from api call */}
+            <Button
+                style={{
+                    marginLeft: "auto",
+                    marginRight: "1ex",
+                    height: "60%",
+                }}
+                variant={likeableComment ? "contained" : "disabled"}
+                onClick={handleLikeOnClick}
+                endIcon={<ThumbUpIcon />}
+            >
+                5
+            </Button>
+        </Card>
+    );
+};
+
 export const Post = (props) => {
     const [show, setShow] = useState(false);
     const [anchor, setAnchor] = useState(null);
-    const [post, setPost] = useState("");
+    // const [post, setPost] = useState("");
+    const [likeablePost, setLikeablePost] = useState(true);
+
+    // console.log(props.accessToken)
+
+    const handleLikeOnClick = () => {
+        setLikeablePost(!likeablePost);
+        // TODO: Get current user for summary
+        // I think I should get it in a API call because the author key contains all the information.
+
+        data = {
+            type: "Like",
+            summary: "Likes your post",
+            object: props.data.id,
+        };
+    };
 
     let comments = props.data.commentsSrc.comments;
-
 
     /* 
     Not implemented yet, but will check if you can follow/send friend request to user.
@@ -251,8 +318,14 @@ export const Post = (props) => {
             let aID = split[4];
             let pID = split[6];
             // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
-            let data = { type: "comment" };
+            let data = {
+                type: "comment",
+                comment: postTextBox.value,
+                contentType: "text/markdown",
+                published: new Date().toISOString(),
+            };
             console.log("postTextBox -> " + postTextBox.value);
+            console.log(data)
 
             // TODO: uncomment out once variable data is done
             // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
@@ -261,6 +334,16 @@ export const Post = (props) => {
             //     },
             //     data,
             // })
+
+            // axios.post(
+            //     "service/authors/" + aID + "/posts/" + pID + "/comments",
+            //     data,
+            //     {
+            //         headers: {
+            //             Authorization: "Bearer " + props.accessToken,
+            //         },
+            //     }
+            // );
             postTextBox.value = "";
         }
     };
@@ -279,7 +362,6 @@ export const Post = (props) => {
             )}
             <Card
                 style={{
-                    textAlign: "center",
                     padding: "2em",
                     margin: "2em 0 0",
                     borderRadius: "10px 10px 0 0",
@@ -291,6 +373,7 @@ export const Post = (props) => {
                         display: "flex",
                         flexDirection: "row",
                         alignItems: "center",
+                        textAlign: "center",
                     }}
                     onClick={onClickHandler}
                 >
@@ -305,29 +388,19 @@ export const Post = (props) => {
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
                 <Typography variant="h6">{props.data.content}</Typography>
+                {/* TODO: I need to get ACTUAL likes from API call */}
+                <Button
+                    style={{ marginTop: "1ex" }}
+                    variant={likeablePost ? "contained" : "disabled"}
+                    onClick={handleLikeOnClick}
+                    endIcon={<ThumbUpIcon />}
+                >
+                    5
+                </Button>
             </Card>
-            {comments.map((com) => {
-                return (
-                    <Card
-                        key={com.id}
-                        elevation={10}
-                        style={{
-                            backgroundColor: "#D3D3D3",
-                            borderRadius: "0",
-                            display: "flex",
-                        }}
-                    >
-                        <Avatar
-                            alt="user image"
-                            src={com["author"]["profileImage"]}
-                            style={{ margin: "1ex 1ex" }}
-                        />
-                        <Typography variant="body1" padding="1em">
-                            {com["comment"]}
-                        </Typography>
-                    </Card>
-                );
-            })}
+            {comments.map((com) => (
+                <Comment key={com.id} data={com} />
+            ))}
             <TextField
                 id="commentData"
                 onKeyDown={handleEnter}
@@ -344,10 +417,10 @@ export const Post = (props) => {
 
 function Stream() {
     const [post, setPost] = useState({});
-
-    var accessToken =
+    const [accessToken, setAccessToken] = useState(
         sessionStorage.getItem("access_token") ||
-        localStorage.getItem("access_token");
+            localStorage.getItem("access_token")
+    );
 
     useEffect(() => {
         const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
