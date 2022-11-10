@@ -17,7 +17,7 @@ class AuthorView(ListAPIView):
     def get(self, request):
         author = Author.objects.all()
         serializer = AuthorsSerializer(author)
-        return Response(serializer.data)
+        return Response(serializer.data, status=200)
     
 
 class AuthorDetail(APIView):
@@ -41,7 +41,7 @@ class AuthorDetail(APIView):
         except Author.DoesNotExist:
             return HttpResponse(status=404)
         serializer = AuthorSerializer(author)
-        return Response(serializer.data)
+        return Response(serializer.data, status=200)
 
     def put(self, request, aid):
         """
@@ -51,5 +51,5 @@ class AuthorDetail(APIView):
         serializer = AuthorSerializer(author, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data)
+            return Response(serializer.data, status=204)
         return Response(serializer.errors, status=400)
