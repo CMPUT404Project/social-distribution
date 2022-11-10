@@ -1,5 +1,6 @@
 import uuid
 from django.db import models
+<<<<<<< HEAD
 
 class Author(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
@@ -9,6 +10,6 @@ class Author(models.Model):
     github = models.CharField(max_length=200)
     profileImage = models.URLField(max_length=200)
 
-    def update_url(self):
-        self.url = self.host + self.id
-        self.save()
+    def save(self, *args, **kwargs):     
+        self.url = str(self.host) + "/authors/" + str(self.id)
+        super().save(*args, **kwargs)
