@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import ClipLoader from 'react-spinners/ClipLoader';
-import jwt_decode from "jwt-decode";
-import axios from 'axios';
+
+import AuthService from "../services/AuthService";
 
 // Import Material UI Icons
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -33,21 +33,12 @@ function RegisterPage() {
         showConfirmPassword: false,
         showError: false,
     });
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token'));
     const [isLoading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState('Please fill in all the fields');
 
     useEffect(() => {
         sessionStorage.setItem('username', values.username)
     }, [values.username])
-
-    useEffect(() => {
-        if (accessToken) {
-            sessionStorage.setItem('access_token', accessToken);
-            sessionStorage.setItem('refresh_token', refreshToken);
-        }
-    }, [accessToken, refreshToken])
 
     const handleClickShowPassword = () => {
         setShowValues({ ...showValues, showPassword: !showValues.showPassword });
@@ -95,34 +86,25 @@ function RegisterPage() {
                 if (!value) { imageError = true };
             });
             if (imageError) {
-                setErrorMessage("Bad Image URL.");
+                setErrorMessage("Could not load image");
                 throw new Error("imageError")
             };
 
             const gitUrl = "https://github.com/" + values.git;
 
-            const registerResponse = await axios.post('api/users/register/',
-                {
-                    username: values.username,
-                    password: values.password
-                }
-            );
-            setAccessToken(registerResponse.data.access);
-            setRefreshToken(registerResponse.data.refresh);
-            await axios.put(jwt_decode(registerResponse.data.access).author_id,
-                {
-                    displayName: values.displayName,
-                    github: gitUrl,
-                    profileImage: values.imageUrl
-                },
-                {
-                    headers: {
-                        "Authorization": "Bearer " + registerResponse.data.access
-                    }
-                }
-            );
-            navigate("/homepage", {replace: true})
-
+            const response = await AuthService.register(values.username, 
+                                                        values.password, 
+                                                        values.displayName,
+                                                        gitUrl,
+                                                        values.imageUrl)
+                .then(() => {
+                    navigate("/homepage", {replace: true})
+                }, error => {
+                    return error
+                })
+            if (response) {
+                throw response
+            }
         } catch (error) {
             setShowValues({ ...showValues, showError: true });
             if (error.response) {

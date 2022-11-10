@@ -40,7 +40,7 @@ class UserCreation(APIView):
             author_serializer = AuthorCreationSerializer(data=new_author_data)
             if author_serializer.is_valid():
                 author_serializer.save()
-                return Response(get_tokens_for_user(user), status=200)
+                return Response(get_tokens_for_user(user), status=201)
             user.delete()
             return Response(author_serializer.errors, status=400)
         return Response(user_serializer.errors, status=400)

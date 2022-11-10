@@ -15,6 +15,8 @@ import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
+import AuthService from "../../services/AuthService";
+
 let data = [
     {
         type: "post",
@@ -417,24 +419,30 @@ export const Post = (props) => {
 
 function Stream() {
     const [post, setPost] = useState({});
-    const [accessToken, setAccessToken] = useState(
-        sessionStorage.getItem("access_token") ||
-            localStorage.getItem("access_token")
-    );
+
+    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
+    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token'));
 
     useEffect(() => {
-        const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
-        axios
-            .get("services/authors/" + aID + "posts", {
-                headers: { Authorization: "Bearer " + accessToken },
-            })
-            .then((res) => {
-                setPost(res.data);
-            })
-            .catch((err) => {
-                console.log(err);
-            });
-    });
+        if (accessToken) {
+            try {
+                const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
+                axios
+                    .get("services/authors/" + aID + "posts", {
+                        headers: { Authorization: "Bearer " + accessToken },
+                    })
+                    .then((res) => {
+                        setPost(res.data);
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            } catch (error) {
+                console.error(error)
+            }
+        }
+    }, [accessToken]);
+
     let fakeData = data;
     return (
         <Grid container justifyContent="center" minHeight={"100%"}>
