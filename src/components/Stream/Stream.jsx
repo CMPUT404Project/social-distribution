@@ -420,6 +420,8 @@ export const Post = (props) => {
             //             },
             //         }
             //     )
+            //    // TODO: if POST response returns the comment, then change to something
+            //    //like: setComments([...comments, res.data])
             //     .then((res) => {
             //         axios
             //             .get(
