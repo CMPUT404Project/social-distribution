@@ -8,6 +8,7 @@ import {
     MenuItem,
     SvgIcon,
     TextField,
+    Tooltip,
     Typography,
 } from "@mui/material";
 import axios from "axios";
@@ -229,18 +230,64 @@ let data = [
 
 export const Comment = (props) => {
     const [likeableComment, setLikeableComment] = useState(true);
+    const [likes, setLikes] = useState(0);
+
+    const split = props.data.id.split("/");
+    const aID = split[4];
+    const pID = split[6];
+    const cID = split[8];
+
+    const currentUser = JSON.parse(AuthService.retrieveCurrentUser());
+
+    // TODO: Uncomment when likes backend API is complete
+    // useEffect(() => {
+    //     axios
+    //         .get(
+    //             "/service/authors/" +
+    //                 aID +
+    //                 "/posts/" +
+    //                 pID +
+    //                 "/comments/" +
+    //                 cID +
+    //                 "/likes",
+    //             {
+    //                 headers: {
+    //                     Authorization: "Bearer " + props.accessToken,
+    //                 },
+    //             }
+    //         )
+    //         .then((res) => {
+    //             const likeList = res.data;
+    //             setLikes(likeList.length);
+    //         })
+    //         .catch((e) => {
+    //             console.log(e);
+    //         });
+    // }, []);
+
     const handleLikeOnClick = (e) => {
         setLikeableComment(!likeableComment);
-        const aID = props.data.author.id.split("/authors/")[1];
-        // TODO: Get the current users name. Maybe put in useContext, or add it JWT access token
-        // I think I should get it in a API call because the author key contains all the information.
-        let data = {
-            type: "like",
-            summary: "Likes your comment",
+        data = {
+            summary: currentUser.displayName + " Likes your comment",
+            type: "Like",
+            author: currentUser,
             object: props.data.id,
         };
-        // console.log(data)
-        // axios.post("/service/authors/" + {aID} + "/inbox/", data)
+        const aID = currentUser.id.split("/authors/")[1];
+        console.log(
+            "Make POST request to ->" +
+                "/service/authors/" +
+                aID +
+                "/inbox/" +
+                "\nData -> "
+        );
+        console.log(data);
+        // TODO: Uncomment when API is available
+        // axios.post("/service/authors/" + aID + "/inbox/", data, {
+        //     headers: {
+        //         Authorization: "Bearer " + props.accessToken,
+        //     },
+        // }).catch((err) => console.log(err));
     };
     return (
         <Card
@@ -252,15 +299,16 @@ export const Comment = (props) => {
                 alignItems: "center",
             }}
         >
-            <Avatar
-                alt="user image"
-                src={props.data["author"]["profileImage"]}
-                style={{ margin: "1ex 1ex" }}
-            />
+            <Tooltip title={props.data.author.displayName}>
+                <Avatar
+                    alt="user image"
+                    src={props.data["author"]["profileImage"]}
+                    style={{ margin: "1ex 1ex" }}
+                />
+            </Tooltip>
             <Typography variant="body1" padding="1em">
                 {props.data["comment"]}
             </Typography>
-            {/* TODO: I need to get ACTUAL likes from api call */}
             <Button
                 style={{
                     marginLeft: "auto",
@@ -271,7 +319,7 @@ export const Comment = (props) => {
                 onClick={handleLikeOnClick}
                 endIcon={<ThumbUpIcon />}
             >
-                5
+                {likes}
             </Button>
         </Card>
     );
@@ -280,24 +328,58 @@ export const Comment = (props) => {
 export const Post = (props) => {
     const [show, setShow] = useState(false);
     const [anchor, setAnchor] = useState(null);
-    // const [post, setPost] = useState("");
     const [likeablePost, setLikeablePost] = useState(true);
+    const [likes, setLikes] = useState(0);
+    const [comments, setComments] = useState(props.data.commentsSrc.comments);
 
-    // console.log(props.accessToken)
+    const split = props.data.id.split("/");
+    const aID = props.data.id.split("/")[4];
+    const pID = props.data.id.split("/")[6];
 
+    // TODO: Uncomment when likes backend API is complete
+    // useEffect(() => {
+    //     axios
+    //         .get("/service/authors/" + aID + "/posts/" + pID + "/likes")
+    //         .then((res) => {
+    //             const likeList = res.data
+    //             console.log("/service/authors/" + aID + "/posts/" + pID + "/likes")
+    //             setLikes(likeList.length)
+    //         })
+    //         .catch((e) => {
+    //             console.log(e)
+    //         });
+    // }, []);
+
+    const currentUser = JSON.parse(AuthService.retrieveCurrentUser());
+    // console.log(props);
     const handleLikeOnClick = () => {
         setLikeablePost(!likeablePost);
-        // TODO: Get current user for summary
-        // I think I should get it in a API call because the author key contains all the information.
-
         data = {
+            summary: currentUser.displayName + " Likes your post",
             type: "Like",
-            summary: "Likes your post",
+            author: currentUser,
             object: props.data.id,
         };
+        const aID = currentUser.id.split("/authors/")[1];
+        console.log(
+            "Make POST request to ->" +
+                "/service/authors/" +
+                aID +
+                "/inbox/" +
+                "\nData -> "
+        );
+        console.log(data);
+        //     TODO: Uncomment when API is available
+        //     axios
+        //         .post("/service/authors/" + aID + "/inbox/", data, {
+        //             headers: {
+        //                 Authorization: "Bearer " + props.accessToken,
+        //             },
+        //         })
+        //         .catch((err) => {
+        //             console.log(err);
+        //         });
     };
-
-    let comments = props.data.commentsSrc.comments;
 
     /* 
     Not implemented yet, but will check if you can follow/send friend request to user.
@@ -308,7 +390,6 @@ export const Post = (props) => {
     };
 
     /* 
-
     When making a comment, pressing the "Enter" key will be the trigger for posting a comment.
     */
     const handleEnter = (e) => {
@@ -319,7 +400,6 @@ export const Post = (props) => {
             let split = props.data.id.split("/");
             let aID = split[4];
             let pID = split[6];
-            // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
             let data = {
                 type: "comment",
                 comment: postTextBox.value,
@@ -327,25 +407,34 @@ export const Post = (props) => {
                 published: new Date().toISOString(),
             };
             console.log("postTextBox -> " + postTextBox.value);
-            console.log(data)
+            console.log(data);
 
             // TODO: uncomment out once variable data is done
-            // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
-            //     headers: {
-            //         Authorization: "Bearer " + props.accessToken,
-            //     },
-            //     data,
-            // })
-
-            // axios.post(
-            //     "service/authors/" + aID + "/posts/" + pID + "/comments",
-            //     data,
-            //     {
-            //         headers: {
-            //             Authorization: "Bearer " + props.accessToken,
-            //         },
-            //     }
-            // );
+            // axios
+            //     .post(
+            //         "service/authors/" + aID + "/posts/" + pID + "/comments",
+            //         data,
+            //         {
+            //             headers: {
+            //                 Authorization: "Bearer " + props.accessToken,
+            //             },
+            //         }
+            //     )
+            //     .then((res) => {
+            //         axios
+            //             .get(
+            //                 "/service/authors/" +
+            //                     aID +
+            //                     "/posts/" +
+            //                     pID +
+            //                     "/comments"
+            //             )
+            //             .then((res) => {
+            //                 data = res.data;
+            //                 setComments(data.comments);
+            //             });
+            //     })
+            //     .catch((err) => console.log(err));
             postTextBox.value = "";
         }
     };
@@ -390,14 +479,13 @@ export const Post = (props) => {
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
                 <Typography variant="h6">{props.data.content}</Typography>
-                {/* TODO: I need to get ACTUAL likes from API call */}
                 <Button
                     style={{ marginTop: "1ex" }}
                     variant={likeablePost ? "contained" : "disabled"}
                     onClick={handleLikeOnClick}
                     endIcon={<ThumbUpIcon />}
                 >
-                    5
+                    {likes}
                 </Button>
             </Card>
             {comments.map((com) => (
@@ -420,13 +508,20 @@ export const Post = (props) => {
 function Stream() {
     const [post, setPost] = useState({});
 
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token'));
+    const [accessToken, setAccessToken] = useState(
+        localStorage.getItem("access_token") ||
+            sessionStorage.getItem("access_token")
+    );
+    const [refreshToken, setRefreshToken] = useState(
+        localStorage.getItem("refresh_token") ||
+            sessionStorage.getItem("refresh_token")
+    );
 
     useEffect(() => {
         if (accessToken) {
             try {
-                const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
+                const aID =
+                    jwtDecode(accessToken)["author_id"].split("/authors")[1];
                 axios
                     .get("services/authors/" + aID + "posts", {
                         headers: { Authorization: "Bearer " + accessToken },
@@ -438,15 +533,14 @@ function Stream() {
                         console.log(err);
                     });
             } catch (error) {
-                console.error(error)
+                console.error(error);
             }
         }
     }, [accessToken]);
 
-    let fakeData = data;
     return (
         <Grid container justifyContent="center" minHeight={"100%"}>
-            {fakeData.map((d) => {
+            {data.map((d) => {
                 return <Post key={d.id} data={d} accessToken={accessToken} />;
             })}
         </Grid>
