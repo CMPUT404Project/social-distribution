@@ -19,10 +19,7 @@ function HomePage() {
         <>
         <NavBar />
             <div className="container">
-            <Stream />
-                {/* <div style={{width:'450px',wordWrap: 'break-word'}}>
-                    Access Token: {accessToken}
-                </div> */}
+                <Stream />
             </div>
         </>
     )

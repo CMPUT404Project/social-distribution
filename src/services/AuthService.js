@@ -47,11 +47,6 @@ class AuthService {
                     displayName: displayName,
                     github: githubUrl,
                     profileImage: imageUrl
-                },
-                {
-                    headers: {
-                        "Authorization": "Bearer " + response.data.access
-                    }
                 }
             ).then(updateResponse => {
                 this.storeCurrentUser()
