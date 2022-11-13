@@ -9,6 +9,7 @@ import "./pages/LoginPage.css";
 import "./pages/HomePage.css";
 import "./pages/RegisterPage.css";
 
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
     // <React.StrictMode>

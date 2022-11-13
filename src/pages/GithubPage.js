@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import GitHubFeed from '../components/GithubActivity/index'
+import GitHubFeed from '../components/GithubActivity/GithubFeed'
 import ClipLoader from 'react-spinners/ClipLoader';
 
 import NavBar from "../components/NavBar/NavBar";
@@ -13,61 +13,63 @@ const BASE_URL = "https://api.github.com/users/";
 function GithubPage() {
     const navigate = useNavigate();
     const author = JSON.parse(AuthService.retrieveCurrentUser());
-    console.log(author)
     const [values, setValues] = useState({
         fullname: "",
-        username: "",
+        username: author.github.split('.com/')[1],
         avatarUrl: ""
     }) 
     const [events, setEvents] = useState([])
-    const [isLoading, setLoading] = useState(false);
+    const [isEmpty, setIsEmpty] = useState(true)
+    const [isLoading, setLoading] = useState(true);
 
     useEffect(() => {
         const getGithubUserData = async () => {
-            const gitUsername = author.github.split('.com/')[1];
-            setValues({ ...values, username: gitUsername });
-            console.log(gitUsername)
-            // REMEMBER TO REMOVE TOKEN
-            const response = await axios.get(BASE_URL + gitUsername).then((response) => {
+            const axoisInstance = axios.create();
+            axoisInstance.defaults.headers.common = {};
+            const response = await axoisInstance.get(BASE_URL + values.username)
+            .then((response) => {
                 setValues({ ...values, avatarUrl: response.data.avatar_url, fullname: response.data.name });
                 return response
             }).catch((error) => {
                 return error.response
             })
             if (response.status === 200) {
-                // REMEMBER TO REMOVE TOKEN
-                const eventsResponse = await axios.get(BASE_URL + gitUsername + "/events").then((response) => {
+                const eventsResponse = await axoisInstance.get(BASE_URL + values.username + "/events")
+                .then((response) => {
                     setEvents(response.data);
+                    if (response.data.length > 0) {
+                        setIsEmpty(false)
+                    }
                     setLoading(false)
                     return response
                 }).catch((error) => {
                     return error.response
                 })
             } else {
-                console.log("YO")
+                setLoading(false)
             }
         }
-        setLoading(true)
         getGithubUserData()
-    }, []);
-
+    }, []);    
 
     return (
         <>
         <NavBar />
-            <div className="container">
-                {isLoading ? (
+            {isLoading ? (
+                <div className="container">
                     <ClipLoader color={'#fff'} loading={isLoading} size={150} />
+                </div>
                 ) : (
-                    <>Github Page</>
-                    // <GitHubFeed
-                    //     fullName={values.fullname}
-                    //     userName={values.username}
-                    //     avatarUrl={values.avatarUrl}
-                    //     events={events}
-                    // />
-                )}
-            </div>
+                <div className="container" style={{alignItems: "start"}}>
+                    <GitHubFeed
+                        fullName={values.fullname}
+                        userName={values.username}
+                        avatarUrl={values.avatarUrl}
+                        events={events}
+                        isEmpty={isEmpty}
+                    />
+                </div>
+            )}
         </>
     )
 }
