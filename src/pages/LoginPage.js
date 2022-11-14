@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
 
 import { setAxiosAuthToken } from "../utils";
@@ -19,6 +19,8 @@ import Checkbox from '@mui/material/Checkbox';
 
 function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from || "/homepage";
     const [values, setValues] = useState({
         username: sessionStorage.getItem('username') || "",
         password: "",
@@ -55,9 +57,10 @@ function LoginPage() {
         try {
             if (values.username && values.password) {
                 const response = await AuthService.login(values.username, values.password, rememberMe)
-                    .then(() => {
+                    .then((response) => {
                         sessionStorage.removeItem("username")
-                        navigate("/homepage", {replace: true})
+                        localStorage.removeItem("username")
+                        navigate(from, {replace: true})
                     }, error => {
                         return error
                     })
