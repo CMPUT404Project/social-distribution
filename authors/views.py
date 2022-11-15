@@ -12,11 +12,11 @@ class AuthorView(ListAPIView):
     """
     Retrieve all authors on server.
     """
-    serializer_class = AuthorsSerializer
     queryset = Author.objects.all()
+    serializer_class = AuthorsSerializer
     def get(self, request):
         author = Author.objects.all()
-        serializer = AuthorsSerializer(author)
+        serializer = AuthorsSerializer(author, context={"request":request})
         return Response(serializer.data, status=200)
     
 
