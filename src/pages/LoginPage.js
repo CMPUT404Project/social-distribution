@@ -1,6 +1,9 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import axios from 'axios';
+
+import { setAxiosAuthToken } from "../utils";
+import AuthService from "../services/AuthService";
 
 // Import Material UI Icons
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
@@ -16,6 +19,8 @@ import Checkbox from '@mui/material/Checkbox';
 
 function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from || "/homepage";
     const [values, setValues] = useState({
         username: sessionStorage.getItem('username') || "",
         password: "",
@@ -26,21 +31,10 @@ function LoginPage() {
         showError: false,
     })
     const [errorMessage, setErrorMessage] = useState('Please fill in all the fields');
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token'))
 
     useEffect(() => {
-        if (accessToken) {
-            if (rememberMe) {
-                localStorage.setItem('access_token', accessToken);
-                localStorage.setItem('refresh_token', refreshToken);
-            } else {
-                sessionStorage.setItem('access_token', accessToken);
-                sessionStorage.setItem('refresh_token', refreshToken);
-            }
-            navigate('/homepage');
-        } 
-    }, [accessToken, refreshToken, rememberMe, navigate]);
+
+    }, []);
 
     useEffect(() => {
         sessionStorage.setItem('username', values.username)
@@ -62,14 +56,17 @@ function LoginPage() {
         event.preventDefault();
         try {
             if (values.username && values.password) {
-                const response = await axios.post('api/auth/token/',
-                    {
-                        username: values.username,
-                        password: values.password
-                    }
-                );
-                setAccessToken(response.data.access);
-                setRefreshToken(response.data.refresh);
+                const response = await AuthService.login(values.username, values.password, rememberMe)
+                    .then((response) => {
+                        sessionStorage.removeItem("username")
+                        localStorage.removeItem("username")
+                        navigate(from, {replace: true})
+                    }, error => {
+                        return error
+                    })
+                if (response) {
+                    throw response
+                }
             } else {
                 throw new Error("emptyField")
             }
