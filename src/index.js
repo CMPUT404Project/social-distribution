@@ -3,12 +3,14 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+import axios from 'axios';
+
 // CSS
 import './index.css';
 import "./pages/LoginPage.css";
 import "./pages/HomePage.css";
 import "./pages/RegisterPage.css";
-
+import "./pages/ProfilePage.css";
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

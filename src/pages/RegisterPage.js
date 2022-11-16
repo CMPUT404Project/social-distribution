@@ -18,7 +18,7 @@ import IconButton from '@mui/material/IconButton';
 
 function RegisterPage() {
     const navigate = useNavigate();
-    const usernamePattern = /^[A-Za-z0-9]{1,30}$/;
+    const namePattern = /^[A-Za-z0-9]{1,30}$/;
     const gitPattern = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
     const [values, setValues] = useState({
         username: sessionStorage.getItem('username'),
@@ -58,45 +58,58 @@ function RegisterPage() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        var body = {};
         var imageError = false;
 
         try {
             setLoading(true);
             for (const value in values) {
-                if (!values[value]) {
-                    setErrorMessage("Please fill in all the fields")
-                    throw new Error("emptyField")
-                };
+                if (value !== "git" && value !== "imageUrl") {
+                    if (!values[value]) {
+                        setErrorMessage("Please fill in all required fields")
+                        throw new Error("emptyField")
+                    };
+                }
             };
 
-            if (!usernamePattern.test(values.username)) {
+            if (!namePattern.test(values.username)) {
                 setErrorMessage("Username can only contain letters and numbers");
                 throw new Error("usernameError")
             };
-            if (!gitPattern.test(values.git)) {
-                setErrorMessage("Invalid Git username");
-                throw new Error("gitError")
+            if (!namePattern.test(values.displayName)) {
+                setErrorMessage("Display name can only contain letters and numbers");
+                throw new Error("displayNameError")
+            } else {
+                body.displayName = values.displayName;
             };
             if (values.password !== values.confirmPassword) {
                 setErrorMessage("Passwords do not match");
                 throw new Error("passMatchError")
             };
 
-            await doesImageExist(values.imageUrl).then((value) => {
-                if (!value) { imageError = true };
-            });
-            if (imageError) {
-                setErrorMessage("Could not load image");
-                throw new Error("imageError")
+            if (values.git) {
+                if (!gitPattern.test(values.git)) {
+                    setErrorMessage("Invalid Git username");
+                    throw new Error("gitError")
+                } else {
+                    body.githubUrl = "https://github.com/" + values.git;
+                }
             };
 
-            const gitUrl = "https://github.com/" + values.git;
+            if (values.imageUrl) {
+                await doesImageExist(values.imageUrl).then((value) => {
+                    if (!value) { imageError = true };
+                });
+                if (imageError) {
+                    setErrorMessage("Could not load image");
+                    throw new Error("imageError")
+                } else {
+                    body.imageUrl = values.imageUrl
+                };
+            };
 
-            const response = await AuthService.register(values.username, 
-                                                        values.password, 
-                                                        values.displayName,
-                                                        gitUrl,
-                                                        values.imageUrl)
+
+            const response = await AuthService.register(values.username, values.password, body)
                 .then(() => {
                     navigate("/homepage", {replace: true})
                 }, error => {
@@ -176,7 +189,7 @@ function RegisterPage() {
                                     className="input-field git-username"
                                     type="text"
                                     name="git-username"
-                                    placeholder="Git Username"
+                                    placeholder="Git Username (Optional)"
                                     value={values.git}
                                     onChange={handleInputChange("git")} />
                                 <span className="input-field-focus"></span>
@@ -190,7 +203,7 @@ function RegisterPage() {
                                     className="input-field image-url"
                                     type="text"
                                     name="image-url"
-                                    placeholder="Profile Image URL"
+                                    placeholder="Profile Image URL (Optional)"
                                     value={values.imageUrl}
                                     onChange={handleInputChange("imageUrl")} />
                                 <span className="input-field-focus"></span>

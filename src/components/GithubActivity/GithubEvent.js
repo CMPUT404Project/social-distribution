@@ -33,7 +33,7 @@ export default class GithubEvent extends Component {
         let commits = {
             commitsUrl: "",
             commitsMessage: "",
-            commitComponents: ""
+            commitComponents: []
         };
         let fork = {
             forkName: "",
@@ -59,7 +59,7 @@ export default class GithubEvent extends Component {
         }
         let followTargetUrl = "";
         let memberUrl = "";
-        let userGravatar = `<img className="user-gravatar" src="${data.actor.avatar_url}">`;
+        let userGravatar = (<img className="user-gravatar" src={data.actor.avatar_url}/>);
 
         if (data.type === 'CreateEvent' && (['repository', 'branch', 'tag'].indexOf(payload.ref_type) >= 0)) {
             icon = "octicon octicon-" + icons[data.type + '_' + payload.ref_type];
@@ -85,7 +85,7 @@ export default class GithubEvent extends Component {
         if (payload.pull_request) {
             pullRequestEvent.pullRequest = payload.pull_request;
             var title = data.repo.name + "#" + pullRequestEvent.pullRequest.number
-            pullRequestEvent.pullRequestUrl = `<a href=${pullRequestEvent.pullRequest.html_url} target="_blank">${title}</a>`;
+            pullRequestEvent.pullRequestUrl = (<a href={pullRequestEvent.pullRequest.html_url} target="_blank">{title}</a>);
             pullRequestEvent.mergeMessage = "";
     
             if (payload.pull_request.merged) {
@@ -93,10 +93,10 @@ export default class GithubEvent extends Component {
                 var message = `${pullRequestEvent.pullRequest.commits} ${pluralize('commit', pullRequestEvent.pullRequest.commits)} \
                                 with ${pullRequestEvent.pullRequest.additions} ${pluralize('addition', pullRequestEvent.pullRequest.additions)} \
                                 and ${pullRequestEvent.pullRequest.deletions} ${pluralize('deletion', pullRequestEvent.pullRequest.deletions)}`;
-                pullRequestEvent.mergeMessage = `<br>
-                                                    <small className="github-merge-message">
-                                                        ${message}
-                                                    </small>`;
+                pullRequestEvent.mergeMessage = (<><br/>
+                                                <small className="github-merge-message">
+                                                    {message}
+                                                </small></>);
             } else {
                 data.eventType = "closed";
             }
@@ -115,7 +115,7 @@ export default class GithubEvent extends Component {
 
         if (payload.comment && payload.comment.pull_request_url) {
             var title = data.repo.name + "#" + payload.comment.pull_request_url.split('/').pop();
-            pullRequestEvent.pullRequestUrl = `<a href=${payload.comment.html_url} target="_blank">${title}</a>`;
+            pullRequestEvent.pullRequestUrl = (<a href={payload.comment.html_url} target="_blank">{title}</a>);
         }
 
 
@@ -126,7 +126,7 @@ export default class GithubEvent extends Component {
             }
             if (payload.comment.html_url && payload.comment.commit_id) {
                 var title = data.repo.name + '@' + payload.comment.commit_id.substring(0, 10);
-                comment.commentUrl = `<a href=${payload.comment.html_url} target="_blank">${title}></a>`;
+                comment.commentUrl = (<a href={payload.comment.html_url} target="_blank">{title}></a>);
             }
         }
 
@@ -136,7 +136,7 @@ export default class GithubEvent extends Component {
             } else {
                 branch.branchName = payload.ref;
             }
-            branch.branchUrl = `<a className="github-branch-url" href=${'https://github.com/' + data.repo.name + '/tree/' + branch.branchName} target="_blank">${branch.branchName}</a>`
+            branch.branchUrl = (<a className="github-branch-url" href={'https://github.com/' + data.repo.name + '/tree/' + branch.branchName} target="_blank">{branch.branchName}</a>);
         }
 
         if (payload.commits) {
@@ -145,26 +145,26 @@ export default class GithubEvent extends Component {
             commits.commitsUrl = "https://github.com/" + data.repo.name + "/compare/" + shaDiff
             if (length === 2) {
                 // If there are 2 commits, show message 'View comparison for these 2 commits >>'
-                commits.commitsMessage = 'View comparison for these 2 commits &raquo'
+                commits.commitsMessage = 'View comparison for these 2 commits \u00bb'
             } else if (length > 2) {
                 // If there are more than two, show message '(numberOfCommits - 2) more commits >>'
-                commits.commitsMessage = length-2 + " more commits &raquo";
+                commits.commitsMessage = length-2 + " more commits \u00bb";
             } else {
                 commits.commitsMessage = ""
             }
     
             payload.commits.forEach(function(commit, i) {
-                if (commit.message.length > 66) {
-                    commit.message = commit.message.substring(0, 66) + '...';
+                if (commit.message.length > 100) {
+                    commit.message = commit.message.substring(0, 100) + '...';
                 }
                 if (i < 2) {
-                    commits.commitComponents += `<li>
+                    commits.commitComponents[i] = (<li key={i}>
                                                     <small>
                                                         <img className="commit-image" src="https://gravatar.com/avatar/" width="16" />
-                                                        <a className="commit-link" href="https://github.com/${data.repo.name}/commit/${commit.sha}">${commit.sha.substring(0, 6)}</a>
-                                                        <span classNames="commits-message">${commit.message}</span>
+                                                        <a className="commit-link" href={`https://github.com/${data.repo.name}/commit/${commit.sha}`}>{commit.sha.substring(0, 6)} </a>
+                                                        <span className="commits-message">{commit.message}</span>
                                                     </small>
-                                                </li>`
+                                                </li>)
                 } else {
                     payload.commits.splice(2, payload.size);
                 }
@@ -174,7 +174,7 @@ export default class GithubEvent extends Component {
             var title = data.repo.name + "#" + payload.issue.number;
             issue.action = payload.action;
             issue.title = payload.issue.title;
-            issue.issueUrl = `<a className="issue-link" href="${payload.issue.html_url}" target="_blank">${title}</a>`;
+            issue.issueUrl = (<a className="issue-link" href={payload.issue.html_url} target="_blank">{title}</a>);
             issue.issueType = "issue";
             if (payload.issue.pull_request) {
                 issue.issueType = "pull request";
@@ -183,20 +183,20 @@ export default class GithubEvent extends Component {
 
         if (payload.gist) {
             gist.actionType = payload.action === 'fork' ? payload.action + 'ed' : payload.action + 'd';
-            gist.gistLink = `<a className="gist-link" href="${payload.gist.html_url}" target="_blank">${'gist: ' + payload.gist.id}</a>`;
+            gist.gistLink = (<a className="gist-link" href={payload.gist.html_url} target="_blank">{'gist: ' + payload.gist.id}</a>);
         }
 
         // Wiki Event
         if (data.type === 'GollumEvent') {
             var page = payload.pages[0];
             gollum.actionType = page.action;
-            gollum.gollumUrl = gollum.actionType.charAt(0).toUpperCase() + gollum.actionType.slice(1) + ' ';
-            gollum.gollumUrl += `<a className="gollum-link" href="${"https://github.com/" + page.html_url}" target="_blank">${page.title}</a>`;
+            let gollumAction = gollum.actionType.charAt(0).toUpperCase() + gollum.actionType.slice(1) + ' ';
+            gollum.gollumUrl = (<>{gollumAction}<a className="gollum-link" href={page.html_url} target="_blank">{page.title}</a></>);
         }
 
         if (data.type === 'ReleaseEvent') {
-            release.tagLink = `<a className="release-tag-link" href="${payload.release.html_url}" target="_blank">${payload.release.tag_name}</a>`;
-            release.zipLink = `<a className="release-zip-link" href="${payload.release.zipball_url}" target="_blank">Download Source Code (zip)</a>`;
+            release.tagLink = (<a className="release-tag-link" href={payload.release.html_url} target="_blank">{payload.release.tag_name}</a>);
+            release.zipLink = (<a className="release-zip-link" href={payload.release.zipball_url} target="_blank">Download Source Code (zip)</a>);
         }
 
         return { icon, userGravatar, comment, branch, commits, fork, pullRequestEvent, issue, followTargetUrl, memberUrl, gist, gollum, release };
@@ -204,42 +204,42 @@ export default class GithubEvent extends Component {
 
     render() {
         const { actor : { login }, repo: { name }, payload, created_at } = this.props.event;
-        const timeString =  millisecondsToStr(new Date() - new Date(created_at))
         const userUrl = `https://github.com/${login}`;
         const repoUrl = `https://github.com/${name}`;
-        const repoComponent = `<a className="github-repo-url" href=${repoUrl} target="_blank">${name}</a>`;
+        const repoComponent = (<a className="github-repo-url" href={repoUrl} target="_blank">{name}</a>);
+        const timeComponent = (<div className="github-time">{millisecondsToStr(new Date() - new Date(created_at))}</div>);
         
         const { icon, userGravatar, comment, branch, commits, fork, pullRequestEvent, issue, followTargetUrl, memberUrl, gist, gollum, release } = this.renderTypes(this.props.event);
 
         const templates = {
-            CommitCommentEvent: `commented on commit ${comment.commentUrl}<br>${userGravatar}<small>${comment.commentBody}</small>`,
-            CreateEvent: `created ${payload.ref_type} ${branch.branchUrl} at ${repoComponent}`,
-            DeleteEvent: `deleted ${payload.ref_type} ${payload.ref} at ${repoComponent}`,
-            FollowEvent: `started following ${followTargetUrl}`,
-            ForkEvent: `forked ${repoComponent} to <a href=${fork.forkUrl} target="_blank">${fork.forkName}</a>`,
-            GistEvent: `${gist.actionType} ${gist.gistUrl}`,
-            GollumEvent: `${gollum.actionType} the ${repoComponent} wiki<br>${userGravatar}<small>${gollum.gollumUrl}</small>`,
-            IssueCommentEvent: `commented on ${issue.issueType} ${issue.issueUrl}<br>${userGravatar}<small>${comment.commentBody}</small>`,
-            IssuesEvent: `${issue.action} issue ${issue.issueUrl}<br>${userGravatar}<small>${issue.title}</small>`,
-            MemberEvent: `added ${memberUrl} to ${repoComponent}`,
-            PublicEvent: `open sourced ${repoComponent}`,
-            PullRequestEvent: `${pullRequestEvent.eventType} pull request ${pullRequestEvent.pullRequestUrl}<br>${userGravatar}<small>${pullRequestEvent.pullRequest.title}</small>${pullRequestEvent.mergeMessage}`,
-            PullRequestReviewEvent: `${pullRequestEvent.eventType} pull request ${pullRequestEvent.pullRequestUrl}.<br>${userGravatar}<small>${pullRequestEvent.reviewBody}</small>`,
-            PullRequestReviewCommentEvent: `commented on pull request ${pullRequestEvent.pullRequestUrl}<br>${userGravatar}<small>${comment.commentBody}</small>`,
-            PushEvent:  `<span>
-                            pushed to ${branch.branchUrl} at ${repoComponent}
-                            <div className="github-time">${timeString}</div>
+            CommitCommentEvent: (<>commented on commit {comment.commentUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
+            CreateEvent: (<>created {payload.ref_type} {branch.branchUrl} at {repoComponent} {timeComponent}</>),
+            DeleteEvent: (<>deleted {payload.ref_type} {payload.ref} at {repoComponent} {timeComponent}</>),
+            FollowEvent: (<>started following {followTargetUrl} {timeComponent}</>),
+            ForkEvent: (<>forked {repoComponent} to <a href={fork.forkUrl} target="_blank">{fork.forkName}</a> {timeComponent}</>),
+            GistEvent: (<>{gist.actionType} {gist.gistUrl} {timeComponent}</>),
+            GollumEvent: (<>{gollum.actionType} the {repoComponent} wiki {timeComponent}<br/>{userGravatar}<small>{gollum.gollumUrl}</small></>),
+            IssueCommentEvent: (<>commented on {issue.issueType} {issue.issueUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
+            IssuesEvent: (<>{issue.action} issue {issue.issueUrl} {timeComponent}<br/>{userGravatar}<small>{issue.title}</small></>),
+            MemberEvent: (<>added {memberUrl} to {repoComponent} {timeComponent}</>),
+            PublicEvent: (<>open sourced {repoComponent} {timeComponent}</>),
+            PullRequestEvent: (<>{pullRequestEvent.eventType} pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{pullRequestEvent.pullRequest.title}</small>{pullRequestEvent.mergeMessage}</>),
+            PullRequestReviewEvent: (<>{pullRequestEvent.eventType} pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{pullRequestEvent.reviewBody}</small></>),
+            PullRequestReviewCommentEvent: (<>commented on pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
+            PushEvent:  (<><span>
+                            pushed to {branch.branchUrl} at {repoComponent}
+                            {timeComponent}
                         </span>
-                        <ul className="commits">${commits.commitComponents}</ul>
+                        <ul className="commits">{commits.commitComponents}</ul>
                         <small>
-                            <a href=${commits.commitsUrl} target="_blank">${commits.commitsMessage}</a>
-                        </small>`,
-            ReleaseEvent:   `released ${release.tagLink} at ${repoComponent}<br>
-                            ${userGravatar}
+                            <a href={commits.commitsUrl} target="_blank">{commits.commitsMessage}</a>
+                        </small></>),
+            ReleaseEvent:   (<>released {release.tagLink} at {repoComponent} {timeComponent}<br/>
+                            {userGravatar}
                             <small>
-                                <span class="octicon octicon-cloud-download"></span>${release.zipLink}
-                            </small>`,
-            WatchEvent: `starred ${repoComponent}`
+                                <span class="octicon octicon-cloud-download"></span>{release.zipLink}
+                            </small></>),
+            WatchEvent: (<>starred {repoComponent} {timeComponent}</>)
         }
 
         return (
@@ -247,7 +247,7 @@ export default class GithubEvent extends Component {
                 <span className={"github-event-octicon " + icon}></span>
                 <div className="github-title">
                     <a className="github-user-url" href={userUrl} target="_blank">{login}</a> {" "}
-                    {parse(templates[this.props.event.type])}
+                    {templates[this.props.event.type]}
                 </div>
             </div>
         );

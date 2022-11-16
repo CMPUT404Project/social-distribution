@@ -21,35 +21,35 @@ class AuthService {
                 sessionStorage.setItem('refresh_token', response.data.refresh);
             }
             // Set auth token as default header for axios calls
-            setAxiosAuthToken(response.data.access);
+            setAxiosAuthToken();
             await this.storeCurrentUser()
         }
         return response.data
     }
 
-    register(username, password, displayName, githubUrl, imageUrl) {
-        return axios.post('api/users/register/',
+    async register(username, password, body) {
+        const response = await axios.post('api/users/register/',
             {
                 username: username,
                 password: password
             }
-        ).then(response => {
+        )
+        if (response.status === 201) {
             sessionStorage.setItem('access_token', response.data.access);
             sessionStorage.setItem('refresh_token', response.data.refresh);
             setAxiosAuthToken(response.data.access);
+            const updateReponse = await this.updateUserDetails(body);
+            return updateReponse
+        }
+        return response.data
+    }
 
-            const updateReponse = axios.put(jwtDecode(response.data.access).author_id,
-                {
-                    displayName: displayName,
-                    github: githubUrl,
-                    profileImage: imageUrl
-                }
-            ).then(updateResponse => {
-                this.storeCurrentUser()
-                return updateResponse.data
-            });
-            return updateReponse || response.data
-        });
+    async updateUserDetails(body) {
+        const response = await axios.put(jwtDecode(this.getAccessToken()).author_id, body)
+        if (response.status === 204) {
+            await this.storeCurrentUser()
+        }
+        return response.data
     }
 
     storeCurrentUser() {

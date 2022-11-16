@@ -25,7 +25,8 @@ import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import axios from "axios";
 
-import { clearStorage } from "../../utils";
+import { clearStorage, setAxiosAuthToken } from "../../utils";
+import AuthService from "../../services/AuthService";
 import "./NavBar.css";
 
 const pages = ['Inbox', 'Friends', 'Github'];
@@ -34,6 +35,7 @@ const settings = ['Profile', 'Account', 'Logout'];
 
 function NavBar() {
     const navigate = useNavigate();
+    setAxiosAuthToken();
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
 
@@ -41,7 +43,7 @@ function NavBar() {
 
     useEffect(() => {
         if (!accessToken) {
-            navigate('/')
+            navigate('/', {replace: true})
         }
     }, [accessToken, navigate]);
 
@@ -51,12 +53,7 @@ function NavBar() {
         if (accessToken) {
             try {
                 const decode = jwt_decode(accessToken)["author_id"].split("/authors");
-                axios
-                    .get("/authors" + decode[1], {
-                        headers: {
-                            Authorization: "Bearer " + accessToken,
-                        },
-                    })
+                axios.get("/authors" + decode[1])
                     .then((res) => {
                         setUser(res["data"]);
                     })
