@@ -5,19 +5,9 @@ from django.core.paginator import Paginator
 class CustomPagination():
     def __init__(self, context):
         self.context = context
-        self.query_params = self.context['request'].query_params
-        self.setup()
-
-    def setup(self):
-        # initialize and setup page size and page
-        try:
-            page_size = self.query_params.get('size')
-            page = self.query_params.get('page')
-            self.page_size = page_size
-            self.page = page
-        except:
-            return
-
+        self.query_params = context['request'].query_params
+        self.page_size = self.query_params.get('size')
+        self.page = self.query_params.get('page')
 
     # this function tkaes an object and orders it by order or default 'id'
     def paginate(self, obj, order='id'):

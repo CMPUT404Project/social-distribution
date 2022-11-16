@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Author
-from django.core.paginator import Paginator 
 from backend.pagination import CustomPagination
 
 class AuthorSerializer(serializers.ModelSerializer):
@@ -8,7 +7,6 @@ class AuthorSerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
-        ordering = 'id'
         model = Author
         fields = ['type', 'id', 'host', 'url',
                   'displayName', 'github', 'profileImage']
