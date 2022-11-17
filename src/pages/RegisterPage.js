@@ -108,7 +108,6 @@ function RegisterPage() {
                 };
             };
 
-
             const response = await AuthService.register(values.username, values.password, body)
                 .then(() => {
                     navigate("/homepage", {replace: true})

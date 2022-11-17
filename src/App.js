@@ -1,6 +1,5 @@
 import { BrowserRouter as Router, Route, Routes, Navigate, useLocation } from "react-router-dom";
 import {React, useState, useEffect} from "react";
-import axios from "axios";
 
 import AuthService from './services/AuthService'
 import { PublicRoute as Pub, PrivateRoute as Priv } from "./components/AuthRoutes";
