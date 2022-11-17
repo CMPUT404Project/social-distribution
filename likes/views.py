@@ -3,76 +3,70 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.generics import GenericAPIView
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from likes.models import Like
+from likes.serializers import LikeSerializer, LikedSerializer, LikesSerializer
 from authors.models import Author
+from posts.models import Post
+from comments.models import Comment
 import json
 
-class LikedView(GenericAPIView):
+class LikedView(APIView):
+    serializer_class = LikesSerializer
+    queryset = Like.objects.all()
     def get(self, request, aid):
         """
         Get what public things given author has liked
         """
         liked = Author.objects.get(pk=aid).like_set.all()
-        serializer = FollowerSerializer(followers, many=True)
-        return JsonResponse(serializer.data, safe=False)
-class FollowerView(GenericAPIView):
-    def get(self, request, aid):
-        """
-        List liked for a given author
-        """
-        #get all followers for author
-        followers = Author.objects.get(pk=aid).follower.all()
-        serializer = FollowerSerializer(followers, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        serializer = LikesSerializer(liked, many=True)
+        return response(serializer.data, safe=False, status=200)
 
-
-    def delete(self, request, aid):
-        followers = Follower.objects.all()
-        followers.delete()
-        return HttpResponse(status=204)
-
-def createFollowerJSONPayload(request, aid, fid):
-    """
-    Create a JSON payload for a follower
-    """
-    jsonData = json.dumps({})
-    jsonData['follower'] = fid
-    jsonData['followed'] = aid
-    return jsonData
-
-class FollowerIDView(GenericAPIView):
-    def get(self, request, aid, fid):
+class PostLikesView(APIView):
+    def get(self, request, aid, pid):
         """
-        Retrieve a follower
+        Retrieve likes for a given post
         """
-        try:
-            follower = Follower.objects.get(followed=aid, follower=fid)
-        except Follower.DoesNotExist:
-            return HttpResponse(status=404)
-        serializer = FollowerSerializer(follower)
-        return JsonResponse(serializer.data)
+        like = Post.objects.get(pk=pid).like_set.all()
+        #for some reason the context argument allows us to skip data=data
+        serializer = LikesSerializer(like)
+        return Response(serializer.data, 200)
 
-    def post(self, request, aid, fid):
+    def post(self, request, aid, pid):
         """
-        Create a new follower
+        Create a new comment
         """
-        data = createFollowerJSONPayload(request, aid, fid)
-        serializer = FollowerSerializer(data=data)
-        print(serializer)
+        data = JSONParser().parse(request)
+        data['postid'] = pid
+        serializer = LikeSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, 200)
+        return Response(serializer.errors, status=400)
 
     def delete(self, request, aid, pid):
-        """
-        Delete a follower
-        """
-        try:
-            follower = Follower.objects.get(followed=aid, follower=fid)
-        except Follower.DoesNotExist:
-            return HttpResponse(status=404)
-        follower.delete()
+        likes = Like.objects.all()
+        likes.delete()
         return HttpResponse(status=204)
 
-# Create your views here.
+class CommentLikesView(APIView):
+    def get(self, request, aid, pid, cid):
+        """
+        Retrieve likes for a given comment
+        """
+        likes = Comment.objects.get(pk=cid).like_set.all()
+        serializer = LikesSerializer(likes)
+        return Response(serializer.data, 200)
+
+    def post(self, request, aid, pid, cid):
+        """
+        Create a new comment
+        """
+        data = JSONParser().parse(request)
+        data['commentid'] = cid
+        serializer = LikeSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, 200)
+        return Response(serializer.errors, status=400)

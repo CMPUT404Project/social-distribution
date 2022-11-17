@@ -4,7 +4,7 @@ from .models import Author
 
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField(read_only=True)
-    id = serializers.SerializerMethodField(read_only=True)
+    id = serializers.UUIDField()
 
     class Meta:
         model = Author

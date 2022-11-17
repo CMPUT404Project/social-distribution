@@ -1,6 +1,5 @@
 from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -19,8 +18,6 @@ class FollowerView(APIView):
         """
         #get all followers for author
         followers = Author.objects.get(id=aid).followed.all()
-        print("followers")
-        print(followers)
         serializer = FollowersSerializer(followers)
         return Response(serializer.data)
 

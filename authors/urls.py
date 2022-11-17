@@ -4,5 +4,5 @@ from .views import AuthorDetail, AuthorView
 
 urlpatterns = [
   path('', AuthorView.as_view()),
-  path('<str:aid>', AuthorIDView.as_view()),
+  path('<str:aid>', AuthorDetail.as_view()),
 ]

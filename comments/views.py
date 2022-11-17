@@ -3,12 +3,13 @@ from django.http import HttpResponse, JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.generics import GenericAPIView
-from rest_framework import generics
+from rest_framework.views import APIView
+from rest_framework.response import Response
 from posts.models import Post
 from comments.models import Comment
-from comments.serializers import CommentSerializer
+from comments.serializers import CommentSerializer, CommentsSerializer
 
-class CommentView(GenericAPIView):
+class CommentView(APIView):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
 
@@ -17,18 +18,19 @@ class CommentView(GenericAPIView):
         List comments for a given post
         """
         comments = Post.objects.get(pk=pid).comment_set.all()
-        serializer = CommentSerializer(comments, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        serializer = CommentsSerializer(comments)
+        return Response(serializer.data, 200)
 
-    def post(self, request, aid):
+    def post(self, request, aid, pid):
         """
         Create a new comment
         """
         data = JSONParser().parse(request)
+        data['post'] = pid
         serializer = CommentSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
+            return Response(serializer.data, 200)
         return JsonResponse(serializer.errors, status=400)
 
     def delete(self, request, aid, pid):
@@ -37,7 +39,7 @@ class CommentView(GenericAPIView):
         return HttpResponse(status=204)
 
 #used for testing purposes, not set in url.py
-class CommentIDView(GenericAPIView):
+class CommentIDView(APIView):
     serializer_class = CommentSerializer
     queryset = Comment.objects.all()
 
@@ -46,11 +48,11 @@ class CommentIDView(GenericAPIView):
         Retrieve a comment
         """
         try:
-            comment = Comment.objects.get(pk=cid)
+            comments = Comment.objects.all()
         except Comment.DoesNotExist:
             return HttpResponse(status=404)
-        serializer = self.serializer_class(comment)
-        return JsonResponse(serializer.data)
+        serializer = CommentsSerializer(comments)
+        return Response(serializer.data, status=200)
 
     def put(self, request, aid, pid, cid):
         """
@@ -74,18 +76,3 @@ class CommentIDView(GenericAPIView):
             return HttpResponse(status=404)
         comment.delete()
         return HttpResponse(status=204)
-@csrf_exempt
-def comment_id(request, aid, pid, cid):
-    """
-    Retrieve, update or delete a code snippet.
-    """
-    try:
-        comment = Comment.objects.get(pk=cid)
-    except Comment.DoesNotExist:
-        return HttpResponse(status=404)
-
-    #only for testing purposes/ should be removed
-    if request.method == 'DELETE':
-        comment.delete()
-        return HttpResponse(status=204)
-
