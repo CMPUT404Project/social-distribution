@@ -126,7 +126,7 @@
              }
              if (payload.comment.html_url && payload.comment.commit_id) {
                  var title = data.repo.name + '@' + payload.comment.commit_id.substring(0, 10);
-                 comment.commentUrl = (<a href={payload.comment.html_url} target="_blank">{title}></a>);
+                 comment.commentUrl = (<a href={payload.comment.html_url} target="_blank">{title}</a>);
              }
          }
  

@@ -3,8 +3,8 @@ from .models import Author
 from backend.pagination import CustomPagination
 
 class AuthorSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField(read_only=True)
-    id = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
 
     class Meta:
         model = Author
