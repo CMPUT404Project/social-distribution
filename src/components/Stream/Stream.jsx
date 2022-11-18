@@ -352,21 +352,17 @@ function Stream() {
 
     useEffect(() => {
         if (accessToken) {
-            try {
-                const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
-                axios
-                    .get("services/authors/" + aID + "posts", {
-                        headers: { Authorization: "Bearer " + accessToken },
-                    })
-                    .then((res) => {
-                        setPost(res.data);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            } catch (error) {
-                console.error(error)
-            }
+            const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
+            axios
+                .get("services/authors/" + aID + "posts", {
+                    headers: { Authorization: "Bearer " + accessToken },
+                })
+                .then((res) => {
+                    setPost(res.data);
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         }
     }, [accessToken]);
 
