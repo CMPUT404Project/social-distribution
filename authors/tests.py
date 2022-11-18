@@ -4,6 +4,7 @@ from rest_framework.test import APITestCase
 from authors.models import Author
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
+from backend.test_utils import create_author_with_user
 
 class AuthorTests(APITestCase):
     user_url = reverse('register_user')        
@@ -16,12 +17,8 @@ class AuthorTests(APITestCase):
     
     def setUp(self):
         self.client.defaults['SERVER_NAME'] = "testserver.com"
-        self.user = User(username=self.username)
-        self.user.set_password(self.password)
-        self.user.save()
         self.host = f'http://{self.client.defaults["SERVER_NAME"]}'
-        self.author = Author(host=self.host, user=self.user)
-        self.author.save()
+        self.user, self.author = create_author_with_user(self.username, self.password, self.host)
         self.refresh = RefreshToken.for_user(self.user)
 
     def test_correct_author_url_set_when_saved(self):

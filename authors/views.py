@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from rest_framework.pagination import PageNumberPagination
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -11,18 +10,16 @@ class AuthorView(ListAPIView):
     """
     Retrieve all authors on server.
     """
-    serializer_class = AuthorsSerializer
     queryset = Author.objects.all()
+    serializer_class = AuthorsSerializer
     def get(self, request):
         author = Author.objects.all()
-        serializer = AuthorsSerializer(author)
+        serializer = AuthorsSerializer(author, context={"request":request})
         return Response(serializer.data, status=200)
-    
 
 class AuthorDetail(APIView):
     serializer_class = AuthorSerializer
     queryset = Author.objects.all()
-
     permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
