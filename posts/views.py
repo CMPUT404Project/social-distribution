@@ -1,12 +1,10 @@
-from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.response import Response
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from rest_framework.generics import GenericAPIView
 from posts.models import Post
 from authors.models import Author
-from posts.serializers import PostSerializer
+from posts.serializers import PostSerializer, PostCreationSerializer
+from backend.pagination import CustomPagination
 
 class PostView(GenericAPIView):
     serializer_class = PostSerializer
@@ -17,19 +15,24 @@ class PostView(GenericAPIView):
         List posts for a given author
         """
         posts = Author.objects.get(pk=aid).post_set.all()
-        serializer = PostSerializer(posts, many=True)
+        context={"request":request}
+        pagination = CustomPagination(context)
+        paginated_posts = pagination.paginate(posts)
+        serializer = PostSerializer(paginated_posts, many=True)
         return Response(serializer.data, status=200)
+
     def post(self, request, aid):
         """
         Create a new post
         Fields from client payload are: displayName, github, profileImage
         Fields filled in by server: host, url, id
         """
-        serializer = PostSerializer(data=request.data)
-        print(serializer)
+        serializer = PostCreationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=201)
+            post = Post.objects.get(pk=serializer.data['id'])
+            view_serializer = PostSerializer(post)
+            return Response(view_serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
     def delete(self, request, aid):
@@ -60,12 +63,12 @@ class PostIDView(GenericAPIView):
             post = Post.objects.get(pk=pid)
         except Post.DoesNotExist:
             return HttpResponse(status=404)
-        data = JSONParser().parse(request)
-        serializer = PostSerializer(post, data=data)
-        print(serializer)
+        serializer = PostCreationSerializer(post, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=200)
+            post = Post.objects.get(pk=serializer.data['id'])
+            view_serializer = PostSerializer(post)
+            return Response(view_serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
     def delete(self, request, aid, pid):
