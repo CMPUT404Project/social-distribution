@@ -4,15 +4,41 @@ from .models import Post, Category
 from authors.models import Author
 from authors.serializers import AuthorSerializer
 from comments.serializers import CommentSerializer
+import ast
 
 class PostSerializer(serializers.ModelSerializer):
-    categories = serializers.ListSerializer(child=serializers.CharField(), required=False)
-    count = serializers.SerializerMethodField(read_only=True)
-    comments = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField()
+    count = serializers.SerializerMethodField()
+    comments = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
+    # categories is not updatable
+    author = serializers.SerializerMethodField()
+    categories = serializers.SerializerMethodField()
     class Meta:
         model = Post
-        fields = ['id', 'source', 'origin', 'description', 'contentType', 'author', 'categories', 'count', 'comments', 'published', 'visibility', 'unlisted']
-    
+        fields = ['type', 
+        'title', 
+        'id', 
+        'source', 
+        'origin', 
+        'description', 
+        'contentType', 
+        'author', 
+        'categories', 
+        # 'count', 
+        # 'comments', 
+        # 'commentsSrc', 
+        'published', 
+        'visibility', 
+        'unlisted'
+        ]
+
+    def get_type(self, obj):
+        return "post"
+
+    def get_id(self, obj):
+        return str(obj.author.url) + '/posts/' + str(obj.id)
+
     def get_count(self, obj):
         return str(obj.comment_set.all().count())
 
@@ -21,8 +47,7 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
-
-class CategorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Category
-        fields = ['name']
+    
+    def get_categories(self, obj):
+        categories_list = ast.literal_eval(obj.categories)
+        return categories_list

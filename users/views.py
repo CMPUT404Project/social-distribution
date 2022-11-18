@@ -37,7 +37,6 @@ class UserCreation(APIView):
         if user_serializer.is_valid():
             user = user_serializer.save()
             new_author_data = {"host": request.scheme + "://" + request.get_host(), "user":user.id, }
-            print(new_author_data)
             author_serializer = AuthorCreationSerializer(data=new_author_data)
             if author_serializer.is_valid():
                 author_serializer.save()

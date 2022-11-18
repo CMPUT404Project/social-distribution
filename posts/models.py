@@ -15,14 +15,15 @@ class Post(models.Model):
         ("FRIEND", "FRIEND")
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    #do we want the url and host as a field?
-    source = models.URLField(max_length=200)
-    origin = models.URLField(max_length=200)
-    description = models.CharField(max_length=200)
+    source = models.URLField(max_length=200, null=True, blank=True)
+    origin = models.URLField(max_length=200, null=True, blank=True)
+    title = models.CharField(max_length=200)
+    content = models.CharField(max_length=500, null=False)
+    description = models.CharField(max_length=200, null=True, blank=True)
     contentType = models.CharField(max_length=200, choices = CONTENT_TYPES, default= "text/plain")
     author = models.ForeignKey(Author, on_delete = models.SET_NULL, null=True)
-    published = models.DateTimeField(auto_now_add=True, blank=True)
-    categories = models.CharField(max_length=200, blank=True)
+    published = models.DateTimeField(auto_now_add=True)
+    categories = models.CharField(max_length=200, default='[]')
     visibility = models.CharField(max_length=200, choices = VISIBILITY_TYPES, default= "PUBLIC")
     unlisted = models.BooleanField(default=False)
 

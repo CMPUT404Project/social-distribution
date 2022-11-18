@@ -1,5 +1,6 @@
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
+from rest_framework.response import Response
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.parsers import JSONParser
 from rest_framework.generics import GenericAPIView
@@ -8,7 +9,6 @@ from authors.models import Author
 from posts.serializers import PostSerializer
 
 class PostView(GenericAPIView):
-
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
@@ -18,19 +18,19 @@ class PostView(GenericAPIView):
         """
         posts = Author.objects.get(pk=aid).post_set.all()
         serializer = PostSerializer(posts, many=True)
-        return JsonResponse(serializer.data, safe=False)
+        return Response(serializer.data, status=200)
     def post(self, request, aid):
         """
         Create a new post
         Fields from client payload are: displayName, github, profileImage
         Fields filled in by server: host, url, id
         """
-        data = JSONParser().parse(request)
-        serializer = PostSerializer(data=data)
+        serializer = PostSerializer(data=request.data)
+        print(serializer)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
     def delete(self, request, aid):
         posts = Post.objects.all()
@@ -38,7 +38,6 @@ class PostView(GenericAPIView):
         return HttpResponse(status=204)
 
 class PostIDView(GenericAPIView):
-
     serializer_class = PostSerializer
     queryset = Post.objects.all()
 
@@ -51,7 +50,7 @@ class PostIDView(GenericAPIView):
         except Post.DoesNotExist:
             return HttpResponse(status=404)
         serializer = PostSerializer(post)
-        return JsonResponse(serializer.data)
+        return Response(serializer.data, status=200)
 
     def put(self, request, aid, pid):
         """
@@ -63,10 +62,11 @@ class PostIDView(GenericAPIView):
             return HttpResponse(status=404)
         data = JSONParser().parse(request)
         serializer = PostSerializer(post, data=data)
+        print(serializer)
         if serializer.is_valid():
             serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
+            return Response(serializer.data, status=200)
+        return Response(serializer.errors, status=400)
 
     def delete(self, request, aid, pid):
         """

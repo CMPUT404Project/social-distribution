@@ -3,8 +3,8 @@ from .models import Author
 
 
 class AuthorSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField(read_only=True)
-    id = serializers.UUIDField()
+    type = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
 
     class Meta:
         model = Author
@@ -19,8 +19,8 @@ class AuthorSerializer(serializers.ModelSerializer):
 
 
 class AuthorsSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField(read_only=True)
-    items = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
 
     class Meta:
         model = Author

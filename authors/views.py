@@ -5,7 +5,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 from authors.models import Author
-from django.http import HttpResponse
 from authors.serializers import AuthorSerializer, AuthorsSerializer
 
 class AuthorView(ListAPIView):
@@ -16,7 +15,6 @@ class AuthorView(ListAPIView):
     queryset = Author.objects.all()
     def get(self, request):
         author = Author.objects.all()
-        print(author)
         serializer = AuthorsSerializer(author)
         return Response(serializer.data, status=200)
     
@@ -31,7 +29,7 @@ class AuthorDetail(APIView):
         try:
             return Author.objects.get(pk=pk)
         except Author.DoesNotExist:
-            raise HttpResponse.Http404
+            raise HttpResponse(status=404)
 
     def get(self, request, aid):
         """
@@ -52,5 +50,5 @@ class AuthorDetail(APIView):
         serializer = AuthorSerializer(author, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=204)
+            return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)
