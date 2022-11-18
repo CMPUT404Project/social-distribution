@@ -1,10 +1,10 @@
 from rest_framework import serializers
 from .models import Author
-
+from backend.pagination import CustomPagination
 
 class AuthorSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField(read_only=True)
-    id = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
 
     class Meta:
         model = Author
@@ -21,17 +21,22 @@ class AuthorSerializer(serializers.ModelSerializer):
 class AuthorsSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField(read_only=True)
     items = serializers.SerializerMethodField(read_only=True)
+    total_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Author
-        fields = ['type', 'items']
+        fields = ['type', 'total_count', 'items']
+    
+    def get_total_count(self, obj):
+        return obj.count()
 
     def get_items(self, obj): 
-        return AuthorSerializer(obj, many=True).data
+        self.pagination = CustomPagination(self.context)
+        author = self.pagination.paginate(obj)
+        return AuthorSerializer(author, many=True).data
 
     def get_type(self, obj):
         return 'authors'
-
 
 class AuthorCreationSerializer(serializers.ModelSerializer):
     class Meta:
