@@ -46,5 +46,6 @@ urlpatterns = [
     path('api/redoc/', schema_view.with_ui('redoc'), name='schema-redoc'),
     path('authors/', include('authors.urls')),
     path('', include('posts.urls')),
+    path('', include('followers.urls')),
     re_path('', TemplateView.as_view(template_name='index.html')),
 ]

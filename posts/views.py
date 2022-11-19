@@ -1,4 +1,3 @@
-from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from posts.models import Post
@@ -38,7 +37,7 @@ class PostView(GenericAPIView):
     def delete(self, request, aid):
         posts = Post.objects.all()
         posts.delete()
-        return HttpResponse(status=204)
+        return Response(status=204)
 
 class PostIDView(GenericAPIView):
     serializer_class = PostSerializer
@@ -51,7 +50,7 @@ class PostIDView(GenericAPIView):
         try:
             post = Post.objects.get(pk=pid)
         except Post.DoesNotExist:
-            return HttpResponse(status=404)
+            return Response(status=404)
         serializer = PostSerializer(post)
         return Response(serializer.data, status=200)
 
@@ -62,7 +61,7 @@ class PostIDView(GenericAPIView):
         try:
             post = Post.objects.get(pk=pid)
         except Post.DoesNotExist:
-            return HttpResponse(status=404)
+            return Response(status=404)
         serializer = PostCreationSerializer(post, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -78,6 +77,6 @@ class PostIDView(GenericAPIView):
         try:
             post = Post.objects.get(pk=pid)
         except Post.DoesNotExist:
-            return HttpResponse(status=404)
+            return Response(status=404)
         post.delete()
-        return HttpResponse(status=204)
+        return Response(status=204)
