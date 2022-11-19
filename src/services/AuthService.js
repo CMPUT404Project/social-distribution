@@ -1,4 +1,3 @@
-import { useState } from 'react'
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 
@@ -21,7 +20,7 @@ class AuthService {
                 sessionStorage.setItem('refresh_token', response.data.refresh);
             }
             // Set auth token as default header for axios calls
-            setAxiosAuthToken();
+            await setAxiosAuthToken();
             await this.storeCurrentUser()
         }
         return response.data
@@ -45,6 +44,7 @@ class AuthService {
     }
 
     async updateUserDetails(body) {
+        setAxiosAuthToken();
         const response = await axios.put(jwtDecode(this.getAccessToken()).author_id, body)
         if (response.status === 204) {
             await this.storeCurrentUser()

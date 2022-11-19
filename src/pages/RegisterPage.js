@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import ClipLoader from 'react-spinners/ClipLoader';
 
 import AuthService from "../services/AuthService";
+import { regexPatterns, doesImageExist } from "../utils";
 
 // Import Material UI Icons
 import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
@@ -18,8 +19,6 @@ import IconButton from '@mui/material/IconButton';
 
 function RegisterPage() {
     const navigate = useNavigate();
-    const namePattern = /^[A-Za-z0-9]{1,30}$/;
-    const gitPattern = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
     const [values, setValues] = useState({
         username: sessionStorage.getItem('username'),
         displayName: "",
@@ -72,11 +71,11 @@ function RegisterPage() {
                 }
             };
 
-            if (!namePattern.test(values.username)) {
+            if (!regexPatterns.namePattern.test(values.username)) {
                 setErrorMessage("Username can only contain letters and numbers");
                 throw new Error("usernameError")
             };
-            if (!namePattern.test(values.displayName)) {
+            if (!regexPatterns.namePattern.test(values.displayName)) {
                 setErrorMessage("Display name can only contain letters and numbers");
                 throw new Error("displayNameError")
             } else {
@@ -88,11 +87,11 @@ function RegisterPage() {
             };
 
             if (values.git) {
-                if (!gitPattern.test(values.git)) {
+                if (!regexPatterns.gitPattern.test(values.git)) {
                     setErrorMessage("Invalid Git username");
                     throw new Error("gitError")
                 } else {
-                    body.githubUrl = "https://github.com/" + values.git;
+                    body.githubUrl = "https://github.com/" + values.git.toLowerCase();
                 }
             };
 
@@ -132,16 +131,7 @@ function RegisterPage() {
         }
     };
 
-    /**
-     * Code from https://stackoverflow.com/a/68333175
-     * By Caleb Taylor
-     */
-    const doesImageExist = (url) => new Promise((resolve) => {
-        const img = new Image();
-        img.src = url;
-        img.onload = () => resolve(true);
-        img.onerror = () => resolve(false);
-    });
+
 
     return (
         <div className="container">
