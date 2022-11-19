@@ -10,8 +10,6 @@ import {
 import AuthService from "../services/AuthService";
 import NavBar from "../components/NavBar/NavBar";
 
-// Import Material UI Icons
-
 // Import Material UI Components
 import {
     Alert, 
@@ -68,14 +66,17 @@ function ProfilePage() {
                     body.displayName = authorValues.displayName;
                 };
             };
-            if (defaultAuthor.github) {
-                if (authorValues.github !== defaultAuthor.github.split(".com/")[1]) {
+            let defaultGit = defaultAuthor.github.split(".com/")[1] ? defaultAuthor.github.split(".com/")[1] : "";
+            if (authorValues.github !== defaultGit) {
+                if (authorValues.github) {
                     if (!regexPatterns.gitPattern.test(authorValues.github)) {
                         throw new Error("gitError")
                     } else {
                         body.github = "https://www.github.com/" + authorValues.github.toLowerCase();
                     }
-                };
+                } else {
+                    body.github = "";
+                }
             };
             if (authorValues.profileImage !== defaultAuthor.profileImage) {
                 if (authorValues.profileImage) {
@@ -91,9 +92,11 @@ function ProfilePage() {
                     body.profileImage = "";
                 }
             };
+            console.log(body)
             if (Object.keys(body).length !== 0) {
                 const response = await AuthService.updateUserDetails(body)
                 .then(() => {
+                    console.log("HELLO")
                     setDefaultAuthor(JSON.parse(AuthService.retrieveCurrentUser()));
                     setAlertDetails({
                         alertSeverity: "success",
@@ -261,6 +264,7 @@ function ProfilePage() {
                                 disabled={!editState}
                                 variant="outlined"
                                 name="github"
+                                placeholder="Leave blank to remove Github"
                                 value={authorValues.github}
                                 onChange={handleInputChange("github")}
                                 type="text" 

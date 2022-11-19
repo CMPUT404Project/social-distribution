@@ -62,7 +62,7 @@ class AuthorTests(APITestCase):
         """
         self.client.credentials(HTTP_AUTHORIZATION=f'Bearer {self.refresh.access_token}')
         author_put_response = self.client.put(self.author.url, self.author_data, format='json')
-        self.assertEqual(author_put_response.status_code, status.HTTP_204_NO_CONTENT)
+        self.assertEqual(author_put_response.status_code, status.HTTP_200_OK)
 
     def test_get_author_failure_when_unauthenticated(self):
         """

@@ -46,8 +46,12 @@ class AuthService {
     async updateUserDetails(body) {
         setAxiosAuthToken();
         const response = await axios.put(jwtDecode(this.getAccessToken()).author_id, body)
-        if (response.status === 204) {
-            await this.storeCurrentUser()
+        if (response.status === 200) {
+            if (localStorage.getItem('access_token')) {
+                localStorage.setItem("author", JSON.stringify(response.data));
+            } else if (sessionStorage.getItem('access_token')) {
+                sessionStorage.setItem("author", JSON.stringify(response.data));
+            }
         }
         return response.data
     }
