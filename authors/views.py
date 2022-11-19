@@ -1,4 +1,3 @@
-from django.http import HttpResponse
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -20,13 +19,13 @@ class AuthorView(ListAPIView):
 class AuthorDetail(APIView):
     serializer_class = AuthorSerializer
     queryset = Author.objects.all()
-    permission_classes = [permissions.IsAuthenticated]
+    # permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self, pk):
         try:
             return Author.objects.get(pk=pk)
-        except Author.DoesNotExist:
-            raise HttpResponse(status=404)
+        except Author.DoesNotExist as e:
+            raise Response(str(e), status=404)
 
     def get(self, request, aid):
         """
@@ -34,8 +33,8 @@ class AuthorDetail(APIView):
         """
         try:
             author = Author.objects.get(pk=aid)
-        except Author.DoesNotExist:
-            return HttpResponse(status=404)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
         serializer = AuthorSerializer(author)
         return Response(serializer.data, status=200)
 
@@ -43,7 +42,10 @@ class AuthorDetail(APIView):
         """
         Update a single author
         """
-        author = self.get_object(aid)
+        try:
+            author = Author.objects.get(pk=aid)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
         serializer = AuthorSerializer(author, data=request.data)
         if serializer.is_valid():
             serializer.save()

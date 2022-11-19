@@ -1,58 +1,78 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
+from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from followers.models import Follower
-from followers.serializers import FollowerSerializer, FollowersSerializer
+from followers.serializers import FollowersSerializer
 from authors.models import Author
-import json
+from django.core.exceptions import ValidationError
 
-class FollowerView(APIView):
-    serializer_class = FollowerSerializer
-    queryset = Follower.objects.all()
+class FollowersView(ListAPIView):
+    """
+    List followers for a given author
+    """
+    queryset = Author.objects.all()
+    serializer_class = FollowersSerializer
 
     def get(self, request, aid):
-        """
-        List followers for a given author
-        """
-        #get all followers for author
-        followers = Author.objects.get(id=aid).followed.all()
-        print("followers")
-        print(followers)
-        serializer = FollowersSerializer(followers)
-        return Response(serializer.data)
+        try:
+            author = Author.objects.get(id=aid)
+            serializer = FollowersSerializer(author.followers)
+            return Response(serializer.data, status=200)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
 
-    def delete(self, request, aid):
-        followers = Follower.objects.all()
-        followers.delete()
-        return Response(status=204)
+class FollowerDetailView(APIView):
+    serializer_class = FollowersSerializer
+    queryset = Author.objects.all()
 
-class FollowerIDView(APIView):
-    serializer_class = FollowerSerializer
-    queryset = Follower.objects.all()
+    def get(self, request, aid, fid):
+        """
+        Check if follower is a follower of author
+        """
+        try:
+            author = Author.objects.get(id=aid)
+            follower = Author.objects.get(id=fid)
+            if follower not in author.followers.all():
+                return Response(status=404)
+            else:
+                return Response(f'{fid} is a follower of {aid}.', status=200)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
 
     def put(self, request, aid, fid):
         """
-        Create a new follower
+        Add follower to author
         """
-        data = JSONParser().parse(request)
-        data['follower'] = fid
-        data['followed'] = aid
-        serializer = FollowerSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=201)
-        return Response(serializer.errors, status=400)
+        try:
+            author = Author.objects.get(id=aid)
+            follower = Author.objects.get(id=fid)
+            if follower == author:
+                raise ValidationError
+            if follower not in author.followers.all():
+                author.followers.add(follower.id)
+            return Response("Successfully added follower", status=200)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
 
-    def delete(self, request, aid, pid):
+    def delete(self, request, aid, fid):
         """
         Delete a follower
         """
         try:
-            follower = Follower.objects.get(followed=aid, follower=fid)
-        except Follower.DoesNotExist:
-            return Response(status=404)
-        follower.delete()
-        return Response(status=204)
+            author = Author.objects.get(pk=aid)
+            follower = Author.objects.get(pk=fid)
+            if follower == author:
+                raise ValidationError
+            if follower in author.followers.all():
+                author.followers.remove(follower.id)
+            return Response(status=204)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
+
