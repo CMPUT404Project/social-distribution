@@ -32,8 +32,8 @@ class AuthorsSerializer(serializers.ModelSerializer):
 
     def get_items(self, obj): 
         self.pagination = CustomPagination(self.context)
-        author = self.pagination.paginate(obj)
-        return AuthorSerializer(author, many=True).data
+        authors = self.pagination.paginate(obj)
+        return AuthorSerializer(authors, many=True).data
 
     def get_type(self, obj):
         return 'authors'
