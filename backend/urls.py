@@ -45,9 +45,9 @@ urlpatterns = [
     path('api/swagger/', schema_view.with_ui('swagger'), name='schema-swagger-ui'),
     path('api/redoc/', schema_view.with_ui('redoc'), name='schema-redoc'),
     path('authors/', include('authors.urls')),
-    path('', include('posts.urls')),
-    path('', include('comments.urls')),
-    path('', include('followers.urls')),
-    path('', include('likes.urls')),
+    path('authors/', include('posts.urls')),
+    path('authors/', include('comments.urls')),
+    path('authors/', include('followers.urls')),
+    path('authors/', include('likes.urls')),
     re_path('', TemplateView.as_view(template_name='index.html')),
 ]

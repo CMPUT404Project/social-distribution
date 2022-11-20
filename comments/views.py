@@ -10,6 +10,7 @@ from posts.models import Post
 from comments.models import Comment
 from comments.serializers import CommentSerializer, CommentsSerializer, CommentCreationSerializer
 from posts.serializers import PostSerializer
+from backend.pagination import CustomPagination
 
 class CommentView(APIView):
     serializer_class = CommentSerializer
@@ -20,13 +21,14 @@ class CommentView(APIView):
         List comments for a given post
         """
         try:
-            Author.objects.get(pk=aid)
+            author = Author.objects.get(pk=aid)
             post = Post.objects.get(pk=pid)
         except (Author.DoesNotExist, Post.DoesNotExist) as e:
             return Response(str(e), status=404)
         comments = post.comment_set.all()
-        post_serializer = PostSerializer(post)
-        serializer = CommentsSerializer(comments, context={"request":request, "post_url":post_serializer.data['id']})
+        pagination = CustomPagination()
+        paginated_comments = pagination.paginate(comments, page=request.GET.get('page'), size=request.GET.get('size'))
+        serializer = CommentsSerializer(paginated_comments, context={"author_url": author.url,"pid":pid})
         return Response(serializer.data, status=200)
 
     def post(self, request, aid, pid):
@@ -64,6 +66,4 @@ class CommentIDView(APIView):
         except (Author.DoesNotExist, Post.DoesNotExist, Comment.DoesNotExist) as e:
             return Response(str(e), status=404)
         serializer = CommentSerializer(comment)
-        if serializer.is_valid():
-            return Response(serializer.data, status=200)
-        return Response(serializer.data, status=400)
+        return Response(serializer.data, status=200)
