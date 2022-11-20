@@ -42,7 +42,7 @@ class CommentsSerializer(serializers.ModelSerializer):
         return 'comments'
 
     def get_id(self, obj):
-        return self.get_post(obj) + '/comments/'
+        return self.get_post(obj) + '/comments'
 
     def get_post(self, obj):
         return str(self.context['author_url']) + '/posts/' + str(self.context['pid'])

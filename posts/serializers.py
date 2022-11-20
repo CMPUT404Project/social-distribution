@@ -56,7 +56,7 @@ class PostSerializer(serializers.ModelSerializer):
         return str(obj.comment_set.all().count())
 
     def get_comments(self, obj):
-        return self.get_id(obj) + '/comments/'
+        return self.get_id(obj) + '/comments'
 
     def get_author(self, obj):
         return AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
