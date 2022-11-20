@@ -5,9 +5,11 @@ from rest_framework.parsers import JSONParser
 from rest_framework.generics import GenericAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from authors.models import Author
 from posts.models import Post
 from comments.models import Comment
-from comments.serializers import CommentSerializer, CommentsSerializer
+from comments.serializers import CommentSerializer, CommentsSerializer, CommentCreationSerializer
+from posts.serializers import PostSerializer
 
 class CommentView(APIView):
     serializer_class = CommentSerializer
@@ -17,30 +19,38 @@ class CommentView(APIView):
         """
         List comments for a given post
         """
-        comments = Post.objects.get(pk=pid).comment_set.all()
-        serializer = CommentsSerializer(comments)
-        return Response(serializer.data, 200)
+        try:
+            Author.objects.get(pk=aid)
+            post = Post.objects.get(pk=pid)
+        except (Author.DoesNotExist, Post.DoesNotExist) as e:
+            return Response(str(e), status=404)
+        comments = post.comment_set.all()
+        post_serializer = PostSerializer(post)
+        serializer = CommentsSerializer(comments, context={"request":request, "post_url":post_serializer.data['id']})
+        return Response(serializer.data, status=200)
 
     def post(self, request, aid, pid):
         """
         Create a new comment
         """
-        data = JSONParser().parse(request)
-        data['post'] = pid
-        serializer = CommentSerializer(data=data)
+        try:
+            Author.objects.get(pk=aid)
+            Post.objects.get(pk=pid)
+        except (Author.DoesNotExist, Post.DoesNotExist) as e:
+            return Response(str(e), status=404)
+        data = request.data.copy()
+        data.update({"post": pid, "author": aid})
+        serializer = CommentCreationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, 200)
-        return JsonResponse(serializer.errors, status=400)
-
-    def delete(self, request, aid, pid):
-        comments = Comment.objects.all()
-        comments.delete()
-        return HttpResponse(status=204)
+            comment = Comment.objects.get(pk=serializer.data['id'])
+            view_serializer = CommentSerializer(comment)
+            return Response(view_serializer.data, status=201)
+        return Response(serializer.errors, status=400)
 
 #used for testing purposes, not set in url.py
 class CommentIDView(APIView):
-    serializer_class = CommentSerializer
+    serializer_class = CommentsSerializer
     queryset = Comment.objects.all()
 
     def get(self, request, aid, pid, cid):
@@ -48,31 +58,12 @@ class CommentIDView(APIView):
         Retrieve a comment
         """
         try:
-            comments = Comment.objects.all()
-        except Comment.DoesNotExist:
-            return HttpResponse(status=404)
-        serializer = CommentsSerializer(comments)
-        return Response(serializer.data, status=200)
-
-    def put(self, request, aid, pid, cid):
-        """
-        Update a comment
-        """
-        try:
+            Author.objects.get(pk=aid)
+            Post.objects.get(pk=pid)
             comment = Comment.objects.get(pk=cid)
-        except Comment.DoesNotExist:
-            return HttpResponse(status=404)
-        data = JSONParser().parse(request)
-        serializer = CommentSerializer(comment, data=data)
+        except (Author.DoesNotExist, Post.DoesNotExist, Comment.DoesNotExist) as e:
+            return Response(str(e), status=404)
+        serializer = CommentSerializer(comment)
         if serializer.is_valid():
-            serializer.save()
-            return JsonResponse(serializer.data)
-        return JsonResponse(serializer.errors, status=400)
-
-    def delete(self, request, aid, pid, cid):
-        try:
-            comment = Comment.objects.get(pk=cid)
-        except Comment.DoesNotExist:
-            return HttpResponse(status=404)
-        comment.delete()
-        return HttpResponse(status=204)
+            return Response(serializer.data, status=200)
+        return Response(serializer.data, status=400)
