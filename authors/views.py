@@ -25,7 +25,7 @@ class AuthorDetail(APIView):
         try:
             return Author.objects.get(pk=pk)
         except Author.DoesNotExist as e:
-            raise Response(str(e), status=404)
+            return Response(str(e), status=404)
 
     def get(self, request, aid):
         """
