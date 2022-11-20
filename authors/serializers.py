@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from .models import Author
-from backend.pagination import CustomPagination
 
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()

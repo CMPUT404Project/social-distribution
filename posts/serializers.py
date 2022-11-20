@@ -2,7 +2,6 @@ from rest_framework import serializers
 from .models import Post
 from authors.models import Author
 from authors.serializers import AuthorSerializer
-from comments.serializers import CommentsSerializer
 import ast
 
 class PostsSerializer(serializers.ModelSerializer):

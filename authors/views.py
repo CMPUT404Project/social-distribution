@@ -2,8 +2,8 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
-from authors.models import Author
-from authors.serializers import AuthorSerializer, AuthorsSerializer
+from .models import Author
+from .serializers import AuthorSerializer, AuthorsSerializer
 from backend.pagination import CustomPagination
 
 class AuthorView(ListAPIView):

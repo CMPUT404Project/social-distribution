@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from posts.models import Post
+from .models import Post
 from authors.models import Author
-from posts.serializers import PostSerializer, PostCreationSerializer, PostsSerializer
+from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer
 from backend.pagination import CustomPagination
 
 class PostView(GenericAPIView):
@@ -52,11 +52,11 @@ class PostIDView(GenericAPIView):
         Retrieve a post
         """
         try:
-            author = Author.objects.get(pk=aid)
+            Author.objects.get(pk=aid)
             post = Post.objects.get(pk=pid)
         except (Author.DoesNotExist, Post.DoesNotExist) as e:
             return Response(str(e), status=404)
-        serializer = PostSerializer(post, context={"author_url": author.url,"pid":pid})
+        serializer = PostSerializer(post)
         return Response(serializer.data, status=200)
 
     def put(self, request, aid, pid):

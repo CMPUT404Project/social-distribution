@@ -1,5 +1,5 @@
 from django.urls import path
-from authors.views import AuthorView, AuthorDetail
+from .views import AuthorView, AuthorDetail
 
 urlpatterns = [
   path('', AuthorView.as_view(), name='all_authors'),

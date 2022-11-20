@@ -1,7 +1,7 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from followers.serializers import FollowersSerializer
+from .serializers import FollowersSerializer
 from authors.models import Author
 from django.core.exceptions import ValidationError
 

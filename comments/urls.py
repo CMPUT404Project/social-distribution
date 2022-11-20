@@ -1,5 +1,4 @@
 from django.urls import path
-from comments import views
 from .views import CommentView, CommentIDView
 
 urlpatterns = [
