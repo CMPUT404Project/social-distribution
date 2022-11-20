@@ -1,8 +1,8 @@
 from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
-from posts.models import Post
+from .models import Post
 from authors.models import Author
-from posts.serializers import PostSerializer, PostCreationSerializer
+from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer
 from backend.pagination import CustomPagination
 
 class PostView(GenericAPIView):
@@ -13,11 +13,14 @@ class PostView(GenericAPIView):
         """
         List posts for a given author
         """
+        try:
+            Author.objects.get(pk=aid)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
         posts = Author.objects.get(pk=aid).post_set.all()
-        context={"request":request}
-        pagination = CustomPagination(context)
-        paginated_posts = pagination.paginate(posts)
-        serializer = PostSerializer(paginated_posts, many=True)
+        pagination = CustomPagination()
+        paginated_posts = pagination.paginate(posts, page=request.GET.get('page'), size=request.GET.get('size'), order='published', ascending=False)
+        serializer = PostsSerializer(paginated_posts)
         return Response(serializer.data, status=200)
 
     def post(self, request, aid):
@@ -26,18 +29,19 @@ class PostView(GenericAPIView):
         Fields from client payload are: displayName, github, profileImage
         Fields filled in by server: host, url, id
         """
-        serializer = PostCreationSerializer(data=request.data)
+        try:
+            Author.objects.get(pk=aid)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        data = request.data.copy()
+        data.update({"author": aid})
+        serializer = PostCreationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
             post = Post.objects.get(pk=serializer.data['id'])
             view_serializer = PostSerializer(post)
             return Response(view_serializer.data, status=201)
         return Response(serializer.errors, status=400)
-
-    def delete(self, request, aid):
-        posts = Post.objects.all()
-        posts.delete()
-        return Response(status=204)
 
 class PostIDView(GenericAPIView):
     serializer_class = PostSerializer
@@ -48,9 +52,10 @@ class PostIDView(GenericAPIView):
         Retrieve a post
         """
         try:
+            Author.objects.get(pk=aid)
             post = Post.objects.get(pk=pid)
-        except Post.DoesNotExist:
-            return Response(status=404)
+        except (Author.DoesNotExist, Post.DoesNotExist) as e:
+            return Response(str(e), status=404)
         serializer = PostSerializer(post)
         return Response(serializer.data, status=200)
 
@@ -59,9 +64,10 @@ class PostIDView(GenericAPIView):
         Update a post
         """
         try:
+            Author.objects.get(pk=aid)
             post = Post.objects.get(pk=pid)
-        except Post.DoesNotExist:
-            return Response(status=404)
+        except (Author.DoesNotExist, Post.DoesNotExist) as e:
+            return Response(str(e), status=404)
         serializer = PostCreationSerializer(post, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -75,8 +81,9 @@ class PostIDView(GenericAPIView):
         Delete a post
         """
         try:
+            Author.objects.get(pk=aid)
             post = Post.objects.get(pk=pid)
-        except Post.DoesNotExist:
-            return Response(status=404)
+        except (Author.DoesNotExist, Post.DoesNotExist) as e:
+            return Response(str(e), status=404)
         post.delete()
         return Response(status=204)

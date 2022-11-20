@@ -38,14 +38,15 @@ schema_view = get_schema_view(
 )
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
+    path('admin', admin.site.urls),
     path('api/', include('users.urls')),
-    path('api/auth/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/auth/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/swagger/', schema_view.with_ui('swagger'), name='schema-swagger-ui'),
-    path('api/redoc/', schema_view.with_ui('redoc'), name='schema-redoc'),
-    path('authors/', include('authors.urls')),
-    path('', include('posts.urls')),
-    path('', include('followers.urls')),
+    path('api/auth/token', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/auth/token/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/swagger', schema_view.with_ui('swagger'), name='schema-swagger-ui'),
+    path('api/redoc', schema_view.with_ui('redoc'), name='schema-redoc'),
+    path('', include('authors.urls')),
+    path('authors/', include('posts.urls')),
+    path('authors/', include('comments.urls')),
+    path('authors/', include('followers.urls')),
     re_path('', TemplateView.as_view(template_name='index.html')),
 ]

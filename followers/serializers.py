@@ -14,4 +14,3 @@ class FollowersSerializer(serializers.ModelSerializer):
 
     def get_items(self, obj):
         return AuthorSerializer(obj, many=True).data
-
