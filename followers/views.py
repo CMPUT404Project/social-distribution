@@ -31,8 +31,12 @@ class FollowerDetailView(APIView):
         try:
             author = Author.objects.get(id=aid)
             follower = Author.objects.get(id=fid)
+            if follower == author:
+                raise ValidationError
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         if follower not in author.followers.all():
             return Response(status=404)
         else:
@@ -54,7 +58,8 @@ class FollowerDetailView(APIView):
             return Response(str(e), status=400)
         if follower not in author.followers.all():
             author.followers.add(follower.id)
-            return Response("Successfully added follower", status=200)
+            return Response("Successfully added follower", status=201)
+        return Response("Follower already exists", status=409)
 
     def delete(self, request, aid, fid):
         """
@@ -72,4 +77,5 @@ class FollowerDetailView(APIView):
         if follower in author.followers.all():
             author.followers.remove(follower.id)
             return Response(status=204)
+        return Response(status=404)
 
