@@ -48,6 +48,5 @@ urlpatterns = [
     path('', include('posts.urls')),
     path('', include('comments.urls')),
     path('', include('followers.urls')),
-    path('', include('likes.urls')),
     re_path('', TemplateView.as_view(template_name='index.html')),
 ]
