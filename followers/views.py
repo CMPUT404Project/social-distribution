@@ -18,6 +18,8 @@ class FollowersView(ListAPIView):
             serializer = FollowersSerializer(author.followers)
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         return Response(serializer.data, status=200)
 
 class FollowerDetailView(APIView):

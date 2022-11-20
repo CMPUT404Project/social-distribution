@@ -1,14 +1,8 @@
-from django.test import TestCase
-
-# Create your tests here.
-from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 from authors.models import Author
-from django.contrib.auth.models import User
 from backend.test_utils import create_authors_with_no_user
 import uuid
-from followers import views
 import json
 
 class FollowerTests(APITestCase):
@@ -19,9 +13,8 @@ class FollowerTests(APITestCase):
         self.authors[0].followers.add(self.authors[1])
         self.authors[0].followers.add(self.authors[2])
         self.authors[0].followers.add(self.authors[3])
-    """
-    PUT TESTS
-    """
+
+    # PUT TESTS
     def test_add_valid_follower_for_invalid_author(self):
         """
         Ensure adding a valid follower to an nonexisting author results in failure
@@ -73,9 +66,7 @@ class FollowerTests(APITestCase):
         follower_put_response2 = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[1].id)}')
         self.assertEqual(follower_put_response2.status_code, status.HTTP_409_CONFLICT)
         
-    """
-    GET OBJECT TESTS
-    """
+    # GET OBJECT TESTS
     def test_if_valid_follower_is_a_follower(self):
         """
         Ensures valid follower is a follower of author
@@ -103,9 +94,7 @@ class FollowerTests(APITestCase):
         follower_put_response = self.client.get(f'{str(self.authors[0].url)}/followers/{str(uuid.uuid4())}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_404_NOT_FOUND)
 
-    """
-    GET ALL TESTS
-    """
+    # GET ALL TESTS
     def test_get_all_followers_of_author(self):
         """
         Ensures all followers of author is returned
@@ -125,9 +114,7 @@ class FollowerTests(APITestCase):
         followers_get_response = self.client.get(f'{author_url}/followers')
         self.assertEqual(followers_get_response.status_code, status.HTTP_404_NOT_FOUND)
 
-    """
-    DELETE OBJECT TESTS
-    """
+    # DELETE OBJECT TESTS
     def test_remove_valid_follower(self):
         """
         Ensures a valid follower is removed

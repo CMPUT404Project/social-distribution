@@ -19,6 +19,8 @@ class CommentView(APIView):
             post = Post.objects.get(pk=pid)
         except (Author.DoesNotExist, Post.DoesNotExist) as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         comments = post.comment_set.all()
         pagination = CustomPagination()
         paginated_comments = pagination.paginate(comments, page=request.GET.get('page'), size=request.GET.get('size'))
@@ -34,6 +36,8 @@ class CommentView(APIView):
             Post.objects.get(pk=pid)
         except (Author.DoesNotExist, Post.DoesNotExist) as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         data = request.data.copy()
         data.update({"post": pid, "author": aid})
         serializer = CommentCreationSerializer(data=data)
@@ -58,5 +62,7 @@ class CommentIDView(APIView):
             comment = Comment.objects.get(pk=cid)
         except (Author.DoesNotExist, Post.DoesNotExist, Comment.DoesNotExist) as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         serializer = CommentSerializer(comment)
         return Response(serializer.data, status=200)

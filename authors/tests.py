@@ -5,6 +5,7 @@ from authors.models import Author
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from backend.test_utils import create_author_with_user
+from unittest import skip
 
 class AuthorTests(APITestCase):
     login_url = reverse('token_obtain_pair')
@@ -47,6 +48,7 @@ class AuthorTests(APITestCase):
         self.assertTrue("access" in token)
         self.assertTrue("refresh" in token)
 
+    @skip("Authentication currently disabled")
     def test_update_author_when_unauthenticated(self): 
         """
         Ensure unauthenticated requests get 401 unauthorized error.
@@ -63,6 +65,7 @@ class AuthorTests(APITestCase):
         author_put_response = self.client.put(self.author.url, self.author_data, format='json')
         self.assertEqual(author_put_response.status_code, status.HTTP_200_OK)
 
+    @skip("Authentication currently disabled")
     def test_get_author_when_unauthenticated(self):
         """
         Ensure unauthenticated requests get 401 unauthorized error.
