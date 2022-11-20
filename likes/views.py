@@ -19,54 +19,46 @@ class LikedView(APIView):
         """
         Get what public things given author has liked
         """
-        liked = Author.objects.get(pk=aid).like_set.all()
-        serializer = LikesSerializer(liked, many=True)
-        return response(serializer.data, safe=False, status=200)
+        try:
+            liked = Author.objects.get(pk=aid).like_set.all()
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
+        serializer = LikedSerializer(liked)
+        return Response(serializer.data, status=200)
 
 class PostLikesView(APIView):
+    serializer_class = LikesSerializer
+    queryset = Like.objects.all()
     def get(self, request, aid, pid):
         """
         Retrieve likes for a given post
         """
-        like = Post.objects.get(pk=pid).like_set.all()
-        #for some reason the context argument allows us to skip data=data
+        try:
+            Author.objects.get(pk=aid)
+            post = Post.objects.get(pk=pid)
+        except (Author.DoesNotExist, Post.DoesNotExist) as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
+        like = post.like_set.all()
         serializer = LikesSerializer(like)
-        return Response(serializer.data, 200)
-
-    def post(self, request, aid, pid):
-        """
-        Create a new comment
-        """
-        data = JSONParser().parse(request)
-        data['postid'] = pid
-        serializer = LikeSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        return Response(serializer.errors, status=400)
-
-    def delete(self, request, aid, pid):
-        likes = Like.objects.all()
-        likes.delete()
-        return HttpResponse(status=204)
+        return Response(serializer.data, status=200)
 
 class CommentLikesView(APIView):
     def get(self, request, aid, pid, cid):
         """
         Retrieve likes for a given comment
         """
-        likes = Comment.objects.get(pk=cid).like_set.all()
+        try:
+            Author.objects.get(pk=aid)
+            Post.objects.get(pk=pid)
+            comment = Comment.objects.get(pk=cid)
+        except (Author.DoesNotExist, Post.DoesNotExist, Comment.DoesNotExist) as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
+        likes = comment.like_set.all()
         serializer = LikesSerializer(likes)
-        return Response(serializer.data, 200)
-
-    def post(self, request, aid, pid, cid):
-        """
-        Create a new comment
-        """
-        data = JSONParser().parse(request)
-        data['commentid'] = cid
-        serializer = LikeSerializer(data=data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, 200)
-        return Response(serializer.errors, status=400)
+        return Response(serializer.data, status=200)
