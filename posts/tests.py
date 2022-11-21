@@ -10,7 +10,7 @@ from rest_framework import status
 class PostTests(APITestCase):
     def setUp(self):
         self.client.defaults['SERVER_NAME'] = "testserver.com"
-        self.host = f'http://{self.client.defaults["SERVER_NAME"]}'
+        self.host = f'http://{self.client.defaults["SERVER_NAME"]}/'
         self.authors = create_authors_with_no_user(self.host, 1)
         self.posts_url = self.authors[0].url + '/posts'
         self.posts = create_posts_for_author(self.authors[0], 3)

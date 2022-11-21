@@ -17,7 +17,7 @@ class AuthorTests(APITestCase):
     
     def setUp(self):
         self.client.defaults['SERVER_NAME'] = "testserver.com"
-        self.host = f'http://{self.client.defaults["SERVER_NAME"]}'
+        self.host = f'http://{self.client.defaults["SERVER_NAME"]}/'
         self.user, self.author = create_author_with_user(self.username, self.password, self.host)
         self.refresh = RefreshToken.for_user(self.user)
 
@@ -28,7 +28,7 @@ class AuthorTests(APITestCase):
         author = Author(host=self.host)
         self.assertEqual(author.url, "")
         author.save()
-        self.assertEqual(author.url, f'{self.host}/authors/{author.id}')
+        self.assertEqual(author.url, f'{self.host}authors/{author.id}')
 
     def test_author_login_with_wrong_creds(self):
         """
@@ -43,8 +43,8 @@ class AuthorTests(APITestCase):
         Ensure JWT Token is returned as a response after successful author login.
         """
         author_login_response = self.client.post(self.login_url, self.user_data, format='json')
-        token = author_login_response.data
         self.assertTrue(author_login_response.status_code, status.HTTP_200_OK)
+        token = author_login_response.data
         self.assertTrue("access" in token)
         self.assertTrue("refresh" in token)
 
