@@ -23,13 +23,6 @@ class AuthorDetail(APIView):
     serializer_class = AuthorSerializer
     queryset = Author.objects.all()
     # permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self, pk):
-        try:
-            return Author.objects.get(pk=pk)
-        except Author.DoesNotExist as e:
-            return Response(str(e), status=404)
-
     def get(self, request, aid):
         """
         Retrieve a single author.
@@ -38,6 +31,8 @@ class AuthorDetail(APIView):
             author = Author.objects.get(pk=aid)
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         serializer = AuthorSerializer(author)
         return Response(serializer.data, status=200)
 
@@ -49,6 +44,8 @@ class AuthorDetail(APIView):
             author = Author.objects.get(pk=aid)
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         serializer = AuthorSerializer(author, data=request.data)
         if serializer.is_valid():
             serializer.save()

@@ -87,3 +87,26 @@ class PostCreationSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return "post"
+
+class PostCreationWithIDSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    id = serializers.UUIDField()
+    class Meta:
+        model = Post
+        fields = ['type', 
+        'title', 
+        'id', 
+        'source', 
+        'origin', 
+        'description', 
+        'contentType', 
+        'content',
+        'author', 
+        'categories', 
+        'published', 
+        'visibility', 
+        'unlisted'
+        ]
+
+    def get_type(self, obj):
+        return "post"
