@@ -8,6 +8,7 @@ import './index.css';
 import "./pages/LoginPage.css";
 import "./pages/HomePage.css";
 import "./pages/RegisterPage.css";
+import "./pages/ProfilePage.css";
 
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
