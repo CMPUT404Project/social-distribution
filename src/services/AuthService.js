@@ -5,7 +5,7 @@ import { setAxiosAuthToken } from "../utils";
 
 class AuthService {
     async login(username, password, rememberMe) {
-        const response = await axios.post('api/auth/token/',
+        const response = await axios.post('api/auth/token',
             {
                 username: username,
                 password: password
@@ -27,7 +27,7 @@ class AuthService {
     }
 
     async register(username, password, body) {
-        const response = await axios.post('api/users/register/',
+        const response = await axios.post('api/users/register',
             {
                 username: username,
                 password: password
