@@ -2,6 +2,11 @@ from rest_framework import serializers
 from .models import Comment
 from authors.serializers import AuthorSerializer
 
+class CommentViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['comment', 'contentType']
+        
 class CommentSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
@@ -24,7 +29,6 @@ class CommentCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['id', 'author', 'comment', 'post', 'contentType', 'published']
-
 class CommentRemoteCreationSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField()
     class Meta:

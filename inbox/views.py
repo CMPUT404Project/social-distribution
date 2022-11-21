@@ -1,4 +1,4 @@
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from authors.models import Author
 from .serializers import InboxSerializer
@@ -34,7 +34,6 @@ def handle_post_type_inbox(data, inbox):
             return Response(InboxSerializer(inbox).data, status=201)
     data['id'] = post_id
     data['author'] = str(author.id)
-    data['categories'] = str(data['categories'])
     serializer = PostCreationWithIDSerializer(data=data)
     if not serializer.is_valid():
         author.delete()
@@ -110,7 +109,7 @@ def handle_comment_type_inbox(data, inbox):
     inbox.save()
     return Response(InboxSerializer(inbox).data, status=201)
 
-class InboxView(APIView):
+class InboxView(GenericAPIView):
     serializer_class = InboxSerializer
     queryset = Inbox.objects.all()
 

@@ -1,18 +1,13 @@
-from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework.parsers import JSONParser
 from rest_framework.generics import GenericAPIView
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from likes.models import Like
-from likes.serializers import LikeSerializer, LikedSerializer, LikesSerializer
+from likes.serializers import LikedSerializer, LikesSerializer
 from authors.models import Author
 from posts.models import Post
 from comments.models import Comment
 import json
 
-class LikedView(APIView):
+class LikedView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
     def get(self, request, aid):
@@ -28,7 +23,7 @@ class LikedView(APIView):
         serializer = LikedSerializer(liked)
         return Response(serializer.data, status=200)
 
-class PostLikesView(APIView):
+class PostLikesView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
     def get(self, request, aid, pid):
@@ -46,7 +41,9 @@ class PostLikesView(APIView):
         serializer = LikesSerializer(like)
         return Response(serializer.data, status=200)
 
-class CommentLikesView(APIView):
+class CommentLikesView(GenericAPIView):
+    serializer_class = LikesSerializer
+    queryset = Like.objects.all()
     def get(self, request, aid, pid, cid):
         """
         Retrieve likes for a given comment
