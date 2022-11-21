@@ -2,8 +2,9 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
-from authors.models import Author
-from authors.serializers import AuthorSerializer, AuthorsSerializer
+from .models import Author
+from .serializers import AuthorSerializer, AuthorsSerializer
+from backend.pagination import CustomPagination
 
 class AuthorView(ListAPIView):
     """
@@ -12,8 +13,10 @@ class AuthorView(ListAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorsSerializer
     def get(self, request):
-        author = Author.objects.all()
-        serializer = AuthorsSerializer(author, context={"request":request})
+        authors = Author.objects.all()
+        pagination = CustomPagination()
+        paginated_authors = pagination.paginate(authors, page=request.GET.get('page'), size=request.GET.get('size'))
+        serializer = AuthorsSerializer(paginated_authors)
         return Response(serializer.data, status=200)
 
 class AuthorDetail(APIView):

@@ -5,9 +5,8 @@ from rest_framework.views import APIView
 from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from users.serializers import UserSerializer, UserCreationSerializer
+from .serializers import UserSerializer, UserCreationSerializer
 from django.contrib.auth.models import User
-from authors.models import Author
 from backend.serializers import MyTokenObtainPairSerializer
 
 def get_tokens_for_user(user):

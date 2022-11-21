@@ -1,8 +1,6 @@
 from rest_framework import serializers
-from comments.models import Comment
+from .models import Comment
 from authors.serializers import AuthorSerializer
-from backend.pagination import CustomPagination
-from collections import OrderedDict
 
 class CommentSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
@@ -38,27 +36,14 @@ class CommentsSerializer(serializers.ModelSerializer):
         fields = ['type', 'post', 'id', 'comments']
 
     def get_comments(self, obj): 
-        self.pagination = CustomPagination(self.context)
-        comments = self.pagination.paginate(obj)
-        return CommentSerializer(comments, many=True).data
+        return CommentSerializer(obj, many=True).data
 
     def get_type(self, obj):
         return 'comments'
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        if self.context['request'].query_params.get('page') is None or self.context['request'].query_params.get('size') is None:
-            return representation
-        representation["page"] = int(self.context['request'].query_params.get('page'))
-        representation["size"] = int(self.context['request'].query_params.get('size'))
-        key_order = ('type', 'page', 'size', 'post', 'id', 'comments')
-        new_representation = OrderedDict()
-        for key in key_order:
-            new_representation[key] = representation[key]
-        return new_representation
-
     def get_id(self, obj):
-        return self.context['post_url'] + '/comments/'
+        return self.get_post(obj) + '/comments'
 
     def get_post(self, obj):
-        return self.context['post_url']
+        return str(self.context['author_url']) + '/posts/' + str(self.context['pid'])
+        

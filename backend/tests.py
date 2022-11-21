@@ -20,7 +20,6 @@ class PaginationTest(APITestCase):
         all_authors_response = self.client.get(self.authors_url)
         data = json.loads(all_authors_response.content)
         self.assertEqual(all_authors_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(int(data['total_count']), 10)
         self.assertEqual(len(data['items']), 10)
     
     def test_pagination_with_request_parameters_for_authors(self):
@@ -30,7 +29,6 @@ class PaginationTest(APITestCase):
         all_authors_response = self.client.get(self.authors_url+'?page=1&size=5')
         data = json.loads(all_authors_response.content)
         self.assertEqual(all_authors_response.status_code, status.HTTP_200_OK)
-        self.assertEqual(int(data['total_count']), 10)
         self.assertEqual(len(data['items']), 5)
 
     def tearDown(self):
