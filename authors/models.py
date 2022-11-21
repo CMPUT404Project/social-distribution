@@ -13,5 +13,5 @@ class Author(models.Model):
     followers = models.ManyToManyField("self", blank=True, symmetrical=False)
 
     def save(self, *args, **kwargs):     
-        self.url = str(self.host) + "/authors/" + str(self.id)
+        self.url = str(self.host) + "authors/" + str(self.id)
         super().save(*args, **kwargs)

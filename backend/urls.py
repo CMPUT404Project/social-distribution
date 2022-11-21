@@ -49,5 +49,6 @@ urlpatterns = [
     path('authors/', include('comments.urls')),
     path('authors/', include('followers.urls')),
     path('authors/', include('likes.urls')),
+    path('authors/', include('inbox.urls')),
     re_path('', TemplateView.as_view(template_name='index.html')),
 ]

@@ -8,12 +8,12 @@ from authors.serializers import AuthorSerializer
 from likes.models import Like
 
 class LikeSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField()
     author = AuthorSerializer()
     
     class Meta:
         model = Like
-        fields = ['@context', 'summary', 'type', 'author', 'object']
+        fields = ['context', 'summary', 'type', 'author', 'object']
 
     def get_type(self, obj):
         return 'like'
@@ -21,9 +21,19 @@ class LikeSerializer(serializers.ModelSerializer):
     def get_author(self, obj):
         return AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
 
+class PostLikeCreationSerializer(serializers.ModelSerializer):    
+    class Meta:
+        model = Like
+        fields = ['context', 'summary', 'author', 'object', 'post']
+
+class CommentLikeCreationSerializer(serializers.ModelSerializer): 
+    class Meta:
+        model = Like
+        fields = ['context', 'summary', 'author', 'object', 'comment']   
+
 class LikesSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField(read_only=True)
-    items = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
     
     class Meta:
         model = Like
@@ -36,8 +46,8 @@ class LikesSerializer(serializers.ModelSerializer):
         return LikeSerializer(obj, many=True).data
 
 class LikedSerializer(serializers.ModelSerializer):
-    type = serializers.SerializerMethodField(read_only=True)
-    items = serializers.SerializerMethodField(read_only=True)
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
     
     class Meta:
         model = Like

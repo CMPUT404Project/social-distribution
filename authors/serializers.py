@@ -35,3 +35,10 @@ class AuthorCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ['host', 'user']
+
+class AuthorRemoteCreationSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField()
+    class Meta:
+        model = Author
+        fields = ['id', 'host', 'url',
+                  'displayName', 'github', 'profileImage']
