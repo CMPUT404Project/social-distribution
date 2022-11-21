@@ -1,19 +1,10 @@
 import {
-    Alert,
-    Autocomplete,
     Button,
-    Card,
-    createFilterOptions,
-    FormControl,
-    InputLabel,
-    MenuItem,
-    Select,
-    Snackbar,
-    TextField,
+    Card, FormControl, MenuItem, Snackbar,
+    TextField
 } from "@mui/material";
 import axios from "axios";
-import React from "react";
-import { useState } from "react";
+import React, { useState } from "react";
 import AuthService from "../../services/AuthService";
 
 export const PostTextbox = () => {
@@ -35,9 +26,9 @@ export const PostTextbox = () => {
     };
 
     // TODO: trim only works for frontend viewing, not for the backend array. Somehow trim category before it enters array?
-    const filterOptions = createFilterOptions({
-        trim: true,
-    });
+    // const filterOptions = createFilterOptions({
+    //     trim: true,
+    // });
 
     const handleUnlistedChange = (e) => {
         setUnlisted(!unlisted);
@@ -70,7 +61,7 @@ export const PostTextbox = () => {
         if (tags !== ""){
             tags.split(",").map((word) => word.trim())
         }
-        console.log(tags)
+        // console.log(tags)
 
 
         const data = {
@@ -140,7 +131,7 @@ export const PostTextbox = () => {
                 onClose={() => setOpen(false)}
                 message={alert}
             />
-            <FormControl fullWidth onSubmit={(data) => console.log(data)}>
+            <FormControl fullWidth>
                 <TextField
                     label="Enter your title here! (required)"
                     variant="filled"
