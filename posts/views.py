@@ -2,11 +2,11 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from .models import Post
 from authors.models import Author
-from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer, PostCreationWithIDSerializer
+from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer, PostCreationWithIDSerializer, PostsViewSerializer
 from backend.pagination import CustomPagination
 
 class PostView(GenericAPIView):
-    serializer_class = PostSerializer
+    serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
 
     def get(self, request, aid):
@@ -38,7 +38,7 @@ class PostView(GenericAPIView):
         except Exception as e:
             return Response(str(e), status=400)
         data = request.data.copy()
-        data.update({"author": aid})
+        data.update({"author": aid, "categories": str(data.get("categories", []))})
         serializer = PostCreationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -48,7 +48,7 @@ class PostView(GenericAPIView):
         return Response(serializer.errors, status=400)
 
 class PostIDView(GenericAPIView):
-    serializer_class = PostSerializer
+    serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
 
     def get(self, request, aid, pid):
@@ -79,7 +79,7 @@ class PostIDView(GenericAPIView):
         if post is not None:
             return Response("A post with that id already exists", status=409)
         data = request.data.copy()
-        data.update({"author": aid, "id": pid})
+        data.update({"author": aid, "id": pid, "categories": str(data.get("categories", []))})
         serializer = PostCreationWithIDSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
@@ -100,7 +100,9 @@ class PostIDView(GenericAPIView):
             return Response(str(e), status=404)
         except Exception as e:
             return Response(str(e), status=400)
-        serializer = PostCreationSerializer(post, data=request.data)
+        data = request.data.copy()
+        data.update({"author": aid, "id": pid})
+        serializer = PostCreationSerializer(post, data=data)
         if serializer.is_valid():
             serializer.save()
             post = Post.objects.get(pk=serializer.data['id'])

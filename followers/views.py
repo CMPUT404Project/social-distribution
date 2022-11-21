@@ -40,7 +40,7 @@ class FollowerDetailView(APIView):
         except Exception as e:
             return Response(str(e), status=400)
         if follower not in author.followers.all():
-            return Response(status=404)
+            return Response(f'{fid} is not a follower of {aid}.', status=404)
         else:
             return Response(f'{fid} is a follower of {aid}.', status=200)
 

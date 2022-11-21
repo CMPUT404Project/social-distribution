@@ -1,9 +1,7 @@
-from django.shortcuts import render
 from authors.serializers import AuthorCreationSerializer
 from rest_framework.generics import ListAPIView
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework import permissions
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from .serializers import UserSerializer, UserCreationSerializer
 from django.contrib.auth.models import User
@@ -26,7 +24,7 @@ class UserList(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class UserCreation(APIView):
+class UserCreation(GenericAPIView):
     """
     Create a new auth user and an author and an inbox, and returns an access token upon success
     """

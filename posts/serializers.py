@@ -3,6 +3,22 @@ from .models import Post
 from authors.models import Author
 from authors.serializers import AuthorSerializer
 import ast
+import json
+
+class PostsViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Post
+        fields = [
+        'title', 
+        'source', 
+        'origin', 
+        'description', 
+        'contentType',
+        'content',
+        'categories', 
+        'visibility', 
+        'unlisted'
+        ]
 
 class PostsSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
@@ -26,7 +42,6 @@ class PostSerializer(serializers.ModelSerializer):
     id = serializers.SerializerMethodField()
     # categories is not updatable
     author = serializers.SerializerMethodField()
-    categories = serializers.SerializerMethodField()
     class Meta:
         model = Post
         fields = ['type', 
@@ -60,14 +75,17 @@ class PostSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
-    
-    def get_categories(self, obj):
-        categories_list = ast.literal_eval(obj.categories)
-        return categories_list
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        categories = ret['categories']
+        ret['categories'] = ast.literal_eval(categories) if categories != "" else "[]"
+        return ret
 
 class PostCreationSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    id = serializers.UUIDField(read_only=True)
+    id = serializers.UUIDField(read_only=True) 
+    categories = serializers.CharField(required=False, allow_blank=True)
     class Meta:
         model = Post
         fields = ['type', 
@@ -91,6 +109,7 @@ class PostCreationSerializer(serializers.ModelSerializer):
 class PostCreationWithIDSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.UUIDField()
+    categories = serializers.CharField(required=False, allow_blank=True)
     class Meta:
         model = Post
         fields = ['type', 

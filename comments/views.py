@@ -1,13 +1,13 @@
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from authors.models import Author
 from posts.models import Post
 from comments.models import Comment
-from comments.serializers import CommentSerializer, CommentsSerializer, CommentCreationSerializer
+from comments.serializers import CommentSerializer, CommentsSerializer, CommentCreationSerializer, CommentViewSerializer
 from backend.pagination import CustomPagination
+from rest_framework.generics import GenericAPIView
 
-class CommentView(APIView):
-    serializer_class = CommentSerializer
+class CommentView(GenericAPIView):
+    serializer_class = CommentViewSerializer
     queryset = Comment.objects.all()
 
     def get(self, request, aid, pid):
@@ -48,7 +48,7 @@ class CommentView(APIView):
             return Response(view_serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
-class CommentIDView(APIView):
+class CommentIDView(GenericAPIView):
     serializer_class = CommentsSerializer
     queryset = Comment.objects.all()
 

@@ -1,10 +1,10 @@
 from rest_framework.generics import ListAPIView
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
 from .models import Author
-from .serializers import AuthorSerializer, AuthorsSerializer
+from .serializers import AuthorSerializer, AuthorsSerializer, AuthorViewSerializer
 from backend.pagination import CustomPagination
+from rest_framework.generics import GenericAPIView
 
 class AuthorView(ListAPIView):
     """
@@ -19,8 +19,8 @@ class AuthorView(ListAPIView):
         serializer = AuthorsSerializer(paginated_authors)
         return Response(serializer.data, status=200)
 
-class AuthorDetail(APIView):
-    serializer_class = AuthorSerializer
+class AuthorDetail(GenericAPIView):
+    serializer_class = AuthorViewSerializer
     queryset = Author.objects.all()
     # permission_classes = [permissions.IsAuthenticated]
     def get(self, request, aid):
