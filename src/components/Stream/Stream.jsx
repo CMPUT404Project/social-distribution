@@ -13,6 +13,7 @@ import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
 
 import AuthService from "../../services/AuthService";
+import { PostTextbox } from "../PostTextbox/PostTextbox";
 
 let data = [
     {
@@ -377,7 +378,9 @@ function Stream() {
 
     let fakeData = data;
     return (
-        <Grid container justifyContent="center" minHeight={"100%"}>
+        <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
+            <div><PostTextbox /></div>
+            
             {fakeData.map((d) => {
                 return <Post key={d.id} data={d} accessToken={accessToken} />;
             })}
