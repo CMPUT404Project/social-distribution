@@ -24,7 +24,7 @@ export const PostTextbox = () => {
     // TODO: Get markdown/base64 example to try.
     const [contentType, setContentType] = useState("text/plain");
     const [visibility, setVisibility] = useState("PUBLIC");
-    const [tags, setTags] = useState([]);
+    const [tags, setTags] = useState("");
     const [unlisted, setUnlisted] = useState(false);
     const [description, setDescription] = useState("");
     const [open, setOpen] = useState(false);
@@ -79,7 +79,7 @@ export const PostTextbox = () => {
             origin: origin,
             content: content,
             visibility: visibility,
-            categories: tags.split(","),
+            categories: tags,
             description: description,
             contentType: contentType,
             unlisted: unlisted,
@@ -135,7 +135,8 @@ export const PostTextbox = () => {
         <Card>
             <Snackbar
                 open={open}
-                autoHideDuration={1000}
+                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                autoHideDuration={3000}
                 onClose={() => setOpen(false)}
                 message={alert}
             />
