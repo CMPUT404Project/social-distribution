@@ -21,5 +21,5 @@ class Like(models.Model):
                 check=Q(post__isnull=False) | Q(comment__isnull=False),
                 name='not_both_null'
             ),
-            models.UniqueConstraint(fields=['id', 'object'], name="id and object should be unique")
+            models.UniqueConstraint(fields=['author', 'object'], name="id and object should be unique")
         ]

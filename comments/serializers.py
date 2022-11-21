@@ -25,6 +25,12 @@ class CommentCreationSerializer(serializers.ModelSerializer):
         model = Comment
         fields = ['id', 'author', 'comment', 'post', 'contentType', 'published']
 
+class CommentRemoteCreationSerializer(serializers.ModelSerializer):
+    id = serializers.UUIDField()
+    class Meta:
+        model = Comment
+        fields = ['id', 'author', 'comment', 'post', 'contentType', 'published']
+        
 class CommentsSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     comments = serializers.SerializerMethodField()

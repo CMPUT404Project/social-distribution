@@ -8,7 +8,7 @@ import json
 class FollowerTests(APITestCase):
     def setUp(self):
         self.client.defaults['SERVER_NAME'] = "testserver.com"
-        self.host = f'http://{self.client.defaults["SERVER_NAME"]}'
+        self.host = f'http://{self.client.defaults["SERVER_NAME"]}/'
         self.authors = create_authors_with_no_user(self.host, 4)
         self.authors[0].followers.add(self.authors[1])
         self.authors[0].followers.add(self.authors[2])
@@ -82,7 +82,7 @@ class FollowerTests(APITestCase):
 
     def test_if_author_itself_is_a_follower(self):
         """
-        Ensures author irself is not a follower of author
+        Ensures author itself is not a follower of author
         """
         follower_put_response = self.client.get(f'{str(self.authors[0].url)}/followers/{str(self.authors[0].id)}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_400_BAD_REQUEST)
