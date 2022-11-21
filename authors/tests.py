@@ -5,9 +5,9 @@ from authors.models import Author
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.tokens import RefreshToken
 from backend.test_utils import create_author_with_user
+from unittest import skip
 
 class AuthorTests(APITestCase):
-    user_url = reverse('register_user')        
     login_url = reverse('token_obtain_pair')
 
     username = 'testusername'
@@ -17,20 +17,20 @@ class AuthorTests(APITestCase):
     
     def setUp(self):
         self.client.defaults['SERVER_NAME'] = "testserver.com"
-        self.host = f'http://{self.client.defaults["SERVER_NAME"]}'
+        self.host = f'http://{self.client.defaults["SERVER_NAME"]}/'
         self.user, self.author = create_author_with_user(self.username, self.password, self.host)
         self.refresh = RefreshToken.for_user(self.user)
 
-    def test_correct_author_url_set_when_saved(self):
+    def test_author_url_set_when_saved(self):
         """
         Ensure the created author object set the correct url.
         """
         author = Author(host=self.host)
         self.assertEqual(author.url, "")
         author.save()
-        self.assertEqual(author.url, f'{self.host}/authors/{author.id}')
+        self.assertEqual(author.url, f'{self.host}authors/{author.id}')
 
-    def test_author_login_failure(self):
+    def test_author_login_with_wrong_creds(self):
         """
         Wrong credentials should result in login failure.
         """
@@ -38,17 +38,18 @@ class AuthorTests(APITestCase):
         author_login_response = self.client.post(self.login_url, invalid_user_data, format='json')
         self.assertTrue(author_login_response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_author_login_success(self):
+    def test_author_login_with_correct_creds(self):
         """
         Ensure JWT Token is returned as a response after successful author login.
         """
         author_login_response = self.client.post(self.login_url, self.user_data, format='json')
-        token = author_login_response.data
         self.assertTrue(author_login_response.status_code, status.HTTP_200_OK)
+        token = author_login_response.data
         self.assertTrue("access" in token)
         self.assertTrue("refresh" in token)
 
-    def test_update_author_failure_when_unauthenticated(self): 
+    @skip("Authentication currently disabled")
+    def test_update_author_when_unauthenticated(self): 
         """
         Ensure unauthenticated requests get 401 unauthorized error.
         """
@@ -56,7 +57,7 @@ class AuthorTests(APITestCase):
         author_put_response = self.client.put(self.author.url, self.author_data, format='json')
         self.assertEqual(author_put_response.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_update_author_success_when_authenticated(self):
+    def test_update_author_when_authenticated(self):
         """
         Ensure authenticated requests get response with 204 status code.
         """
@@ -64,7 +65,8 @@ class AuthorTests(APITestCase):
         author_put_response = self.client.put(self.author.url, self.author_data, format='json')
         self.assertEqual(author_put_response.status_code, status.HTTP_200_OK)
 
-    def test_get_author_failure_when_unauthenticated(self):
+    @skip("Authentication currently disabled")
+    def test_get_author_when_unauthenticated(self):
         """
         Ensure unauthenticated requests get 401 unauthorized error.
         """
@@ -72,7 +74,7 @@ class AuthorTests(APITestCase):
         author_get_reponse = self.client.get(self.author.url)
         self.assertEqual(author_get_reponse.status_code, status.HTTP_401_UNAUTHORIZED)
 
-    def test_get_author_success_when_authenticated(self):
+    def test_get_author_when_authenticated(self):
         """
         Ensure authenticated requests get response with 200 status code.
         """

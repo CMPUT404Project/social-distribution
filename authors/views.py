@@ -2,8 +2,9 @@ from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
-from authors.models import Author
-from authors.serializers import AuthorSerializer, AuthorsSerializer
+from .models import Author
+from .serializers import AuthorSerializer, AuthorsSerializer
+from backend.pagination import CustomPagination
 
 class AuthorView(ListAPIView):
     """
@@ -12,21 +13,16 @@ class AuthorView(ListAPIView):
     queryset = Author.objects.all()
     serializer_class = AuthorsSerializer
     def get(self, request):
-        author = Author.objects.all()
-        serializer = AuthorsSerializer(author, context={"request":request})
+        authors = Author.objects.all()
+        pagination = CustomPagination()
+        paginated_authors = pagination.paginate(authors, page=request.GET.get('page'), size=request.GET.get('size'))
+        serializer = AuthorsSerializer(paginated_authors)
         return Response(serializer.data, status=200)
 
 class AuthorDetail(APIView):
     serializer_class = AuthorSerializer
     queryset = Author.objects.all()
     # permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self, pk):
-        try:
-            return Author.objects.get(pk=pk)
-        except Author.DoesNotExist as e:
-            raise Response(str(e), status=404)
-
     def get(self, request, aid):
         """
         Retrieve a single author.
@@ -35,6 +31,8 @@ class AuthorDetail(APIView):
             author = Author.objects.get(pk=aid)
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         serializer = AuthorSerializer(author)
         return Response(serializer.data, status=200)
 
@@ -46,6 +44,8 @@ class AuthorDetail(APIView):
             author = Author.objects.get(pk=aid)
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         serializer = AuthorSerializer(author, data=request.data)
         if serializer.is_valid():
             serializer.save()

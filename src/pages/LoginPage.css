@@ -88,27 +88,6 @@
     }
 }
 
-/* CSS for MUI textfield that might be used */
-/* .input-field div {
-    font-size: 18px;
-    color: #686868;
-    width: 100%;
-    background: #e6e6e6;
-    border-radius: 3px;
-    padding: 0 10px 0 40px;
-}
-
-.input-field label {
-    font-size: 18px;
-    width: 100%;
-    border-radius: 3px;
-    padding: 0 0px 0 50px;
-}
-
-.css-1sumxir-MuiFormLabel-root-MuiInputLabel-root {
-    transform: translate(-23px, -9px) scale(0.75)!important;
-} */
-
 .input-icon {
     height: 100%;
     color: rgb(66, 66, 66);
@@ -155,11 +134,8 @@
 .error-message {
     color: red;
     margin: 0;
+    font-size: 15px;
 }
-
-/* .remember-container {
-    margin-top: 20px;
-} */
 
 .login-btn-container {
     width: 100%;
@@ -184,7 +160,7 @@
 }
 
 .login-btn:hover {
-    background: #e0127c;
+    background: #b40e64;
 }
 
 .register-link-container {
