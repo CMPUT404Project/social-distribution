@@ -6,6 +6,7 @@ from posts.models import Post
 from comments.models import Comment
 from authors.serializers import AuthorSerializer
 from likes.models import Like
+from collections import OrderedDict
 
 class LikeSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
@@ -20,6 +21,16 @@ class LikeSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
+
+    def to_representation(self, instance):
+        ins = super().to_representation(instance)
+        new_ins = OrderedDict()
+        for key in ins:
+            if key == "context":
+                new_ins['@context'] = ins[key]
+            else:
+                new_ins[key] = ins[key]
+        return new_ins
 
 class PostLikeCreationSerializer(serializers.ModelSerializer):    
     class Meta:

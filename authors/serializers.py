@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import Author
 
+class AuthorViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Author
+        fields = ['displayName', 'github', 'profileImage']
+
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()

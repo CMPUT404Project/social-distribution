@@ -2,6 +2,11 @@ from rest_framework import serializers
 from .models import Comment
 from authors.serializers import AuthorSerializer
 
+class CommentViewSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Comment
+        fields = ['comment', 'contentType']
+        
 class CommentSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
@@ -18,6 +23,8 @@ class CommentSerializer(serializers.ModelSerializer):
         return AuthorSerializer(obj.author).data
 
     def get_id(self, obj):
+        if obj.url:
+            return obj.url
         return str(obj.author.url) + '/posts/' + str(obj.post.id) + '/comments/' + str(obj.id)
 
 class CommentCreationSerializer(serializers.ModelSerializer):
@@ -26,10 +33,10 @@ class CommentCreationSerializer(serializers.ModelSerializer):
         fields = ['id', 'author', 'comment', 'post', 'contentType', 'published']
 
 class CommentRemoteCreationSerializer(serializers.ModelSerializer):
-    id = serializers.UUIDField()
+    url = serializers.URLField(required=True)
     class Meta:
         model = Comment
-        fields = ['id', 'author', 'comment', 'post', 'contentType', 'published']
+        fields = ['id', 'url', 'author', 'comment', 'post', 'contentType', 'published']
         
 class CommentsSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
