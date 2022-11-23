@@ -26,28 +26,28 @@ export default class GithubFeed extends Component {
                             <span className="github-icon-octicon octicon octicon-mark-github"></span>
                         </div>
                         {!this.props.avatarUrl ? (
-                        <a className="github-profile" href={ "https://github.com/"+ this.props.userName } target="_blank">
-                            <div className="github-fullname" >
+                        <div className="github-profile">
+                            <a className="github-fullname" href={"https://github.com/"+ this.props.userName} target="_blank" rel="noreferrer">
                                 { this.props.fullName ? this.props.fullName : this.props.userName }
-                            </div>
+                            </a>
                             <div className="github-username" style={{color: "red"}}>
                                 {this.props.userName ? 
-                                    "Github acitivty could not be loaded for " + this.props.userName :
+                                    "Github acitivity could not be loaded for " + this.props.userName :
                                     "Please add your github to your profile and try again"}
                             </div>
-                        </a>
+                        </div>
                         ) : (
-                        <a className="github-profile" href={ "https://github.com/"+ this.props.userName } target="_blank">
+                        <a className="github-profile" href={"https://github.com/"+ this.props.userName} target="_blank" rel="noreferrer">
                             <div className="github-fullname">
-                            { this.props.fullName ? this.props.fullName : this.props.userName }
+                                {this.props.fullName ? this.props.fullName : this.props.userName}
                             </div>
                             <div className="github-username">
-                            { this.props.fullName ? this.props.userName : "" }
+                                {this.props.fullName ? this.props.userName : ""}
                             </div>
                         </a>
                         )}
                         <div className="github-avatar">
-                            <img className="github-avatar-img" src={ this.props.avatarUrl } />
+                            <img className="github-avatar-img" alt="" src={ this.props.avatarUrl } />
                         </div>
                     </div>
                 </div>
