@@ -10,6 +10,7 @@ import ProfilePage from "./pages/ProfilePage";
 import AccountPage from "./pages/AccountPage";
 import InboxPage from "./pages/InboxPage";
 import GithubPage from "./pages/GithubPage";
+import RelationshipPage from "./pages/RelationshipPage";
 
 function App() {
     return (
@@ -23,6 +24,7 @@ function App() {
                 <Route path="/account" element={<Priv><AccountPage/></Priv>}/>
                 <Route path="/inbox" element={<Priv><InboxPage/></Priv>}/>
                 <Route path="/friends" element={<Priv><FriendsPage/></Priv>}/>
+                <Route path="/relationships" element={<Priv><RelationshipPage/></Priv>}/>
                 <Route path="/github" element={<Priv><GithubPage/></Priv>}/>
             </Routes>
         </Router>

@@ -10,7 +10,7 @@ import axios from 'axios';
 const BASE_URL = "https://api.github.com/users/";
 
 function GithubPage() {
-    const author = JSON.parse(AuthService.retrieveCurrentUser());
+    const author = JSON.parse(AuthService.retrieveCurrentAuthor());
     const [values, setValues] = useState({
         fullname: "",
         username: author.github.split('.com/')[1],
@@ -45,7 +45,7 @@ function GithubPage() {
             }
         }
         getGithubUserData()
-    }, [values.username]);    
+    }, [values.username]);
 
     return (
         <>

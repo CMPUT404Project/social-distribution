@@ -20,7 +20,7 @@ import {
 } from '@mui/material';
 
 function ProfilePage() {
-    const [defaultAuthor, setDefaultAuthor] = useState(JSON.parse(AuthService.retrieveCurrentUser()));
+    const [defaultAuthor, setDefaultAuthor] = useState(JSON.parse(AuthService.retrieveCurrentAuthor()));
     const [authorValues, setAuthorValues] = useState({
         displayName: defaultAuthor.displayName || "",
         github: defaultAuthor.github.split(".com/")[1] || "",
@@ -92,12 +92,10 @@ function ProfilePage() {
                     body.profileImage = "";
                 }
             };
-            console.log(body)
             if (Object.keys(body).length !== 0) {
-                const response = await AuthService.updateUserDetails(body)
+                const response = await AuthService.updateAuthorDetails(body)
                 .then(() => {
-                    console.log("HELLO")
-                    setDefaultAuthor(JSON.parse(AuthService.retrieveCurrentUser()));
+                    setDefaultAuthor(JSON.parse(AuthService.retrieveCurrentAuthor()));
                     setAlertDetails({
                         alertSeverity: "success",
                         errorMessage: "Successfully updated profile"

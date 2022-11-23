@@ -21,7 +21,7 @@ class AuthService {
             }
             // Set auth token as default header for axios calls
             await setAxiosAuthToken();
-            await this.storeCurrentUser()
+            await this.storeCurrentAuthor()
         }
         return response.data
     }
@@ -37,13 +37,13 @@ class AuthService {
             sessionStorage.setItem('access_token', response.data.access);
             sessionStorage.setItem('refresh_token', response.data.refresh);
             setAxiosAuthToken(response.data.access);
-            const updateReponse = await this.updateUserDetails(body);
+            const updateReponse = await this.updateAuthorDetails(body);
             return updateReponse
         }
         return response.data
     }
 
-    async updateUserDetails(body) {
+    async updateAuthorDetails(body) {
         setAxiosAuthToken();
         const response = await axios.put(jwtDecode(this.getAccessToken()).author_id, body)
         if (response.status === 200) {
@@ -56,7 +56,7 @@ class AuthService {
         return response.data
     }
 
-    storeCurrentUser() {
+    storeCurrentAuthor() {
         const accessToken = this.getAccessToken();
         const authorID = jwtDecode(accessToken)["author_id"].split("authors/")[1];
         return axios.get('authors/' + authorID).then(response => {
@@ -71,8 +71,63 @@ class AuthService {
         });
     }
 
-    retrieveCurrentUser() {
+    retrieveCurrentAuthor() {
         return sessionStorage.getItem('author') || localStorage.getItem('author');
+    }
+
+    async getAuthorFollowers() {
+        const accessToken = this.getAccessToken();
+        const authorID = jwtDecode(accessToken)["author_id"].split("authors/")[1];
+        const data = {
+            type: "followers",
+            items: [
+                {
+                    type: "author",
+                    id: "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                    url: "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
+                    host: "http://127.0.0.1:5454/",
+                    displayName: "Greg Johnson",
+                    github: "http://github.com/gjohnson",
+                    profileImage: "https://i.imgur.com/k7XVwpB.jpeg",
+                },
+                {
+                    type: "author",
+                    id: "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                    host: "http://127.0.0.1:5454/",
+                    displayName: "Lara Croft",
+                    url: "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
+                    github: "http://github.com/laracroft",
+                    profileImage: "https://i.imgur.com/k7XVwpB.jpeg",
+                },
+                {
+                    type: "author",
+                    id: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908f1658e",
+                    host: "http://127.0.0.1:8000/",
+                    displayName: "Byron Tung",
+                    url: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908f1658e",
+                    github: "http://github.com/byrontung",
+                    profileImage: "https://i.imgur.com/LRoLTlK.jpeg",
+                },
+                {
+                    type: "author",
+                    id: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908fff1658e",
+                    host: "http://127.0.0.1:8000/",
+                    displayName: "Tyron Bung",
+                    url: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908fff1658e",
+                    github: "http://github.com/tyronbung",
+                },
+            ],
+        };
+        // setFollowers(decode)
+        const response = await axios.get("/service/authors/" + authorID + "/followers")
+        console.log(response)
+        // console.log("/service/authors" + aID + "/followers")
+        // setFollowers(res["items"]);
+        if (response.status === 200) {
+            return data //temp
+            // return response.data
+        }
+        return response.data
     }
 
     getAccessToken() {

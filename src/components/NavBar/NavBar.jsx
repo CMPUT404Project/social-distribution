@@ -28,7 +28,7 @@ import axios from "axios";
 import { clearStorage } from "../../utils";
 import "./NavBar.css";
 
-const pages = ['Inbox', 'Friends', 'Github'];
+const pages = ['Inbox', 'Friends', 'Github', 'Relationships'];
 // Keep logout last in array
 const settings = ['Profile', 'Account', 'Logout'];
 
@@ -38,12 +38,6 @@ function NavBar() {
     const [anchorElUser, setAnchorElUser] = useState(null);
 
     const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
-
-    useEffect(() => {
-        if (!accessToken) {
-            navigate('/')
-        }
-    }, [accessToken, navigate]);
 
     const [user, setUser] = useState({});
 
