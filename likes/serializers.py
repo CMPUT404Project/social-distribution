@@ -1,16 +1,11 @@
-from django.db import models
 from rest_framework import serializers
-from django.forms import CharField, UUIDField
 from authors.models import Author
-from posts.models import Post
-from comments.models import Comment
-from authors.serializers import AuthorSerializer
+from authors.serializers import AuthorSerializer, AuthorSwaggerResponseSerializer, AuthorSwaggerRequestSerializer
 from likes.models import Like
-from collections import OrderedDict
 
 class LikeSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    author = AuthorSerializer()
+    author = serializers.SerializerMethodField()
     
     class Meta:
         model = Like
@@ -21,16 +16,6 @@ class LikeSerializer(serializers.ModelSerializer):
 
     def get_author(self, obj):
         return AuthorSerializer(Author.objects.get(pk=obj.author.id)).data
-
-    def to_representation(self, instance):
-        ins = super().to_representation(instance)
-        new_ins = OrderedDict()
-        for key in ins:
-            if key == "context":
-                new_ins['@context'] = ins[key]
-            else:
-                new_ins[key] = ins[key]
-        return new_ins
 
 class PostLikeCreationSerializer(serializers.ModelSerializer):    
     class Meta:
@@ -69,3 +54,28 @@ class LikedSerializer(serializers.ModelSerializer):
 
     def get_items(self, obj):
         return LikeSerializer(obj, many=True).data
+
+class LikeSwaggerRequestSerializer(serializers.ModelSerializer):
+    author = AuthorSwaggerRequestSerializer(required=True)
+    class Meta:
+        model = Like
+        fields = ['context', 'summary', 'author', 'object']
+
+class LikeSwaggerResponseSerializer(serializers.ModelSerializer):
+    context = serializers.URLField(required=False)
+    type = serializers.SerializerMethodField()
+    summary = serializers.SerializerMethodField()
+    author = AuthorSwaggerResponseSerializer(many=True, required=False)
+    object = serializers.URLField(required=False)
+    
+    class Meta:
+        model = Like
+        fields = ['context', 'summary', 'type', 'author', 'object']
+
+class LikesSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = LikeSwaggerResponseSerializer(many=True, required=False)
+
+    class Meta:
+        model = Like
+        fields = ['type', 'items']
