@@ -19,15 +19,20 @@ class FollowerTests(APITestCase):
         """
         Ensure adding a valid follower to an nonexisting author results in failure
         """
-        follower_put_response = self.client.put(f'{str(uuid.uuid4())}/followers/{str(self.authors[0].id)}')
+        follower_put_response = self.client.put(f'/authors/{str(uuid.uuid4())}/followers/{str(self.authors[0].id)}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_404_NOT_FOUND)
+        content = json.loads(follower_put_response.content)
+        self.assertEqual(content, "Author matching query does not exist.")
 
     def test_add_invalid_follower(self):
         """
-        Ensures adding invalid authors as a follwer results in failure
+        Ensures adding invalid author as a follower results in failure
         """
-        follower_put_response = self.client.put(f'{str(self.authors[0].url)}/followers/invalidauthor')
+        invalid_authorID = 'abcd1234'
+        follower_put_response = self.client.put(f'{str(self.authors[0].url)}/followers/{invalid_authorID}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_400_BAD_REQUEST)
+        content = json.loads(follower_put_response.content)
+        self.assertEqual(content, f"['“{invalid_authorID}” is not a valid UUID.']")
 
     def test_add_nonexisting_authors(self):
         """
@@ -35,6 +40,8 @@ class FollowerTests(APITestCase):
         """
         follower_put_response = self.client.put(f'{str(self.authors[0].url)}/followers/{str(uuid.uuid4())}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_404_NOT_FOUND)
+        content = json.loads(follower_put_response.content)
+        self.assertEqual(content, "Author matching query does not exist.")
 
     def test_add_author_itself_as_follower(self):
         """
@@ -42,6 +49,9 @@ class FollowerTests(APITestCase):
         """
         follower_put_response = self.client.put(f'{str(self.authors[0].url)}/followers/{str(self.authors[0].id)}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_400_BAD_REQUEST)
+        content = json.loads(follower_put_response.content)
+        self.assertEqual(content, "['Follower is the same as the followee']")
+
 
     def test_add_existing_authors_as_followers(self):
         """
@@ -49,12 +59,21 @@ class FollowerTests(APITestCase):
         """
         authors = create_authors_with_no_user(self.host, 4)
         follower1_put_response = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[1].id)}')
-        follower2_put_response = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[2].id)}')
-        follower3_put_response = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[3].id)}') 
+        follower_get_response = self.client.get(f'{str(authors[0].url)}/followers')
         self.assertEqual(follower1_put_response.status_code, status.HTTP_201_CREATED)
+        num_followers = len(json.loads(follower_get_response.content)["items"])
+        self.assertEqual(num_followers, 1)
+        follower2_put_response = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[2].id)}')
+        follower_get_response = self.client.get(f'{str(authors[0].url)}/followers')
         self.assertEqual(follower2_put_response.status_code, status.HTTP_201_CREATED)
+        num_followers = len(json.loads(follower_get_response.content)["items"])
+        self.assertEqual(num_followers, 2)
+        follower3_put_response = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[3].id)}')
+        follower_get_response = self.client.get(f'{str(authors[0].url)}/followers')
         self.assertEqual(follower3_put_response.status_code, status.HTTP_201_CREATED)
-
+        num_followers = len(json.loads(follower_get_response.content)["items"])
+        self.assertEqual(num_followers, 3)
+        
     def test_add_follower_as_follower(self):
         """
         Ensures adding the same follower results in failure
@@ -62,10 +81,16 @@ class FollowerTests(APITestCase):
         authors = create_authors_with_no_user(self.host, 2)
         follower_put_response1 = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[1].id)}')
         self.assertEqual(follower_put_response1.status_code, status.HTTP_201_CREATED)
-
+        follower_get_response = self.client.get(f'{str(authors[0].url)}/followers')
+        num_followers = len(json.loads(follower_get_response.content)["items"])
+        self.assertEqual(num_followers, 1)
+        
         follower_put_response2 = self.client.put(f'{str(authors[0].url)}/followers/{str(authors[1].id)}')
         self.assertEqual(follower_put_response2.status_code, status.HTTP_409_CONFLICT)
-        
+        follower_get_response = self.client.get(f'{str(authors[0].url)}/followers')
+        num_followers = len(json.loads(follower_get_response.content)["items"])
+        self.assertEqual(num_followers, 1)
+    
     # GET OBJECT TESTS
     def test_if_valid_follower_is_a_follower(self):
         """
@@ -73,10 +98,10 @@ class FollowerTests(APITestCase):
         """
         follower1_get_response = self.client.get(f'{str(self.authors[0].url)}/followers/{str(self.authors[1].id)}')
         self.assertEqual(follower1_get_response.status_code, status.HTTP_200_OK)
-
+        
         follower2_get_response = self.client.get(f'{str(self.authors[0].url)}/followers/{str(self.authors[2].id)}')
         self.assertEqual(follower2_get_response.status_code, status.HTTP_200_OK)
-
+        
         follower3_get_response = self.client.get(f'{str(self.authors[0].url)}/followers/{str(self.authors[3].id)}')
         self.assertEqual(follower3_get_response.status_code, status.HTTP_200_OK)
 
@@ -86,6 +111,9 @@ class FollowerTests(APITestCase):
         """
         follower_put_response = self.client.get(f'{str(self.authors[0].url)}/followers/{str(self.authors[0].id)}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_400_BAD_REQUEST)
+        
+        content = json.loads(follower_put_response.content)
+        self.assertEqual(content, "['Follower is the same as the followee']")
 
     def test_if_nonexistent_follower_is_a_follower(self):
         """
@@ -93,6 +121,9 @@ class FollowerTests(APITestCase):
         """
         follower_put_response = self.client.get(f'{str(self.authors[0].url)}/followers/{str(uuid.uuid4())}')
         self.assertEqual(follower_put_response.status_code, status.HTTP_404_NOT_FOUND)
+        
+        content = json.loads(follower_put_response.content)
+        self.assertEqual(content, "Author matching query does not exist.")
 
     # GET ALL TESTS
     def test_get_all_followers_of_author(self):
@@ -106,15 +137,34 @@ class FollowerTests(APITestCase):
         
     def test_get_all_invalid_author_followers(self):
         """
-        Ensures an invalid author return an error
+        Ensures an invalid author return an error /authors/
         """
-        author_url = list(str(self.authors[0].url))
-        author_url[-1] = "0" if author_url[-1] == "1" else "1"
-        author_url = ''.join(author_url)
-        followers_get_response = self.client.get(f'{author_url}/followers')
-        self.assertEqual(followers_get_response.status_code, status.HTTP_404_NOT_FOUND)
+        invalid_authorID = 'abcd1234'
+        followers_get_response = self.client.get(f'/authors/{invalid_authorID}/followers')
+        self.assertEqual(followers_get_response.status_code, status.HTTP_400_BAD_REQUEST)
+        content = json.loads(followers_get_response.content)
+        self.assertEqual(content, f"['“{invalid_authorID}” is not a valid UUID.']")
 
     # DELETE OBJECT TESTS
+    def test_delete_valid_follower_for_invalid_author(self):
+        """
+        Ensure deleting a valid follower to an nonexisting author results in failure
+        """
+        follower_delete_response = self.client.delete(f'/authors/{str(uuid.uuid4())}/followers/{str(self.authors[0].id)}')
+        self.assertEqual(follower_delete_response.status_code, status.HTTP_404_NOT_FOUND)
+        content = json.loads(follower_delete_response.content)
+        self.assertEqual(content, "Author matching query does not exist.")
+
+    def test_delete_invalid_follower(self):
+        """
+        Ensures deleting invalid author as a follower results in failure
+        """
+        invalid_authorID = 'abcd1234'
+        follower_delete_response = self.client.put(f'{str(self.authors[0].url)}/followers/{invalid_authorID}')
+        self.assertEqual(follower_delete_response.status_code, status.HTTP_400_BAD_REQUEST)
+        content = json.loads(follower_delete_response.content)
+        self.assertEqual(content, f"['“{invalid_authorID}” is not a valid UUID.']")
+
     def test_remove_valid_follower(self):
         """
         Ensures a valid follower is removed
@@ -147,6 +197,8 @@ class FollowerTests(APITestCase):
 
         follower1_delete_response = self.client.delete(f'{authors[0].url}/followers/{authors[2].id}')
         self.assertEqual(follower1_delete_response.status_code, status.HTTP_404_NOT_FOUND)
+        content = json.loads(follower1_delete_response.content)
+        self.assertEqual(content, "Follower does not follow this author")
 
         self.assertEqual(len(authors[0].followers.all()), 1)
 

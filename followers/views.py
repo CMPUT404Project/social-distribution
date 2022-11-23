@@ -34,7 +34,7 @@ class FollowerDetailView(APIView):
             author = Author.objects.get(id=aid)
             follower = Author.objects.get(id=fid)
             if follower == author:
-                raise ValidationError
+                raise ValidationError("Follower is the same as the followee")
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
         except Exception as e:
@@ -53,7 +53,7 @@ class FollowerDetailView(APIView):
             author = Author.objects.get(id=aid)
             follower = Author.objects.get(id=fid)
             if follower == author:
-                raise ValidationError
+                raise ValidationError("Follower is the same as the followee")
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
         except Exception as e:
@@ -71,7 +71,7 @@ class FollowerDetailView(APIView):
             author = Author.objects.get(pk=aid)
             follower = Author.objects.get(pk=fid)
             if follower == author:
-                raise ValidationError
+                raise ValidationError("Follower is the same as the followee")
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
         except Exception as e:
@@ -79,5 +79,5 @@ class FollowerDetailView(APIView):
         if follower in author.followers.all():
             author.followers.remove(follower.id)
             return Response(status=204)
-        return Response(status=404)
+        return Response("Follower does not follow this author", status=404)
 
