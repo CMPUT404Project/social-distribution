@@ -1,11 +1,12 @@
 from rest_framework import serializers
 from .models import Post
 from authors.models import Author
-from authors.serializers import AuthorSerializer
+from authors.serializers import AuthorSerializer, AuthorSwaggerResponseSerializer, AuthorSwaggerRequestSerializer
 import ast
 import json
 
 class PostsViewSerializer(serializers.ModelSerializer):
+    categories = serializers.CharField(required=True, allow_blank=False)
     class Meta:
         model = Post
         fields = [
@@ -16,6 +17,26 @@ class PostsViewSerializer(serializers.ModelSerializer):
         'contentType',
         'content',
         'categories', 
+        'visibility', 
+        'unlisted'
+        ]
+
+class PostsInboxSerializer(serializers.ModelSerializer):
+    id = serializers.URLField()
+    categories = serializers.CharField(required=True, allow_blank=True)
+    class Meta:
+        model = Post
+        fields = [
+        'title', 
+        'id', 
+        'source', 
+        'origin', 
+        'description', 
+        'contentType', 
+        'content',
+        'author', 
+        'categories',
+        'published', 
         'visibility', 
         'unlisted'
         ]
@@ -68,7 +89,7 @@ class PostSerializer(serializers.ModelSerializer):
         return str(obj.author.url) + '/posts/' + str(obj.id)
 
     def get_count(self, obj):
-        return str(obj.comment_set.all().count())
+        return int(obj.comment_set.all().count())
 
     def get_comments(self, obj):
         return self.get_id(obj) + '/comments'
@@ -84,7 +105,7 @@ class PostSerializer(serializers.ModelSerializer):
 
 class PostCreationSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    id = serializers.UUIDField(read_only=True) 
+    id = serializers.UUIDField(read_only=True)
     categories = serializers.CharField(required=True, allow_blank=False)
     class Meta:
         model = Post
@@ -114,7 +135,7 @@ class PostCreationSerializer(serializers.ModelSerializer):
 class PostCreationWithIDSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.UUIDField()
-    categories = serializers.CharField(required=True, allow_blank=True)
+    categories = serializers.CharField(required=True, allow_blank=False)
     class Meta:
         model = Post
         fields = ['type', 
@@ -126,7 +147,7 @@ class PostCreationWithIDSerializer(serializers.ModelSerializer):
         'contentType', 
         'content',
         'author', 
-        'categories', 
+        'categories',
         'published', 
         'visibility', 
         'unlisted'
@@ -139,3 +160,64 @@ class PostCreationWithIDSerializer(serializers.ModelSerializer):
         if "[" not in value and "]" not in value:
             raise serializers.ValidationError("Please enter a list of values.")
         return value
+
+class PostSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    title = serializers.SerializerMethodField()
+    count = serializers.IntegerField(required=False)
+    comments = serializers.URLField(required=False)
+    id = serializers.URLField(required=False)
+    source = serializers.URLField(required=False)
+    origin = serializers.URLField(required=False)
+    published = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ", required=False)
+    categories = serializers.SerializerMethodField()
+    author = AuthorSwaggerResponseSerializer(many=True, required=False)
+    content = serializers.SerializerMethodField()
+    class Meta:
+        model = Post
+        fields = ['type', 
+        'title', 
+        'id', 
+        'source', 
+        'origin', 
+        'description', 
+        'contentType',
+        'content', 
+        'author', 
+        'categories', 
+        'count', 
+        'comments', 
+        'published', 
+        'visibility', 
+        'unlisted'
+        ]
+
+class PostsSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = PostSwaggerResponseSerializer(many=True, required=False)
+
+    class Meta:
+        model = Post
+        fields = ['type', 'items']
+
+class PostSwaggerRequestSerializer(serializers.ModelSerializer):
+    id = serializers.URLField(required=True)
+    title = serializers.URLField(required=True)
+    categories = serializers.CharField(required=True, allow_blank=True)
+    author = AuthorSwaggerRequestSerializer(required=True)
+    class Meta:
+        model = Post
+        fields = [
+        'title', 
+        'id', 
+        'source', 
+        'origin', 
+        'description', 
+        'contentType', 
+        'content',
+        'author', 
+        'categories',
+        'published', 
+        'visibility', 
+        'unlisted'
+        ]

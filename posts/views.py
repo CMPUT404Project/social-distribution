@@ -2,16 +2,18 @@ from rest_framework.response import Response
 from rest_framework.generics import GenericAPIView
 from .models import Post
 from authors.models import Author
-from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer, PostCreationWithIDSerializer, PostsViewSerializer
+from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer, PostCreationWithIDSerializer, PostsViewSerializer, PostSwaggerResponseSerializer, PostsSwaggerResponseSerializer
 from backend.pagination import CustomPagination
+from drf_yasg.utils import swagger_auto_schema
 
 class PostView(GenericAPIView):
     serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
 
+    @swagger_auto_schema(responses={200: PostsSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found"})
     def get(self, request, aid):
         """
-        List posts for a given author
+        get the recent posts from author aid (remote supported, paginated)
         """
         try:
             Author.objects.get(pk=aid)
@@ -25,11 +27,10 @@ class PostView(GenericAPIView):
         serializer = PostsSerializer(paginated_posts)
         return Response(serializer.data, status=200)
 
+    @swagger_auto_schema(request_body=PostsViewSerializer, responses={201: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found"})
     def post(self, request, aid):
         """
-        Create a new post
-        Fields from client payload are: displayName, github, profileImage
-        Fields filled in by server: host, url, id
+        create a new post but generate a new id
         """
         try:
             Author.objects.get(pk=aid)
@@ -42,7 +43,7 @@ class PostView(GenericAPIView):
         serializer = PostCreationSerializer(data=data)
         if serializer.is_valid():
             serializer.save()
-            post = Post.objects.get(pk=serializer.data['id'])
+            post = Post.objects.get(pk=serializer.data.get('id'))
             view_serializer = PostSerializer(post)
             return Response(view_serializer.data, status=201)
         return Response(serializer.errors, status=400)
@@ -51,9 +52,10 @@ class PostIDView(GenericAPIView):
     serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
 
+    @swagger_auto_schema(responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
     def get(self, request, aid, pid):
         """
-        Retrieve a post
+        get the public post whose id is pid (remote supported)
         """
         try:
             Author.objects.get(pk=aid)
@@ -65,9 +67,10 @@ class PostIDView(GenericAPIView):
         serializer = PostSerializer(post)
         return Response(serializer.data, status=200)
 
+    @swagger_auto_schema(request_body=PostsViewSerializer, responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found", 409: "A post with that id already exists"})
     def post(self, request, aid, pid):
         """
-        Create a post with a pid
+        create a post where its id is pid
         """
         try:
             Author.objects.get(pk=aid)
@@ -88,10 +91,10 @@ class PostIDView(GenericAPIView):
             return Response(view_serializer.data, status=201)
         return Response(serializer.errors, status=400)
         
-
+    @swagger_auto_schema(request_body=PostsViewSerializer, responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
     def put(self, request, aid, pid):
         """
-        Update a post
+        update the post whose id is pid
         """
         try:
             Author.objects.get(pk=aid)
@@ -105,14 +108,15 @@ class PostIDView(GenericAPIView):
         serializer = PostCreationSerializer(post, data=data)
         if serializer.is_valid():
             serializer.save()
-            post = Post.objects.get(pk=serializer.data['id'])
+            post = Post.objects.get(pk=serializer.data.get('id'))
             view_serializer = PostSerializer(post)
             return Response(view_serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
+    @swagger_auto_schema(responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})    
     def delete(self, request, aid, pid):
         """
-        Delete a post
+        remove the post whose id is pid
         """
         try:
             Author.objects.get(pk=aid)

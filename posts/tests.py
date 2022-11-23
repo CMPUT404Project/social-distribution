@@ -51,7 +51,7 @@ class PostTests(APITestCase):
         """
         Ensures creating a new post for an existing author results in success
         """
-        posts_data = {"title": "test", "content": "test"}
+        posts_data = {"title": "test", "content": "test", "categories": "[]"}
         posts_post_response = self.client.post(self.posts_url, posts_data)
         self.assertEqual(posts_post_response.status_code, status.HTTP_201_CREATED)
 
@@ -82,7 +82,7 @@ class PostTests(APITestCase):
         Ensures creating a new post with a valid provided id for an existing author results in success
         """
         post_url = self.authors[0].url + '/posts/' + str(uuid.uuid4())
-        post_data = {"title": "test", "content": "test"}
+        post_data = {"title": "test", "content": "test", "categories": "[]"}
         post_post_response = self.client.post(post_url, post_data)
         self.assertEqual(post_post_response.status_code, status.HTTP_201_CREATED)
 
@@ -91,7 +91,7 @@ class PostTests(APITestCase):
         Ensures creating a new post with an invalid provided id for an existing author results in failure
         """
         post_url = self.authors[0].url + '/posts/' + "invalidid"
-        post_data = {"title": "test", "content": "test"}
+        post_data = {"title": "test", "content": "test", "categories": "[]"}
         post_post_response = self.client.post(post_url, post_data)
         self.assertEqual(post_post_response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -110,7 +110,7 @@ class PostTests(APITestCase):
         Ensures updating an existing post for an existing author results in success
         """
         post_url = self.posts_url + '/' + str(self.posts[1].id)
-        updated_data = {"title": "updatedtitle", "content": "updatedcontent"}
+        updated_data = {"title": "updatedtitle", "content": "updatedcontent", "categories": "[]"}
         post_put_response = self.client.put(post_url, updated_data)
         self.assertEqual(post_put_response.status_code, status.HTTP_200_OK)
         post_content = json.loads(post_put_response.content)
