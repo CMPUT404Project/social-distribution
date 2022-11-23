@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import GitHubFeed from '../components/GithubActivity/GithubFeed'
 import ClipLoader from 'react-spinners/ClipLoader';
 
@@ -11,7 +10,6 @@ import axios from 'axios';
 const BASE_URL = "https://api.github.com/users/";
 
 function GithubPage() {
-    const navigate = useNavigate();
     const author = JSON.parse(AuthService.retrieveCurrentUser());
     const [values, setValues] = useState({
         fullname: "",
@@ -34,23 +32,20 @@ function GithubPage() {
                 return error.response
             })
             if (response.status === 200) {
-                const eventsResponse = await axoisInstance.get(BASE_URL + values.username + "/events")
+                await axoisInstance.get(BASE_URL + values.username + "/events")
                 .then((response) => {
                     setEvents(response.data);
                     if (response.data.length > 0) {
                         setIsEmpty(false)
                     }
                     setLoading(false)
-                    return response
-                }).catch((error) => {
-                    return error.response
                 })
             } else {
                 setLoading(false)
             }
         }
         getGithubUserData()
-    }, []);    
+    });    
 
     return (
         <>

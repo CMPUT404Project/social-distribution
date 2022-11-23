@@ -9,6 +9,8 @@ from unittest import skip
 import json
 
 class AuthorTests(APITestCase):
+    login_url = reverse('token_obtain_pair')
+
     username = 'testusername'
     password = 'testpassword'
     author_data = {'displayName': 'test', 'github': 'http://github.com/test', 'profileImage': 'https://test.png'}
