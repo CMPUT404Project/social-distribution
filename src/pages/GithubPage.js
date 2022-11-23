@@ -26,7 +26,7 @@ function GithubPage() {
             axoisInstance.defaults.headers.common = {};
             const response = await axoisInstance.get(BASE_URL + values.username)
             .then((response) => {
-                setValues({ ...values, avatarUrl: response.data.avatar_url, fullname: response.data.name });
+                setValues(v => ({ ...v, avatarUrl: response.data.avatar_url, fullname: response.data.name }));
                 return response
             }).catch((error) => {
                 return error.response
@@ -45,7 +45,7 @@ function GithubPage() {
             }
         }
         getGithubUserData()
-    });    
+    }, [values.username]);    
 
     return (
         <>
