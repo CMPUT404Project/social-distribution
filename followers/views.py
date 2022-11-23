@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from .serializers import FollowersSerializer, FollowersSwaggerSerializer
 from authors.models import Author
 from rest_framework.generics import GenericAPIView
+from followRequests.models import FollowRequest
 from django.core.exceptions import ValidationError
 from drf_yasg.utils import swagger_auto_schema, no_body
 
@@ -60,6 +61,9 @@ class FollowerDetailView(GenericAPIView):
         except Exception as e:
             return Response(str(e), status=400)
         if follower not in author.followers.all():
+            followRequest = FollowRequest.objects.filter(actor=follower, object=author).first()
+            if followRequest:
+                followRequest.delete()
             author.followers.add(follower.id)
             return Response("Successfully added follower", status=201)
         return Response("Follower already exists", status=409)

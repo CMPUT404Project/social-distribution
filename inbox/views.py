@@ -12,6 +12,8 @@ from authors.serializers import AuthorRemoteCreationSerializer
 from posts.serializers import PostCreationWithIDSerializer, PostSerializer, PostSwaggerResponseSerializer, PostSwaggerRequestSerializer
 import uuid
 from drf_yasg.utils import swagger_auto_schema
+from followRequests.models import FollowRequest
+from followRequests.serializers import FollowRequestSerializer, FollowRequestCreationSerializer
 
 def check_author_and_create_serialization(data):
     author = Author.objects.filter(url=data.get('author').get('url')).first()
@@ -29,7 +31,7 @@ def handle_post_type_inbox(data, inbox):
     post = Post.objects.filter(id=post_id).first()
     if post:
         if inbox.posts.contains(post):
-            return Response("The target inbox already contains this item", status=400)
+            return Response("The target inbox already contains this item", status=409)
         else:
             inbox.posts.add(post)
             inbox.save()
@@ -55,7 +57,7 @@ def handle_like_type_inbox(data, inbox):
     like = Like.objects.filter(object=data.get('object'), author=str(author.id)).first()
     if like:
         if inbox.likes.contains(like):
-            return Response("The target inbox already contains this item", status=400)
+            return Response("The target inbox already contains this item", status=409)
         else:
             inbox.likes.add(like)
             inbox.save()
@@ -122,6 +124,57 @@ class InboxView(GenericAPIView):
         return Response(serializer.data, status=200)
 
     @swagger_auto_schema(responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    def post(self, request, aid):
+        """
+        Post a post(post here refers to post, follow, like, and comment) to the author
+        """
+        # authors/string/inbox
+        # authors/aid/inbox
+        try:
+            author = Author.objects.get(pk=aid)
+            inbox = Inbox.objects.get(author=aid)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
+        data = request.data
+        type = data['type']
+        if type.lower() == "post":
+            return handle_post_type_inbox(data, inbox)
+        elif type.lower() == "like":
+            return handle_like_type_inbox(data, inbox)
+        elif type.lower() == "comment":
+            return handle_comment_type_inbox(data, inbox)
+        elif type.lower() == "follow":
+            #actor wants to follow object
+            follow_actor = Author.objects.filter(url=data['actor']['url']).first()
+            data['actor']['id'] = data['actor']['id'].split('/')[-1]
+            if not follow_actor:
+                serializer = AuthorRemoteCreationSerializer(data=data['actor'])
+            serializer = AuthorRemoteCreationSerializer(follow_actor, data=data['actor'])
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=400)
+            follow_actor = serializer.save()
+            data['actor'] = str(follow_actor.id)
+            follow_request = FollowRequest.objects.filter(actor=follow_actor, object=author).first()
+            if follow_request:
+                if inbox.followRequests.contains(follow_request):
+                    return Response("The target inbox already contains this item", status=409)
+                inbox.followRequests.add(follow_request)
+                inbox.save()
+                return Response(FollowRequestSerializer(follow_request).data, status=201)
+            data['object'] = author.id
+            serializer = FollowRequestCreationSerializer(data=data)
+            if not serializer.is_valid():
+                return Response(serializer.errors, status=400)
+            new_follow_request = serializer.save()
+            inbox.followRequests.add(new_follow_request)
+            inbox.save()
+            return Response(FollowRequestSerializer(new_follow_request).data, status=201)
+
+        else:
+            return Response("The type you entered is not supported", status=400)
+
     def delete(self, request, aid):
         """
         clear the inbox
@@ -136,6 +189,7 @@ class InboxView(GenericAPIView):
         inbox.comments.clear()
         inbox.likes.clear()
         inbox.posts.clear()
+        inbox.followRequests.clear()
         return Response(status=204)
     
 class InboxPostView(GenericAPIView):
