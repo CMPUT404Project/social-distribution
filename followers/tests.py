@@ -198,7 +198,7 @@ class FollowerTests(APITestCase):
         follower1_delete_response = self.client.delete(f'{authors[0].url}/followers/{authors[2].id}')
         self.assertEqual(follower1_delete_response.status_code, status.HTTP_404_NOT_FOUND)
         content = json.loads(follower1_delete_response.content)
-        self.assertEqual(content, "Follower does not follow this author")
+        self.assertEqual(content, "Follower cannot be found")
 
         self.assertEqual(len(authors[0].followers.all()), 1)
 

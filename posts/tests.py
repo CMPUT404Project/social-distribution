@@ -54,7 +54,7 @@ class PostTests(APITestCase):
         Ensures that adding a new post to an invalid author returns a failure
         """
         invalid_authorID = "abcd1234"
-        posts_data = {"title": "Test Title", "content": "Test content"}
+        posts_data = {"title": "Test Title", "content": "Test content", "categories": "[]"}
         posts_post_request = self.client.post(f'/authors/{invalid_authorID}/posts', posts_data)
         self.assertEqual(posts_post_request.status_code, status.HTTP_400_BAD_REQUEST)
         content = json.loads(posts_post_request.content)
@@ -64,7 +64,7 @@ class PostTests(APITestCase):
         """
         Ensures that adding a new post to an nonexistent author returns a failure
         """
-        posts_data = {"title": "Test Title", "content": "Test content"}
+        posts_data = {"title": "Test Title", "content": "Test content", "categories": "[]"}
         posts_post_request = self.client.post(f'/authors/{str(uuid.uuid4())}/posts', posts_data)
         self.assertEqual(posts_post_request.status_code, status.HTTP_404_NOT_FOUND)
         content = json.loads(posts_post_request.content)
