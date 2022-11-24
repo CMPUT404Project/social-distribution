@@ -54,7 +54,7 @@ class PostTests(APITestCase):
         Ensures that adding a new post to an invalid author returns a failure
         """
         invalid_authorID = "abcd1234"
-        posts_data = {"title": "Test Title", "content": "Test content"}
+        posts_data = {"title": "Test Title", "content": "Test content", "categories": "[]"}
         posts_post_request = self.client.post(f'/authors/{invalid_authorID}/posts', posts_data)
         self.assertEqual(posts_post_request.status_code, status.HTTP_400_BAD_REQUEST)
         content = json.loads(posts_post_request.content)
@@ -64,7 +64,7 @@ class PostTests(APITestCase):
         """
         Ensures that adding a new post to an nonexistent author returns a failure
         """
-        posts_data = {"title": "Test Title", "content": "Test content"}
+        posts_data = {"title": "Test Title", "content": "Test content", "categories": "[]"}
         posts_post_request = self.client.post(f'/authors/{str(uuid.uuid4())}/posts', posts_data)
         self.assertEqual(posts_post_request.status_code, status.HTTP_404_NOT_FOUND)
         content = json.loads(posts_post_request.content)
@@ -74,7 +74,7 @@ class PostTests(APITestCase):
         """
         Ensures creating a new post for an existing author results in success
         """
-        posts_data = {"title": "NewPostTitle", "content": "NewPostContent"}
+        posts_data = {"title": "NewPostTitle", "content": "NewPostContent", "categories": "[]"}
         posts_post_response = self.client.post(self.posts_url, posts_data)
         self.assertEqual(posts_post_response.status_code, status.HTTP_201_CREATED)
         posts_get_response = self.client.get(json.loads(posts_post_response.content)["id"])
@@ -137,7 +137,7 @@ class PostTests(APITestCase):
         Ensures creating a new post with a valid provided id for an existing author results in success
         """
         post_url = self.authors[0].url + '/posts/' + str(uuid.uuid4())
-        post_data = {"title": "NewPostTitle", "content": "NewPostContent"}
+        post_data = {"title": "NewPostTitle", "content": "NewPostContent", "categories": "[]"}
         posts_post_response = self.client.post(post_url, post_data)
         self.assertEqual(posts_post_response.status_code, status.HTTP_201_CREATED)
         posts_get_response = self.client.get(json.loads(posts_post_response.content)["id"])
@@ -153,7 +153,7 @@ class PostTests(APITestCase):
         """
         invalid_postID = 'abcd1234'
         post_url = f'{self.authors[0].url}/posts/{invalid_postID}'
-        post_data = {"title": "test", "content": "test"}
+        post_data = {"title": "test", "content": "test", "categories": "[]"}
         post_post_response = self.client.post(post_url, post_data)
         self.assertEqual(post_post_response.status_code, status.HTTP_400_BAD_REQUEST)
         content = json.loads(post_post_response.content)
@@ -177,7 +177,7 @@ class PostTests(APITestCase):
         Ensures updating an existing post for an existing author results in success
         """
         post_url = self.posts_url + '/' + str(self.posts[1].id)
-        updated_data = {"title": "updatedtitle", "content": "updatedcontent"}
+        updated_data = {"title": "updatedtitle", "content": "updatedcontent", "categories": "[]"}
         post_put_response = self.client.put(post_url, updated_data)
         self.assertEqual(post_put_response.status_code, status.HTTP_200_OK)
         post_content = json.loads(post_put_response.content)

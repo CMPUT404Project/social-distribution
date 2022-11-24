@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import Comment
-from authors.serializers import AuthorSerializer
+from authors.serializers import AuthorSerializer, AuthorSwaggerResponseSerializer, AuthorSwaggerRequestSerializer
 
 class CommentViewSerializer(serializers.ModelSerializer):
     class Meta:
@@ -59,4 +59,34 @@ class CommentsSerializer(serializers.ModelSerializer):
 
     def get_post(self, obj):
         return str(self.context['author_url']) + '/posts/' + str(self.context['pid'])
-        
+    
+class CommentSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    id = serializers.URLField(required=False)
+    author = AuthorSwaggerResponseSerializer(required=False)
+    comment = serializers.SerializerMethodField()
+    published = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ", required=False)
+    class Meta:
+        model = Comment
+        fields = ['type', 'author', 'comment', 'contentType', 'published', 'id']
+
+class CommentsSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    post = serializers.URLField(required=False)
+    id = serializers.URLField(required=False)
+    comments = CommentSwaggerResponseSerializer(many=True, required=False)
+
+    class Meta:
+        model = Comment
+        fields = ['type', 'post', 'id', 'comments']
+
+class CommentSwaggerRequestSerializer(serializers.ModelSerializer):
+    author = AuthorSwaggerRequestSerializer(required=True)
+    comment = serializers.CharField(required=True)
+    post = serializers.UUIDField(required=True)
+    published = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ", required=False)
+    class Meta:
+        model = Comment
+        fields = ['author', 'comment', 'post', 'contentType', 'published']
+
+

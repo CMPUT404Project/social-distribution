@@ -21,7 +21,6 @@ class AuthorTests(APITestCase):
         self.user, self.author = create_author_with_user(self.username, self.password, self.host)
         
         self.refresh = RefreshToken.for_user(self.user)
-        self.refresh2 = RefreshToken.for_user(self.user2)
 
     def test_author_url_set_when_saved(self):
         """
