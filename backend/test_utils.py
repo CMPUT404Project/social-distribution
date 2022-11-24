@@ -21,7 +21,7 @@ def create_author_with_user(username, password, host):
 def create_posts_for_author(author, num):
     posts = []
     for i in range(num):
-        post = Post(title=f"test {num}", content="content", author=author)
+        post = Post(title=f"test {num}", content="content", author=author, categories="[]")
         post.save()
         posts.append(post)
     return posts
