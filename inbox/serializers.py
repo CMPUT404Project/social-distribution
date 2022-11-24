@@ -1,11 +1,5 @@
-
-from django.db import models
-from django.forms import CharField, UUIDField
+from django.forms import UUIDField
 from rest_framework import serializers
-from authors.models import Author
-from posts.models import Post
-from comments.models import Comment
-from likes.models import Like
 from posts.serializers import PostSerializer
 from comments.serializers import CommentSerializer
 from likes.serializers import LikeSerializer
@@ -47,5 +41,12 @@ class InboxCreationSerializer(serializers.ModelSerializer):
         model = Inbox
         fields = ['author']
 
-# class InboxAddPostSerializer(serializers.ModelSerializer):
-    
+class InboxSwaggerSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
+    author = serializers.URLField(required=False)
+
+    class Meta:
+        model = Inbox
+        fields = ['type', 'author', 'items']
+

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Author
 
-class AuthorViewSerializer(serializers.ModelSerializer):
+class AuthorDRFSerializer(serializers.ModelSerializer):
     class Meta:
         model = Author
         fields = ['displayName', 'github', 'profileImage']
@@ -9,6 +9,7 @@ class AuthorViewSerializer(serializers.ModelSerializer):
 class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
+    host = serializers.UUIDField(read_only=True)
 
     class Meta:
         model = Author
@@ -47,3 +48,47 @@ class AuthorRemoteCreationSerializer(serializers.ModelSerializer):
         model = Author
         fields = ['id', 'host', 'url',
                   'displayName', 'github', 'profileImage']
+
+class AuthorSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    id = serializers.URLField(required=False)
+    host = serializers.URLField(required=False)
+    url = serializers.URLField(required=False)
+    
+    class Meta:
+        model = Author
+        fields = [
+            'type',
+            'id',
+            'host',
+            'url',
+            'displayName',
+            'github',
+            'profileImage'
+        ]
+
+class AuthorsSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = AuthorSwaggerResponseSerializer(many=True, required=False)
+    
+    class Meta:
+        model = Author
+        fields = ['type', 'items']
+
+class AuthorSwaggerRequestSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    id = serializers.URLField(required=True)
+    host = serializers.URLField(required=True)
+    url = serializers.URLField(required=True)
+    
+    class Meta:
+        model = Author
+        fields = [
+            'type',
+            'id',
+            'host',
+            'url',
+            'displayName',
+            'github',
+            'profileImage'
+        ]
