@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import FollowRequest
-from authors.serializers import AuthorSerializer
+from authors.serializers import AuthorSerializer, AuthorSwaggerResponseSerializer, AuthorSwaggerRequestSerializer
 
 class FollowRequestSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
@@ -24,3 +24,19 @@ class FollowRequestCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = FollowRequest
         fields = ['actor', 'object', 'summary']
+
+class FollowRequestSwaggerRequestSerializer(serializers.ModelSerializer):
+    summary = serializers.SerializerMethodField()
+    actor = AuthorSwaggerRequestSerializer()
+    class Meta:
+        model = FollowRequest
+        fields = ['summary', 'actor']
+
+class FollowRequestSwaggerResponseSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    type = serializers.SerializerMethodField()
+    actor = AuthorSwaggerResponseSerializer(required=False)
+    object = AuthorSwaggerResponseSerializer(required=False)
+    class Meta:
+        model = FollowRequest
+        fields = ['type', 'summary', 'actor', 'object']

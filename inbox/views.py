@@ -13,7 +13,7 @@ from posts.serializers import PostCreationWithIDSerializer, PostSerializer, Post
 import uuid
 from drf_yasg.utils import swagger_auto_schema
 from followRequests.models import FollowRequest
-from followRequests.serializers import FollowRequestSerializer, FollowRequestCreationSerializer
+from followRequests.serializers import FollowRequestSerializer, FollowRequestCreationSerializer, FollowRequestSwaggerRequestSerializer, FollowRequestSwaggerResponseSerializer
 
 def check_author_and_create_serialization(data):
     author = Author.objects.filter(url=data.get('author').get('url')).first()
@@ -21,6 +21,32 @@ def check_author_and_create_serialization(data):
     if not author:
         return AuthorRemoteCreationSerializer(data=data.get('author'))
     return AuthorRemoteCreationSerializer(author, data=data.get('author'))
+
+def handle_follow_type_inbox(data, inbox):
+    follow_actor = Author.objects.filter(url=data['actor']['url']).first()
+    data['actor']['id'] = data['actor']['id'].split('/')[-1]
+    if not follow_actor:
+        serializer = AuthorRemoteCreationSerializer(data=data['actor'])
+    serializer = AuthorRemoteCreationSerializer(follow_actor, data=data['actor'])
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    follow_actor = serializer.save()
+    data['actor'] = str(follow_actor.id)
+    follow_request = FollowRequest.objects.filter(actor=follow_actor, object=author).first()
+    if follow_request:
+        if inbox.followRequests.contains(follow_request):
+            return Response("The target inbox already contains this item", status=409)
+        inbox.followRequests.add(follow_request)
+        inbox.save()
+        return Response(FollowRequestSerializer(follow_request).data, status=201)
+    data['object'] = author.id
+    serializer = FollowRequestCreationSerializer(data=data)
+    if not serializer.is_valid():
+        return Response(serializer.errors, status=400)
+    new_follow_request = serializer.save()
+    inbox.followRequests.add(new_follow_request)
+    inbox.save()
+    return Response(FollowRequestSerializer(new_follow_request).data, status=201)
 
 def handle_post_type_inbox(data, inbox):
     serializer = check_author_and_create_serialization(data)
@@ -124,57 +150,6 @@ class InboxView(GenericAPIView):
         return Response(serializer.data, status=200)
 
     @swagger_auto_schema(responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
-    def post(self, request, aid):
-        """
-        Post a post(post here refers to post, follow, like, and comment) to the author
-        """
-        # authors/string/inbox
-        # authors/aid/inbox
-        try:
-            author = Author.objects.get(pk=aid)
-            inbox = Inbox.objects.get(author=aid)
-        except Author.DoesNotExist as e:
-            return Response(str(e), status=404)
-        except Exception as e:
-            return Response(str(e), status=400)
-        data = request.data
-        type = data['type']
-        if type.lower() == "post":
-            return handle_post_type_inbox(data, inbox)
-        elif type.lower() == "like":
-            return handle_like_type_inbox(data, inbox)
-        elif type.lower() == "comment":
-            return handle_comment_type_inbox(data, inbox)
-        elif type.lower() == "follow":
-            #actor wants to follow object
-            follow_actor = Author.objects.filter(url=data['actor']['url']).first()
-            data['actor']['id'] = data['actor']['id'].split('/')[-1]
-            if not follow_actor:
-                serializer = AuthorRemoteCreationSerializer(data=data['actor'])
-            serializer = AuthorRemoteCreationSerializer(follow_actor, data=data['actor'])
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=400)
-            follow_actor = serializer.save()
-            data['actor'] = str(follow_actor.id)
-            follow_request = FollowRequest.objects.filter(actor=follow_actor, object=author).first()
-            if follow_request:
-                if inbox.followRequests.contains(follow_request):
-                    return Response("The target inbox already contains this item", status=409)
-                inbox.followRequests.add(follow_request)
-                inbox.save()
-                return Response(FollowRequestSerializer(follow_request).data, status=201)
-            data['object'] = author.id
-            serializer = FollowRequestCreationSerializer(data=data)
-            if not serializer.is_valid():
-                return Response(serializer.errors, status=400)
-            new_follow_request = serializer.save()
-            inbox.followRequests.add(new_follow_request)
-            inbox.save()
-            return Response(FollowRequestSerializer(new_follow_request).data, status=201)
-
-        else:
-            return Response("The type you entered is not supported", status=400)
-
     def delete(self, request, aid):
         """
         clear the inbox
@@ -238,6 +213,25 @@ class InboxCommentView(GenericAPIView):
     def post(self, request, aid):
         """
         send a comment to the author (remote supported)
+        """
+        try:
+            Author.objects.get(pk=aid)
+            inbox = Inbox.objects.get(author=aid)
+        except (Author.DoesNotExist, Inbox.DoesNotExist) as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
+        data = request.data
+        return handle_comment_type_inbox(data, inbox)
+    
+class InboxFollowView(GenericAPIView):
+    serializer_class = FollowRequestSwaggerRequestSerializer
+    queryset = Inbox.objects.all()
+
+    @swagger_auto_schema(request_body=FollowRequestSwaggerRequestSerializer, responses={201: FollowRequestSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    def post(self, request, aid):
+        """
+        add that follow is added to aid's inbox to approve later
         """
         try:
             Author.objects.get(pk=aid)

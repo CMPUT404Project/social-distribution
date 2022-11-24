@@ -57,9 +57,10 @@ class LikedSerializer(serializers.ModelSerializer):
 
 class LikeSwaggerRequestSerializer(serializers.ModelSerializer):
     author = AuthorSwaggerRequestSerializer(required=True)
+    type = serializers.SerializerMethodField()
     class Meta:
         model = Like
-        fields = ['context', 'summary', 'author', 'object']
+        fields = ['context', 'summary', 'type', 'author', 'object']
 
 class LikeSwaggerResponseSerializer(serializers.ModelSerializer):
     context = serializers.URLField(required=False)

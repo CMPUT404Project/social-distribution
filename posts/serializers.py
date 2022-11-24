@@ -220,6 +220,7 @@ class PostsSwaggerResponseSerializer(serializers.ModelSerializer):
         fields = ['type', 'items']
 
 class PostSwaggerRequestSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
     id = serializers.URLField(required=True)
     title = serializers.URLField(required=True)
     categories = serializers.CharField(required=True, allow_blank=True)
@@ -227,6 +228,7 @@ class PostSwaggerRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
+        'type'
         'title', 
         'id', 
         'source', 
