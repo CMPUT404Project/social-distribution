@@ -205,17 +205,16 @@ class InboxView(GenericAPIView):
             return Response(str(e), status=400)
         data = request.data
         type = data.get('type')
-        if not type:
-            return Response("Please enter a valid type", status=400)
-        if type.lower() == "post":
-            return handle_post_type_inbox(data, inbox)
-        elif type.lower() == "like":
-            return handle_like_type_inbox(data, inbox)
-        elif type.lower() == "follow":
-            return handle_follow_type_inbox(data, author, inbox)
-        elif type.lower() == "comment":
-            return handle_comment_type_inbox(data, inbox)
-        return Response(status=204)
+        if type:
+            if type.lower() == "post":
+                return handle_post_type_inbox(data, inbox)
+            elif type.lower() == "like":
+                return handle_like_type_inbox(data, inbox)
+            elif type.lower() == "follow":
+                return handle_follow_type_inbox(data, author, inbox)
+            elif type.lower() == "comment":
+                return handle_comment_type_inbox(data, inbox)
+        return Response("Please enter a valid type", status=400)
     
 class InboxPostView(GenericAPIView):
     serializer_class = PostSwaggerRequestSerializer
