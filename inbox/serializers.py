@@ -32,12 +32,12 @@ class InboxSerializer(serializers.ModelSerializer):
         follows = obj.followRequests.all()
         for post in posts:
             result.append(PostSerializer(post).data)
-        for comment in comments:
-            result.append(CommentSerializer(comment).data)
-        for like in likes:
-            result.append(LikeSerializer(like).data)
-        for follow in follows:
-            result.append(FollowRequestSerializer(follow).data)
+        # for comment in comments:
+        #     result.append(CommentSerializer(comment).data)
+        # for like in likes:
+        #     result.append(LikeSerializer(like).data)
+        # for follow in follows:
+        #     result.append(FollowRequestSerializer(follow).data)
         return sorted(result, key=sortByPublishDate, reverse=True)
 
 class InboxLikesSerializer(serializers.ModelSerializer):

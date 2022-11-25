@@ -126,9 +126,10 @@ export const PostTextbox = () => {
             description: description,
             contentType: contentType,
             unlisted: unlisted,
-            author: AuthService.retrieveCurrentUser(),
+            author: JSON.parse(AuthService.retrieveCurrentUser()),
         };
-        const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split(
+        const userJSON = JSON.parse(AuthService.retrieveCurrentUser())
+        const aID = userJSON.id.split(
             "/authors/"
         )[1];
         axios
@@ -140,67 +141,80 @@ export const PostTextbox = () => {
             })
             .then((createdPost) => {
                 // the response should be the whole post, which I send to the users.
-                axios.get("/authors/" + aID + "/followers").then((res) => {
-                    let followers = res.items;
-                    followers.forEach((user) => {
-                        let faID = user.id.split("/authors/")[1];
-                        if (data.visibility === "PUBLIC") {
-                            if (user.host === "https://social-distribution-404.herokuapp.com") {
-                                axios.post(
-                                    "/authors/" + faID + "/inbox/posts",
-                                    createdPost,
-                                    {
-                                        headers: {
-                                            Authorization:
-                                                "Bearer " + AuthService.getAccessToken(),
-                                            ContentType: "application/JSON",
-                                        },
-                                    }
-                                );
-                            }
-                            // Team 12
-                            else if (user.host === "https://true-friends-404.herokuapp.com"){
-                                
-                            }
-                            // Team 13
-                            else if (user.host === "https://cmput404-team13.herokuapp.com"){
-                                
-                            }
-                        }
-                        if (data.visibility === "FRIEND") {
-                            axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
-                                if (statusString.toLowerCase().includes("true")) {
-                                    if (user.host === "https://social-distribution-404.herokuapp.com") {
-                                        axios.post(
-                                            "/authors/" + faID + "/inbox/posts",
-                                            createdPost,
-                                            {
-                                                headers: {
-                                                    Authorization:
-                                                        "Bearer " + AuthService.getAccessToken(),
-                                                    ContentType: "application/JSON",
-                                                },
-                                            }
-                                        );
-                                    }
-                                    // Team 12
-                                    else if (user.host === "https://true-friends-404.herokuapp.com"){
-                                        //pass for now
-                                    }
-                                    // Team 13
-                                    else if (user.host === "https://cmput404-team13.herokuapp.com"){
-                                        // let data13 = data
-                                        // data13["published"] = Date()
-                                        // url = user.host + "/authors/" + faID + "/inbox/" + createdPost.id.split("/posts/")[1]
-                                        // axios.post
-                                    }
-                                }
-                            })
-                            // axios.get("/authors/" + faID + "/followers/" + aID)
+                // first send to current user's inbox
+                let postWithAuthor = createdPost.data
+                postWithAuthor["author"] = userJSON
+                axios
+                    .post("/authors/" + aID + "/inbox/posts", postWithAuthor, {
+                        headers: {
+                            Authorization:
+                                "Bearer " + AuthService.getAccessToken(),
+                            ContentType: "application/JSON",
+                        },
+                    })
+                    .catch((res) => console.log(postWithAuthor));
+                // then to everyone elseD
+                // axios.get("/authors/" + aID + "/followers").then((res) => {
+                //     let followers = res.items;
+                //     followers.forEach((user) => {
+                //         let faID = user.id.split("/authors/")[1];
+                //         if (data.visibility === "PUBLIC") {
+                //             if (user.host === "https://social-distribution-404.herokuapp.com") {
+                //                 axios.post(
+                //                     "/authors/" + faID + "/inbox/posts",
+                //                     createdPost,
+                //                     {
+                //                         headers: {
+                //                             Authorization:
+                //                                 "Bearer " + AuthService.getAccessToken(),
+                //                             ContentType: "application/JSON",
+                //                         },
+                //                     }
+                //                 );
+                //             }
+                //             // Team 12
+                //             else if (user.host === "https://true-friends-404.herokuapp.com"){
 
-                        }
-                    });
-                });
+                //             }
+                //             // Team 13
+                //             else if (user.host === "https://cmput404-team13.herokuapp.com"){
+
+                //             }
+                //         }
+                //         if (data.visibility === "FRIEND") {
+                //             axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
+                //                 if (statusString.toLowerCase().includes("true")) {
+                //                     if (user.host === "https://social-distribution-404.herokuapp.com") {
+                //                         axios.post(
+                //                             "/authors/" + faID + "/inbox/posts",
+                //                             createdPost,
+                //                             {
+                //                                 headers: {
+                //                                     Authorization:
+                //                                         "Bearer " + AuthService.getAccessToken(),
+                //                                     ContentType: "application/JSON",
+                //                                 },
+                //                             }
+                //                         );
+                //                     }
+                //                     // Team 12
+                //                     else if (user.host === "https://true-friends-404.herokuapp.com"){
+                //                         //pass for now
+                //                     }
+                //                     // Team 13
+                //                     else if (user.host === "https://cmput404-team13.herokuapp.com"){
+                //                         // let data13 = data
+                //                         // data13["published"] = Date()
+                //                         // url = user.host + "/authors/" + faID + "/inbox/" + createdPost.id.split("/posts/")[1]
+                //                         // axios.post
+                //                     }
+                //                 }
+                //             })
+                //             // axios.get("/authors/" + faID + "/followers/" + aID)
+
+                //         }
+                //     });
+                // });
             })
             .catch(() => setAlert("Could not submit post."))
             .finally(() => {
@@ -258,19 +272,19 @@ export const PostTextbox = () => {
                     required
                 />
                 <TextField
-                    label="Enter your description here!"
-                    variant="filled"
-                    value={description}
-                    multiline
-                    onInput={(e) => setDescription(e.target.value)}
-                />
-                <TextField
                     label="Enter your main text here! (required)"
                     variant="filled"
                     value={content}
                     multiline
                     onInput={(e) => setContent(e.target.value)}
                     required
+                />
+                <TextField
+                    label="Enter your description here!"
+                    variant="filled"
+                    value={description}
+                    multiline
+                    onInput={(e) => setDescription(e.target.value)}
                 />
                 {/* <InputLabel id="permissions">Permission</InputLabel> */}
                 {/* TODO: Are source and origin optional? */}
