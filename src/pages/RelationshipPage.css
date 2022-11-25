@@ -8,10 +8,14 @@
 .search-icon {
     height: 100%;
     color: rgb(66, 66, 66);
+    background-color: rgba(170, 170, 170, 0.274);
     display: flex;
     align-items: center;
     position: absolute;
     bottom: 0;
     right: 0;
-    padding-right: 20px;
+    padding-left: 15px;
+    padding-right: 15px;
+    box-shadow: -5px 0px 10px rgba(0, 0, 0, 0.285);
+    transition: all .4s;
 }

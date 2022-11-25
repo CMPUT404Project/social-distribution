@@ -1,7 +1,7 @@
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 
-import { setAxiosAuthToken } from "../utils";
+import { getCurrentAuthorID, getAccessToken, setAxiosAuthToken } from "../utils";
 
 class AuthService {
     async login(username, password, rememberMe) {
@@ -45,7 +45,8 @@ class AuthService {
 
     async updateAuthorDetails(body) {
         setAxiosAuthToken();
-        const response = await axios.put(jwtDecode(this.getAccessToken()).author_id, body)
+        const authorID = "" //getCurrentAuthorID();
+        const response = await axios.put("authors/" + authorID, body)
         if (response.status === 200) {
             if (localStorage.getItem('access_token')) {
                 localStorage.setItem("author", JSON.stringify(response.data));
@@ -57,7 +58,7 @@ class AuthService {
     }
 
     storeCurrentAuthor() {
-        const accessToken = this.getAccessToken();
+        const accessToken = getAccessToken();
         const authorID = jwtDecode(accessToken)["author_id"].split("authors/")[1];
         return axios.get('authors/' + authorID).then(response => {
             if (localStorage.getItem('access_token')) {
@@ -75,9 +76,47 @@ class AuthService {
         return sessionStorage.getItem('author') || localStorage.getItem('author');
     }
 
+    async getAuthorDetails(authorID) {
+        const response = await axios.get("/authors/" + authorID);
+        console.log(response.data);
+
+        if (response.status === 200) {
+            return response.data
+        }
+    }
+
+    async getAllAuthors() {
+        const response = await axios.get("/authors")
+        console.log(response.data)
+        // console.log("/service/authors" + aID + "/followers")
+        // setFollowers(res["items"]);
+        if (response.status === 200) {
+            return response.data 
+        }
+        return response.data
+    }
+
+    async getRemoteAuthors(remoteNode) {
+        let remoteAuthorsUrl = ""
+        if (remoteNode === "13") {
+            remoteAuthorsUrl = "https://cmput404-team13.herokuapp.com/authors?page=1&size=1000"
+        } else if (remoteNode === "12") {
+            remoteAuthorsUrl = "https://true-friends-404.herokuapp.com/authors/"
+        }
+        return await axios.get(remoteAuthorsUrl).then((response) => {
+            console.log(response)
+            return response.data;
+        }).catch((error) => {
+            if (error.response) {
+                console.log(error.response)
+            }
+            return [];
+        });
+    }
+
     async getAuthorFollowers() {
-        const accessToken = this.getAccessToken();
-        const authorID = jwtDecode(accessToken)["author_id"].split("authors/")[1];
+        setAxiosAuthToken();
+        const authorID = "" //getCurrentAuthorID();
         const data = {
             type: "followers",
             items: [
@@ -130,12 +169,11 @@ class AuthService {
         return response.data
     }
 
-    getAccessToken() {
-        return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-    }
-
-    getRefreshToken() {
-        return localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
+    async unfollowAuthor(foreignID) {
+        setAxiosAuthToken();
+        //const authorID = getCurrentAuthorID();
+        // const response = await axios.delete("service/authors/" + authorID + "/followers/" + foreignID);
+        // console.log(response)
     }
 }
 

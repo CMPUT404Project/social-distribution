@@ -1,11 +1,13 @@
 import { useState } from "react";
+import { useParams } from "react-router-dom";
 import ClipLoader from 'react-spinners/ClipLoader';
 
 import { 
+    getCurrentAuthorID,
+    retrieveCurrentAuthor,
     regexPatterns, 
     doesImageExist, 
-    capitalizeFirstLetter,
-    SlideTransition
+    capitalizeFirstLetter
 } from "../utils";
 import AuthService from "../services/AuthService";
 import NavBar from "../components/NavBar/NavBar";
@@ -16,11 +18,19 @@ import {
     AlertTitle,
     Avatar,
     TextField,
-    Snackbar  
+    Slide,
+    Snackbar
 } from '@mui/material';
+import { useEffect } from "react";
+
+function SlideTransition(props: SlideProps) {
+    return <Slide{...props} direction="down"/>;
+}
 
 function ProfilePage() {
-    const [defaultAuthor, setDefaultAuthor] = useState(JSON.parse(AuthService.retrieveCurrentAuthor()));
+    const {authorID} = useParams();
+    const [isAuthor, setIsAuthor] = useState(false);
+    const [defaultAuthor, setDefaultAuthor] = useState(retrieveCurrentAuthor());
     const [authorValues, setAuthorValues] = useState({
         displayName: defaultAuthor.displayName || "",
         github: defaultAuthor.github.split(".com/")[1] || "",
@@ -28,15 +38,27 @@ function ProfilePage() {
     })
 
     const [editState, setEditState] = useState(false)
-
     const [isLoading, setLoading] = useState(false);
-
     const [open, setOpen] = useState(false);
 
     const [alertDetails, setAlertDetails] = useState({
         alertSeverity: 'error',
         errorMessage: 'Failed to update. Please try again'
     })
+
+    useEffect(() => {
+        let currentAuthorID = getCurrentAuthorID();
+        if (authorID === currentAuthorID) {
+            setIsAuthor(true);
+        } else {
+            setLoading(true);
+
+        };
+    })
+
+    // const getAuthorDetails = async () => {
+
+    // }
 
     const handleInputChange = (prop) => (event) => {
         setAuthorValues({ ...authorValues, [prop]: event.target.value });
@@ -174,7 +196,7 @@ function ProfilePage() {
             <div className="container" style={{alignItems: "flex-start"}}>
                 <div className="profile-details-card">
                     <span className="profile-title">
-                        Profile
+                        {!isAuthor ? (authorValues.displayName + "'s Profile") : ("Edit Profile")}
                     </span>
                     <Avatar 
                         src={authorValues.profileImage}
@@ -269,7 +291,7 @@ function ProfilePage() {
                             />
                         </div>
                     </div>
-                    {editState ? (
+                    {!isAuthor ? (<></>) : editState ? (
                         <div className="update-profile-btn-container">
                             <button className="update-profile-btn" onClick={handleUpdateProfile}>
                                 Update

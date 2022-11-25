@@ -25,7 +25,7 @@ import { useNavigate } from "react-router-dom";
 import jwt_decode from "jwt-decode";
 import axios from "axios";
 
-import { clearStorage } from "../../utils";
+import { clearStorage, getAccessToken, getCurrentAuthorID } from "../../utils";
 import "./NavBar.css";
 
 const pages = ['Inbox', 'Friends', 'Github', 'Relationships'];
@@ -34,19 +34,27 @@ const settings = ['Profile', 'Account', 'Logout'];
 
 function NavBar() {
     const navigate = useNavigate();
+    const [authorID, setAuthorID] = useState("");
     const [anchorElNav, setAnchorElNav] = useState(null);
     const [anchorElUser, setAnchorElUser] = useState(null);
 
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
+    const [accessToken, setAccessToken] = useState(getAccessToken());
+
+    useEffect(() => {
+        if (!accessToken) {
+            navigate('/')
+        }
+    }, [accessToken, navigate]);
 
     const [user, setUser] = useState({});
 
     useEffect(() => {
         if (accessToken) {
             try {
+                setAuthorID(getCurrentAuthorID());
                 const decode = jwt_decode(accessToken)["author_id"].split("/authors");
                 axios
-                    .get("/authors" + decode[1], {
+                    .get("/authors/" + decode[1], {
                         headers: {
                             Authorization: "Bearer " + accessToken,
                         },
@@ -87,8 +95,11 @@ function NavBar() {
         } else {
             for (let setting of settings) {
                 if (event.target.innerText === setting) {
-                    let link = setting.toLowerCase();
-                    navigate("/" + link);
+                    let link = "/" + setting.toLowerCase();
+                    if (event.target.innerText === "Profile") {
+                        link = link + "/" + authorID
+                    }
+                    navigate(link);
                 }
             }
         }

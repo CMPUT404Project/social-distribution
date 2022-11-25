@@ -20,7 +20,7 @@ function App() {
                 <Route path="/register" element={<Pub><RegisterPage/></Pub>}/>
 
                 <Route path="/homepage" element={<Priv><HomePage/></Priv>}/>
-                <Route path="/profile" element={<Priv><ProfilePage/></Priv>}/>
+                <Route path="/profile/:authorID" element={<Priv><ProfilePage/></Priv>}/>
                 <Route path="/account" element={<Priv><AccountPage/></Priv>}/>
                 <Route path="/inbox" element={<Priv><InboxPage/></Priv>}/>
                 <Route path="/friends" element={<Priv><FriendsPage/></Priv>}/>

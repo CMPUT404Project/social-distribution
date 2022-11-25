@@ -1,5 +1,6 @@
 import axios from 'axios';
-import { Slide, SlideProps} from '@mui/material';
+import jwtDecode from "jwt-decode";
+
 
 export const regexPatterns = {
     namePattern: /^[A-Za-z0-9]{1,30}$/,
@@ -10,12 +11,30 @@ export const namePattern = /^[A-Za-z0-9]{1,30}$/;
 export const gitPattern = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
 
 export const setAxiosAuthToken = () => {
-    const token = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
-    if (token) {
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    if (accessToken) {
+        axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
     } else {
         delete axios.defaults.headers.common["Authorization"];
     }
+}
+
+export const retrieveCurrentAuthor = () => {
+    const author = sessionStorage.getItem('author') || localStorage.getItem('author')
+    return JSON.parse(author);
+}
+
+export const getCurrentAuthorID = () => {
+    const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    return jwtDecode(accessToken)["author_id"].split("authors/")[1];
+}
+
+export const getAccessToken = () => {
+    return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+}
+
+export const getRefreshToken = () => {
+    return localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
 }
 
 /**
@@ -29,13 +48,9 @@ export const doesImageExist = (url) => new Promise((resolve) => {
    img.onerror = () => resolve(false);
 });
 
-export function SlideTransition(props: SlideProps) {
-    return <Slide{...props} direction="down"/>;
-}
-
 export const capitalizeFirstLetter = (string) => {
     return string.charAt(0).toUpperCase() + string.slice(1);
-  }
+}
 
 export function clearStorage() {
     localStorage.clear();
