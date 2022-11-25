@@ -14,6 +14,7 @@ class Like(models.Model):
     object = models.URLField(max_length=200)
     post = models.ForeignKey(Post, on_delete = models.CASCADE, null=True)
     comment = models.ForeignKey(Comment, on_delete = models.CASCADE, null=True)
+    published = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
         constraints = [

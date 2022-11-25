@@ -11,7 +11,7 @@ class Comment(models.Model):
         ("image/png;base64","image/png;base64"),
         ("image/jpeg;base64","image/jpeg;base64")
     ]
-    id = models.UUIDField(max_length=250, primary_key=True, editable=False, default=uuid.uuid4)
+    id = models.UUIDField(max_length=250, primary_key=True, default=uuid.uuid4)
     url = models.URLField(max_length=500, editable=False)
     post = models.ForeignKey(Post, on_delete = models.CASCADE)
     author = models.ForeignKey(Author, on_delete = models.CASCADE)

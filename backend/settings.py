@@ -29,8 +29,8 @@ SECRET_KEY = 'django-insecure-)2)q$9p_@5qugj4eo^ku$8+3wg$qnuj4wuk=gmxt=(@d_crqnt
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    'http://localhost:8000',
-    'https://localhost:8000',
+    'http://localhost:3000',
+    'https://localhost:3000',
     'https://true-friends-404.herokuapp.com',
     'https://cmput404-team13.herokuapp.com',
     'https://social-distribution-404.herokuapp.com',
@@ -56,6 +56,7 @@ INSTALLED_APPS = [
     'followers',
     'likes',
     'inbox',
+    'followRequests',
 ]
 
 MIDDLEWARE = [

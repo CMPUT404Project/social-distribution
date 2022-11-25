@@ -11,8 +11,9 @@ class PostView(GenericAPIView):
     serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
     permission_classes = [CustomDjangoModelPermissions]
+    tag = "Posts"
 
-    @swagger_auto_schema(responses={200: PostsSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found"})
+    @swagger_auto_schema(tags=[tag], responses={200: PostsSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found"})
     def get(self, request, aid):
         """
         get the recent posts from author aid (remote supported, paginated)
@@ -29,7 +30,7 @@ class PostView(GenericAPIView):
         serializer = PostsSerializer(paginated_posts)
         return Response(serializer.data, status=200)
 
-    @swagger_auto_schema(request_body=PostsViewSerializer, responses={201: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found"})
+    @swagger_auto_schema(tags=[tag], request_body=PostsViewSerializer, responses={201: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found"})
     def post(self, request, aid):
         """
         create a new post but generate a new id
@@ -54,8 +55,9 @@ class PostIDView(GenericAPIView):
     serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
     permission_classes = [CustomDjangoModelPermissions]
+    tag = "Post"
 
-    @swagger_auto_schema(responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
+    @swagger_auto_schema(tags=[tag], responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
     def get(self, request, aid, pid):
         """
         get the public post whose id is pid (remote supported)
@@ -70,7 +72,7 @@ class PostIDView(GenericAPIView):
         serializer = PostSerializer(post)
         return Response(serializer.data, status=200)
 
-    @swagger_auto_schema(request_body=PostsViewSerializer, responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found", 409: "A post with that id already exists"})
+    @swagger_auto_schema(tags=[tag], request_body=PostsViewSerializer, responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found", 409: "A post with that id already exists"})
     def post(self, request, aid, pid):
         """
         create a post where its id is pid
@@ -94,7 +96,7 @@ class PostIDView(GenericAPIView):
             return Response(view_serializer.data, status=201)
         return Response(serializer.errors, status=400)
         
-    @swagger_auto_schema(request_body=PostsViewSerializer, responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
+    @swagger_auto_schema(tags=[tag], request_body=PostsViewSerializer, responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
     def put(self, request, aid, pid):
         """
         update the post whose id is pid
@@ -116,7 +118,7 @@ class PostIDView(GenericAPIView):
             return Response(view_serializer.data, status=200)
         return Response(serializer.errors, status=400)
 
-    @swagger_auto_schema(responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})    
+    @swagger_auto_schema(tags=[tag], responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})    
     def delete(self, request, aid, pid):
         """
         remove the post whose id is pid
