@@ -12,6 +12,7 @@ class FollowRequest(models.Model):
     # actor is the person sending the follow
     actor = models.ForeignKey(Author, on_delete=models.CASCADE, null=False, related_name="actor")
     object = models.ForeignKey(Author, on_delete=models.CASCADE, null=False, related_name="object")
+    published = models.DateTimeField(auto_now_add=True, blank=True)
 
     class Meta:
         constraints = [

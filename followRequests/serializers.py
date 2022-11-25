@@ -9,7 +9,7 @@ class FollowRequestSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = FollowRequest
-        fields = ['type', 'summary', 'actor', 'object']
+        fields = ['type', 'summary', 'actor', 'object', 'published']
 
     def get_type (self, obj):
         return "Follow"
@@ -26,7 +26,7 @@ class FollowRequestCreationSerializer(serializers.ModelSerializer):
         fields = ['actor', 'object', 'summary']
 
 class FollowRequestSwaggerRequestSerializer(serializers.ModelSerializer):
-    summary = serializers.SerializerMethodField()
+    summary = serializers.CharField(required=True)
     actor = AuthorSwaggerRequestSerializer()
     class Meta:
         model = FollowRequest
@@ -34,9 +34,9 @@ class FollowRequestSwaggerRequestSerializer(serializers.ModelSerializer):
 
 class FollowRequestSwaggerResponseSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
-    type = serializers.SerializerMethodField()
     actor = AuthorSwaggerResponseSerializer(required=False)
     object = AuthorSwaggerResponseSerializer(required=False)
+    summary = serializers.CharField(required=False)
     class Meta:
         model = FollowRequest
         fields = ['type', 'summary', 'actor', 'object']

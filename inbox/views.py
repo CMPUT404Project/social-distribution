@@ -1,7 +1,7 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from authors.models import Author
-from .serializers import InboxSerializer, InboxSwaggerSerializer
+from .serializers import InboxSerializer, InboxSwaggerSerializer, InboxCommentsSerializer, InboxFollowsSerializer, InboxLikesSerializer, InboxPostsSerializer
 from .models import Inbox
 from .models import Post
 from .models import Comment
@@ -11,7 +11,7 @@ from likes.models import Like
 from authors.serializers import AuthorRemoteCreationSerializer
 from posts.serializers import PostCreationWithIDSerializer, PostSerializer, PostSwaggerResponseSerializer, PostSwaggerRequestSerializer
 import uuid
-from drf_yasg.utils import swagger_auto_schema
+from drf_yasg.utils import swagger_auto_schema, no_body
 from followRequests.models import FollowRequest
 from followRequests.serializers import FollowRequestSerializer, FollowRequestCreationSerializer, FollowRequestSwaggerRequestSerializer, FollowRequestSwaggerResponseSerializer
 
@@ -22,7 +22,7 @@ def check_author_and_create_serialization(data):
         return AuthorRemoteCreationSerializer(data=data.get('author'))
     return AuthorRemoteCreationSerializer(author, data=data.get('author'))
 
-def handle_follow_type_inbox(data, inbox):
+def handle_follow_type_inbox(data, author, inbox):
     follow_actor = Author.objects.filter(url=data['actor']['url']).first()
     data['actor']['id'] = data['actor']['id'].split('/')[-1]
     if not follow_actor:
@@ -31,6 +31,8 @@ def handle_follow_type_inbox(data, inbox):
     if not serializer.is_valid():
         return Response(serializer.errors, status=400)
     follow_actor = serializer.save()
+    if author.followers.contains(follow_actor):
+        return Response("You are already following this author", status=409)
     data['actor'] = str(follow_actor.id)
     follow_request = FollowRequest.objects.filter(actor=follow_actor, object=author).first()
     if follow_request:
@@ -61,7 +63,7 @@ def handle_post_type_inbox(data, inbox):
         else:
             inbox.posts.add(post)
             inbox.save()
-            return Response(InboxSerializer(inbox).data, status=201)
+            return Response(PostSerializer(post).data, status=201)
     data['id'] = post_id
     data['author'] = str(author.id)
     serializer = PostCreationWithIDSerializer(data=data)
@@ -87,7 +89,7 @@ def handle_like_type_inbox(data, inbox):
         else:
             inbox.likes.add(like)
             inbox.save()
-            return Response(InboxSerializer(inbox).data, status=201)
+            return Response(LikeSerializer(like).data, status=201)
     if "comments" in object_url:
         post_author = object_url[-5]
         post = object_url[-3]
@@ -134,10 +136,11 @@ class InboxView(GenericAPIView):
     serializer_class = InboxSerializer
     queryset = Inbox.objects.all()
 
-    @swagger_auto_schema(responses={200: InboxSwaggerSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    tag = "Inbox"
+    @swagger_auto_schema(tags=[tag],responses={200: InboxSwaggerSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def get(self, request, aid):
         """
-        get a list of posts sent to aid
+        get a list of posts sent to aid, query_parameters: type=["likes", "comments", "follows", "posts"]
         """
         try:
             Author.objects.get(pk=aid)
@@ -146,10 +149,24 @@ class InboxView(GenericAPIView):
             return Response(str(e), status=404)
         except Exception as e:
             return Response(str(e), status=400)
-        serializer = InboxSerializer(inbox)
+        type = request.GET.get('type')
+        if not type:
+            serializer = InboxSerializer(inbox)
+            return Response(serializer.data, status=200)
+        if type.lower() == "likes":
+            serializer = InboxLikesSerializer(inbox)
+        elif type.lower() == "follows":
+            serializer = InboxFollowsSerializer(inbox)
+        elif type.lower() == "comments":
+            serializer = InboxCommentsSerializer(inbox)
+        elif type.lower() == "posts":
+            serializer = InboxPostsSerializer(inbox)
+        else:
+            return Response("Please enter a valid query parameter", status=400)
         return Response(serializer.data, status=200)
+        
 
-    @swagger_auto_schema(responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    @swagger_auto_schema(tags=[tag], responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def delete(self, request, aid):
         """
         clear the inbox
@@ -166,12 +183,44 @@ class InboxView(GenericAPIView):
         inbox.posts.clear()
         inbox.followRequests.clear()
         return Response(status=204)
+        
+    @swagger_auto_schema(tags=[tag], request_body=no_body, responses={201: "*Look at the corresponding inbox create api method for exact response*", 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    def post(self, request, aid):
+        """
+        send a post to the author
+        **type** must be present in request payload
+        if the type is “post” then add that post to aid's inbox (follow authors_inbox_posts_create for exact request needed and response)
+        if the type is “follow” then add that follow is added to aid's inbox to approve later (follow authors_inbox_follows_create for exact request needed and response)
+        if the type is “like” then add that like to aid's inbox (follow authors_inbox_likes_create for exact request needed and response)
+        if the type is “comment” then add that comment to aid's inbox (follow authors_inbox_comments_create for exact request needed and response)
+        """
+        try:
+            author = Author.objects.get(pk=aid)
+            inbox = Inbox.objects.get(author=aid)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
+        data = request.data
+        type = data.get('type')
+        if not type:
+            return Response("Please enter a valid type", status=400)
+        if type.lower() == "post":
+            return handle_post_type_inbox(data, inbox)
+        elif type.lower() == "like":
+            return handle_like_type_inbox(data, inbox)
+        elif type.lower() == "follow":
+            return handle_follow_type_inbox(data, author, inbox)
+        elif type.lower() == "comment":
+            return handle_comment_type_inbox(data, inbox)
+        return Response(status=204)
     
 class InboxPostView(GenericAPIView):
     serializer_class = PostSwaggerRequestSerializer
     queryset = Inbox.objects.all()
 
-    @swagger_auto_schema(request_body=PostSwaggerRequestSerializer, responses={201: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    tag = "Inbox"
+    @swagger_auto_schema(tags=[tag], request_body=PostSwaggerRequestSerializer, responses={201: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def post(self, request, aid):
         """
         send a post to the author (remote supported)
@@ -190,7 +239,8 @@ class InboxLikeView(GenericAPIView):
     serializer_class = LikeSwaggerRequestSerializer
     queryset = Inbox.objects.all()
 
-    @swagger_auto_schema(request_body=LikeSwaggerRequestSerializer, responses={201: LikeSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    tag = "Inbox"
+    @swagger_auto_schema(tags=[tag], request_body=LikeSwaggerRequestSerializer, responses={201: LikeSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def post(self, request, aid):
         """
         send a like to the author (remote supported)
@@ -209,7 +259,8 @@ class InboxCommentView(GenericAPIView):
     serializer_class = CommentSwaggerRequestSerializer
     queryset = Inbox.objects.all()
 
-    @swagger_auto_schema(request_body=CommentSwaggerRequestSerializer, responses={201: CommentSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    tag="Inbox"
+    @swagger_auto_schema(tags=[tag], request_body=CommentSwaggerRequestSerializer, responses={201: CommentSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def post(self, request, aid):
         """
         send a comment to the author (remote supported)
@@ -228,17 +279,18 @@ class InboxFollowView(GenericAPIView):
     serializer_class = FollowRequestSwaggerRequestSerializer
     queryset = Inbox.objects.all()
 
-    @swagger_auto_schema(request_body=FollowRequestSwaggerRequestSerializer, responses={201: FollowRequestSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
+    tag = "Inbox"
+    @swagger_auto_schema(tags=[tag], request_body=FollowRequestSwaggerRequestSerializer, responses={201: FollowRequestSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def post(self, request, aid):
         """
         add that follow is added to aid's inbox to approve later
         """
         try:
-            Author.objects.get(pk=aid)
+            author = Author.objects.get(pk=aid)
             inbox = Inbox.objects.get(author=aid)
         except (Author.DoesNotExist, Inbox.DoesNotExist) as e:
             return Response(str(e), status=404)
         except Exception as e:
             return Response(str(e), status=400)
         data = request.data
-        return handle_comment_type_inbox(data, inbox)
+        return handle_follow_type_inbox(data, author, inbox)

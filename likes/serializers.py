@@ -9,7 +9,7 @@ class LikeSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = Like
-        fields = ['context', 'summary', 'type', 'author', 'object']
+        fields = ['context', 'summary', 'type', 'author', 'object', 'published']
 
     def get_type(self, obj):
         return 'like'

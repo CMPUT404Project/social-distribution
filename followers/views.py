@@ -12,12 +12,13 @@ class FollowersView(GenericAPIView):
     """
     queryset = Author.objects.all()
     serializer_class = FollowersSerializer
+    tag = "Followers"
     
-    @swagger_auto_schema(responses={200: FollowersSwaggerSerializer, 404: "Author cannot be found", 400: "Bad Request"})
+    @swagger_auto_schema(tags=[tag], responses={200: FollowersSwaggerSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def get(self, request, aid):
         try:
             author = Author.objects.get(id=aid)
-            serializer = FollowersSerializer(author.followers)
+            serializer = FollowersSerializer(author.followers.order_by("id"))
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
         except Exception as e:
@@ -27,8 +28,9 @@ class FollowersView(GenericAPIView):
 class FollowerDetailView(GenericAPIView):
     serializer_class = FollowersSerializer
     queryset = Author.objects.all()
+    tag = "Follower"
 
-    @swagger_auto_schema(responses={200: "true/false", 404: "Author cannot be found", 400: "Bad Request"})
+    @swagger_auto_schema(tags=[tag], responses={200: "true/false", 404: "Author cannot be found", 400: "Bad Request"})
     def get(self, request, aid, fid):
         """
         check if fid is a follower of aid (remote supported)
@@ -46,10 +48,10 @@ class FollowerDetailView(GenericAPIView):
             return Response(True, status=200)
         return Response(False, status=200)
 
-    @swagger_auto_schema(request_body=no_body, responses={201: "Successfully added follower", 409: "Follower already exists", 404: "Author cannot be found/Follower cannot be found", 400: "Bad Request"})
+    @swagger_auto_schema(tags=[tag], request_body=no_body, responses={201: "Successfully added follower", 409: "Follower already exists", 404: "Author cannot be found/Follower cannot be found", 400: "Bad Request"})
     def put(self, request, aid, fid):
         """
-        Add fid as a follower of aid (remote supported)
+        Add fid as a follower of aid, will automatically delete followRequest if it exists
         """
         try:
             author = Author.objects.get(id=aid)
@@ -68,10 +70,10 @@ class FollowerDetailView(GenericAPIView):
             return Response("Successfully added follower", status=201)
         return Response("Follower already exists", status=409)
 
-    @swagger_auto_schema(responses={204: "", 409: "Follower already exists", 404: "Author cannot be found/Follower cannot be found", 400: "Bad Request"})
+    @swagger_auto_schema(tags=[tag], responses={204: "", 409: "Follower already exists", 404: "Author cannot be found/Follower cannot be found", 400: "Bad Request"})
     def delete(self, request, aid, fid):
         """
-        remove fid as a follower of aid (remote supported)
+        remove fid as a follower of aid
         """
         try:
             author = Author.objects.get(pk=aid)

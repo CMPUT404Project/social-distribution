@@ -228,7 +228,7 @@ class PostSwaggerRequestSerializer(serializers.ModelSerializer):
     class Meta:
         model = Post
         fields = [
-        'type'
+        'type',
         'title', 
         'id', 
         'source', 

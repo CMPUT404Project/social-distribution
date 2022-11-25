@@ -6,6 +6,9 @@ from likes.serializers import LikeSerializer
 from .models import Inbox
 from followRequests.serializers import FollowRequestSerializer
 
+def sortByPublishDate(elem):
+    return elem['published']
+
 class InboxSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     items = serializers.SerializerMethodField()
@@ -35,8 +38,79 @@ class InboxSerializer(serializers.ModelSerializer):
             result.append(LikeSerializer(like).data)
         for follow in follows:
             result.append(FollowRequestSerializer(follow).data)
-        return result
-    
+        return sorted(result, key=sortByPublishDate, reverse=True)
+
+class InboxLikesSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    class Meta:
+        model = Inbox
+        fields = ['type', 'author', 'items']
+
+    def get_type(self, obj):
+        return 'inbox'
+
+    def get_author(self, obj):
+        return obj.author.url
+
+    def get_items(self, obj):
+        likes = obj.likes.all().order_by('-published')
+        return LikeSerializer(likes, many=True).data
+
+class InboxFollowsSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    class Meta:
+        model = Inbox
+        fields = ['type', 'author', 'items']
+
+    def get_type(self, obj):
+        return 'inbox'
+
+    def get_author(self, obj):
+        return obj.author.url
+
+    def get_items(self, obj):
+        follows = obj.followRequests.all().order_by('-published')
+        return FollowRequestSerializer(follows, many=True).data
+
+class InboxCommentsSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    class Meta:
+        model = Inbox
+        fields = ['type', 'author', 'items']
+
+    def get_type(self, obj):
+        return 'inbox'
+
+    def get_author(self, obj):
+        return obj.author.url
+
+    def get_items(self, obj):
+        comments = obj.comments.all().order_by('-published')
+        return CommentSerializer(comments, many=True).data
+
+class InboxPostsSerializer(serializers.ModelSerializer):
+    type = serializers.SerializerMethodField()
+    items = serializers.SerializerMethodField()
+    author = serializers.SerializerMethodField()
+    class Meta:
+        model = Inbox
+        fields = ['type', 'author', 'items']
+
+    def get_type(self, obj):
+        return 'inbox'
+
+    def get_author(self, obj):
+        return obj.author.url
+
+    def get_items(self, obj):
+        posts = obj.posts.all().order_by('-published')
+        return PostSerializer(posts, many=True).data
 
 class InboxCreationSerializer(serializers.ModelSerializer):
     author = UUIDField()

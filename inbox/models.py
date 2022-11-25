@@ -13,3 +13,4 @@ class Inbox(models.Model):
     comments = models.ManyToManyField(Comment, blank=True, symmetrical=False)
     followRequests = models.ManyToManyField(FollowRequest, blank=True, symmetrical=False)
     likes = models.ManyToManyField(Like, blank=True, symmetrical=False)
+    
