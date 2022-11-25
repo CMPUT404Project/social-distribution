@@ -12,6 +12,11 @@
     -webkit-text-fill-color: rgba(0, 0, 0, 0.354)!important
 }
 
+.test-container {
+    display: flex;
+    position: relative;
+}
+
 .profile-title {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 40px;
@@ -20,6 +25,12 @@
     width: 100%;
     display: block;
     padding-bottom: 10px;
+}
+
+.follow-button {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 .preview-image-container {

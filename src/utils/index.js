@@ -10,7 +10,7 @@ export const regexPatterns = {
 export const namePattern = /^[A-Za-z0-9]{1,30}$/;
 export const gitPattern = /^[a-z\d](?:[a-z\d]|-(?=[a-z\d])){0,38}$/i;
 
-export const setAxiosAuthToken = () => {
+export const setAxiosDefaults = () => {
     const accessToken = localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
     if (accessToken) {
         axios.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;

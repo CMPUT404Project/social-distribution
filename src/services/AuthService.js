@@ -1,7 +1,7 @@
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 
-import { getCurrentAuthorID, getAccessToken, setAxiosAuthToken } from "../utils";
+import { getCurrentAuthorID, getAccessToken, setAxiosDefaults } from "../utils";
 
 class AuthService {
     async login(username, password, rememberMe) {
@@ -20,7 +20,7 @@ class AuthService {
                 sessionStorage.setItem('refresh_token', response.data.refresh);
             }
             // Set auth token as default header for axios calls
-            await setAxiosAuthToken();
+            await setAxiosDefaults();
             await this.storeCurrentAuthor()
         }
         return response.data
@@ -36,7 +36,8 @@ class AuthService {
         if (response.status === 201) {
             sessionStorage.setItem('access_token', response.data.access);
             sessionStorage.setItem('refresh_token', response.data.refresh);
-            setAxiosAuthToken(response.data.access);
+            await setAxiosDefaults();
+            await this.storeCurrentAuthor()
             const updateReponse = await this.updateAuthorDetails(body);
             return updateReponse
         }
@@ -44,9 +45,10 @@ class AuthService {
     }
 
     async updateAuthorDetails(body) {
-        setAxiosAuthToken();
-        const authorID = "" //getCurrentAuthorID();
-        const response = await axios.put("authors/" + authorID, body)
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.put("/authors/" + authorID, body)
+        console.log(response)
         if (response.status === 200) {
             if (localStorage.getItem('access_token')) {
                 localStorage.setItem("author", JSON.stringify(response.data));
@@ -78,8 +80,6 @@ class AuthService {
 
     async getAuthorDetails(authorID) {
         const response = await axios.get("/authors/" + authorID);
-        console.log(response.data);
-
         if (response.status === 200) {
             return response.data
         }
@@ -115,7 +115,7 @@ class AuthService {
     }
 
     async getAuthorFollowers() {
-        setAxiosAuthToken();
+        setAxiosDefaults();
         const authorID = "" //getCurrentAuthorID();
         const data = {
             type: "followers",
@@ -169,11 +169,25 @@ class AuthService {
         return response.data
     }
 
+    async getFollowStatus(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);
+        return response.data
+    }
+
+    async followAuthor(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.put("/authors/" + foreignID + "/followers/" + authorID);
+        return response.data
+    }
+
     async unfollowAuthor(foreignID) {
-        setAxiosAuthToken();
-        //const authorID = getCurrentAuthorID();
-        // const response = await axios.delete("service/authors/" + authorID + "/followers/" + foreignID);
-        // console.log(response)
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.delete("/authors/" + foreignID + "/followers/" + authorID);
+        return response.data
     }
 }
 
