@@ -1,6 +1,7 @@
 from rest_framework.response import Response
 from .serializers import FollowersSerializer, FollowersSwaggerSerializer
 from authors.models import Author
+from backend.permissions import CustomDjangoModelPermissions
 from rest_framework.generics import GenericAPIView
 from followRequests.models import FollowRequest
 from django.core.exceptions import ValidationError
@@ -12,6 +13,7 @@ class FollowersView(GenericAPIView):
     """
     queryset = Author.objects.all()
     serializer_class = FollowersSerializer
+    permission_classes = [CustomDjangoModelPermissions]
     tag = "Followers"
     
     @swagger_auto_schema(tags=[tag], responses={200: FollowersSwaggerSerializer, 404: "Author cannot be found", 400: "Bad Request"})
@@ -28,6 +30,7 @@ class FollowersView(GenericAPIView):
 class FollowerDetailView(GenericAPIView):
     serializer_class = FollowersSerializer
     queryset = Author.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
     tag = "Follower"
 
     @swagger_auto_schema(tags=[tag], responses={200: "true/false", 404: "Author cannot be found", 400: "Bad Request"})

@@ -5,11 +5,13 @@ from likes.serializers import LikedSerializer, LikesSerializer, LikeSwaggerRespo
 from authors.models import Author
 from posts.models import Post
 from comments.models import Comment
+from backend.permissions import CustomDjangoModelPermissions
 from drf_yasg.utils import swagger_auto_schema
 
 class LikedView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
     tag = "Liked"
 
     @swagger_auto_schema(tags=[tag], responses={200: LikesSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found" })
@@ -29,6 +31,7 @@ class LikedView(GenericAPIView):
 class PostLikesView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
     tag = "Likes"
 
     @swagger_auto_schema(tags=[tag], responses={200: LikesSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found" })
@@ -50,6 +53,7 @@ class PostLikesView(GenericAPIView):
 class CommentLikesView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
     tag = "Likes"
 
     @swagger_auto_schema(tags=[tag], responses={200: LikesSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found/Comment cannot be found" })
