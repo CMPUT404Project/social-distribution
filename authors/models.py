@@ -9,8 +9,9 @@ class Author(models.Model):
     url = models.URLField(max_length=200, editable=False)
     displayName = models.CharField(max_length=200, blank=True)
     github = models.URLField(max_length=200, blank=True)
-    profileImage = models.URLField(max_length=200, blank=True)
+    profileImage = models.URLField(max_length=500, blank=True)
+    followers = models.ManyToManyField("self", blank=True, symmetrical=False)
 
     def save(self, *args, **kwargs):     
-        self.url = str(self.host) + "/authors/" + str(self.id)
+        self.url = str(self.host) + "authors/" + str(self.id)
         super().save(*args, **kwargs)

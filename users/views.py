@@ -1,14 +1,11 @@
-from django.shortcuts import render
 from authors.serializers import AuthorCreationSerializer
-from rest_framework.generics import ListAPIView
-from rest_framework.views import APIView
+from rest_framework.generics import GenericAPIView
 from rest_framework import permissions
-from rest_framework.views import APIView
 from rest_framework.response import Response
-from users.serializers import UserSerializer, UserCreationSerializer
+from .serializers import UserSerializer, UserCreationSerializer
 from django.contrib.auth.models import User
-from authors.models import Author
 from backend.serializers import MyTokenObtainPairSerializer
+from inbox.serializers import InboxCreationSerializer
 
 def get_tokens_for_user(user):
     refresh = MyTokenObtainPairSerializer().get_token(user)
@@ -18,7 +15,7 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
-class UserList(ListAPIView):
+class UserList(GenericAPIView):
     """
     Returns a list of all users in the system.
     """
@@ -26,9 +23,9 @@ class UserList(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
 
-class UserCreation(APIView):
+class UserCreation(GenericAPIView):
     """
-    Create a new auth user and an author, and returns an access token upon success
+    Create a new auth user and an author and an inbox, and returns an access token upon success
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
@@ -36,11 +33,17 @@ class UserCreation(APIView):
         user_serializer = UserCreationSerializer(data=request.data)
         if user_serializer.is_valid():
             user = user_serializer.save()
-            new_author_data = {"host": request.scheme + "://" + request.get_host(), "user":user.id, }
+            new_author_data = {"host": request.scheme + "://" + request.get_host() + '/', "user":user.id, }
             author_serializer = AuthorCreationSerializer(data=new_author_data)
             if author_serializer.is_valid():
-                author_serializer.save()
-                return Response(get_tokens_for_user(user), status=201)
+                author = author_serializer.save()
+                new_inbox_data = {"author": author.id}
+                inbox_serializer = InboxCreationSerializer(data=new_inbox_data)
+                if inbox_serializer.is_valid():
+                    inbox_serializer.save()
+                    return Response(get_tokens_for_user(user), status=201)
+                author.delete()
+                return Response(inbox_serializer.errors, status=400)
             user.delete()
             return Response(author_serializer.errors, status=400)
         return Response(user_serializer.errors, status=400)
