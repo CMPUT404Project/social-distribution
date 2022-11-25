@@ -28,7 +28,7 @@ import axios from "axios";
 import { clearStorage, getAccessToken, getCurrentAuthorID } from "../../utils";
 import "./NavBar.css";
 
-const pages = ['Inbox', 'Friends', 'Github', 'Relationships'];
+const pages = ['Inbox', 'Followers', 'Github'];
 // Keep logout last in array
 const settings = ['Profile', 'Account', 'Logout'];
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { Component, PropTypes, useEffect, useState } from "react";
-import { Navigate, redirect } from "react-router-dom";
+import { useNavigate, redirect } from "react-router-dom";
 
 //Import MUI components
 import { 
@@ -17,6 +17,7 @@ import AuthService from "../../services/AuthService";
 import "./FriendsList.css";
 
 export const User = (props) => {
+    const navigate = useNavigate();
     const displayName = props.data.displayName;
     const github = props.data.github;
     const profileImage = props.data.profileImage
@@ -29,6 +30,10 @@ export const User = (props) => {
         console.log(faID)
     };
 
+    const handleUserClick = (event) => {
+        navigate("/profile/" + foreignID)
+    }
+
     return (
         <Grid>
             <Card
@@ -38,7 +43,7 @@ export const User = (props) => {
             >
                 <CardActionArea 
                     style={{padding: "2% 2%"}}
-                    onMouseDown={() => {console.log(props.data.url)}}
+                    onClick={handleUserClick}
                 >
                     <CardHeader
                         avatar={
@@ -52,23 +57,23 @@ export const User = (props) => {
                                 alt="profile"
                             />
                         }
-                        action={
-                            <Button
-                                variant="contained"
-                                component="span"
-                                disableRipple={true}
-                                sx={{
-                                    backgroundColor: "#e0127c",
-                                    '&:hover': {backgroundColor: "#e0127c"},
-                                    fontWeight: "600"}}
-                                onMouseDown={e => {
-                                    e.stopPropagation();
-                                    handleUnfollow(props.currentAuthorID, foreignID);
-                                }}
-                            >
-                                Unfollow
-                            </Button>
-                        }
+                        // action={
+                        //     <Button
+                        //         variant="contained"
+                        //         component="span"
+                        //         disableRipple={true}
+                        //         sx={{
+                        //             backgroundColor: "#e0127c",
+                        //             '&:hover': {backgroundColor: "#e0127c"},
+                        //             fontWeight: "600"}}
+                        //         onMouseDown={e => {
+                        //             e.stopPropagation();
+                        //             handleUnfollow(props.currentAuthorID, foreignID);
+                        //         }}
+                        //     >
+                        //         Unfollow
+                        //     </Button>
+                        // }
                         title={
                             <Typography variant="h4">
                                 {displayName}
@@ -88,7 +93,7 @@ export const User = (props) => {
 
 
 
-export default class FriendsList extends Component {
+export default class FollowersList extends Component {
     propTypes: {
         followers: PropTypes.isRequired,
         currentAuthorID: PropTypes.isRequired,
@@ -104,7 +109,7 @@ export default class FriendsList extends Component {
     render() {
         return (
             <div>
-                {this.props.isEmpty ? (<div className="empty-events">No followers to show</div>) : (this.renderEvents())}
+                {this.renderEvents()}
             </div>
         );
     }

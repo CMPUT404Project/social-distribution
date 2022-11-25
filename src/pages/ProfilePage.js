@@ -61,6 +61,7 @@ function ProfilePage() {
             })
             setLoading(false);
         } else {
+            setEditState(false);
             setIsAuthor(false);
             getAuthorDetails();
             checkFollowStatus();
@@ -138,7 +139,6 @@ function ProfilePage() {
                     body.profileImage = "";
                 }
             };
-            console.log(body)
             if (Object.keys(body).length !== 0) {
                 const response = await AuthService.updateAuthorDetails(body)
                 .then(() => {
@@ -179,99 +179,51 @@ function ProfilePage() {
 
     const handleFollow = async (event) => {
         let alterText = "";
-        let response = null;
+        let response = "";
         try {
-            if (event.target.innerText === "FOLLOW") {
+            setLoading(true)
+            if (event.target.innerText === "SEND FOLLOW REQUEST") {
                 alterText = "already";
-                const response = await AuthService.followAuthor(authorID).then(() => {
+                const response = await AuthService.sendInboxItem("follow", authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
-                            errorMessage: "Successfully followed " + authorValues.displayName})
+                            errorMessage: "Sent a follow request to " + authorValues.displayName})
+                    setIsFollowing(true);
                     handleOpen();
                 }, error => {
                     return error;
                 });
+                if (response) {
+                    throw response;
+                };
             } else if (event.target.innerText === "UNFOLLOW") {
                 alterText = "don't";
                 const response = await AuthService.unfollowAuthor(authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
                             errorMessage: "Successfully unfollowed " + authorValues.displayName})
+                    setIsFollowing(false);
                     handleOpen();
                 }, error => {
                     return error;
                 });
+                if (response) {
+                    throw response;
+                };
             }
-            if (response) {
-                throw response;
-            };
+
         } catch (error) {
             console.log(error.response);
             if (error.response.status === 404) {
                 setAlertDetails({alertSeverity: "error", 
                     errorMessage: "Author could not found"})
             } else if (error.response.status === 409) {
-                setAlertDetails({alertSeverity: "warning", 
-                    errorMessage: "You " + alterText + " follow this author"})
+                setAlertDetails({alertSeverity: "error", 
+                    errorMessage: "You've already sent a follow request to this author"})
             } else {
                 setAlertDetails({alertSeverity: "warning", 
                     errorMessage: "Something went wrong. Try again later."})
             }
             handleOpen();
         }
-        // if (event.target.innerText === "FOLLOW") {
-        //     try {
-        //         const response = await AuthService.followAuthor(authorID).then(() => {
-        //             console.log("Success")
-        //             setAlertDetails({alertSeverity: "success", 
-        //                     errorMessage: "Successfully followed " + authorValues.displayName})
-        //             handleOpen();
-        //         }, error => {
-        //             return error;
-        //         });
-        //         if (response) {
-        //             throw response;
-        //         };
-        //     } catch (error) {
-        //         console.log(error.response);
-        //         if (error.response.status === 404) {
-        //             setAlertDetails({alertSeverity: "error", 
-        //                 errorMessage: "Author could not found"})
-        //         } else if (error.response.status === 409) {
-        //             setAlertDetails({alertSeverity: "warning", 
-        //                 errorMessage: "You already follow this author"})
-        //         } else {
-        //             setAlertDetails({alertSeverity: "warning", 
-        //                 errorMessage: "Something went wrong. Try again later."})
-        //         }
-        //         handleOpen();
-        //     }
-        // } else if (event.target.innerText === "UNFOLLOW") {
-        //     try {
-        //         const response = await AuthService.unfollowAuthor(authorID).then(() => {
-        //             console.log("Success")
-        //             setAlertDetails({alertSeverity: "success", 
-        //                     errorMessage: "Successfully followed " + authorValues.displayName})
-        //             handleOpen();
-        //         }, error => {
-        //             return error;
-        //         });
-        //         if (response) {
-        //             throw response;
-        //         };
-        //     } catch (error) {
-        //         console.log(error.response);
-        //         if (error.response.status === 404) {
-        //             setAlertDetails({alertSeverity: "error", 
-        //                 errorMessage: "Author could not found"})
-        //         } else if (error.response.status === 409) {
-        //             setAlertDetails({alertSeverity: "warning", 
-        //                 errorMessage: "You already follow this author"})
-        //         } else {
-        //             setAlertDetails({alertSeverity: "warning", 
-        //                 errorMessage: "Something went wrong. Try again later."})
-        //         }
-        //         handleOpen();
-        //     }
-        // }
     }
 
     const handleOpen = () => {
@@ -298,6 +250,7 @@ function ProfilePage() {
                 onClose={handleClose}
                 anchorOrigin={{ vertical: "top", horizontal: "right" }}
                 autoHideDuration={5000}
+                disableWindowBlurListener={true}
                 TransitionComponent={SlideTransition}
                 transitionDuration={{enter: 600, exit: 300}}
             >
@@ -312,7 +265,7 @@ function ProfilePage() {
                 <div className="profile-details-card">
                     <div className="test-container">
                         <span className="profile-title">
-                            {!isAuthor ? (authorValues.displayName + "'s Profile") : ("Edit Profile")}
+                            {isAuthor ? ("Edit Profile") : authorValues.displayName ? (authorValues.displayName + "'s Profile") : ("UNKNOWN Profile")}
                         </span>
                         {!isAuthor ? (
                             <Button 
@@ -324,7 +277,7 @@ function ProfilePage() {
                                     fontWeight: "600"}}
                                 onClick={handleFollow}
                             >
-                                {isFollowing ? ("Unfollow") : ("Follow")}
+                                {isFollowing ? ("Unfollow") : ("Send Follow Request")}
                             </Button>
                         ) : (<></>)}
                     </div>
@@ -409,7 +362,8 @@ function ProfilePage() {
                                             border : "3px solid #e0127c"
                                         }
                                     }
-                                }}                                InputLabelProps={{ sx: {display: 'none'}}}
+                                }}
+                                InputLabelProps={{ sx: {display: 'none'}}}
                                 InputProps={{ sx: {fontSize: '20px'}}}
                                 required
                                 disabled={!editState}

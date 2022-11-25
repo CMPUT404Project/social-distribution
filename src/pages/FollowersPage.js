@@ -3,18 +3,18 @@ import React, { useEffect, useState } from "react";
 import ClipLoader from 'react-spinners/ClipLoader';
 import { Container, TextField } from "@mui/material";
 
-import FriendsList from "../components/FriendsList/FriendsList";
+import FollowersList from "../components/FriendsList/FollowersList";
 import NavBar from "../components/NavBar/NavBar";
 import AuthService from "../services/AuthService";
 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 
-import './RelationshipPage.css'
+import './FollowersPage.css'
 
 const teams = ["12", "13"]
 
-function RelationshipPage() {
+function FollowersPage() {
     const author = JSON.parse(AuthService.retrieveCurrentAuthor())
     const currentAuthorID = author.id.split("authors/")[1];
     const [followers, setFollowers] = useState([]);
@@ -37,10 +37,11 @@ function RelationshipPage() {
         }
     }, [searchField])
 
+    
+
     const getFollowerData = async () => {
         await AuthService.getAuthorFollowers().then((data) => {
             setFollowers(data.items);
-            console.log(data.items)
             if (data.items.length > 0) {
                 setIsEmpty(false)
             }
@@ -113,12 +114,16 @@ function RelationshipPage() {
                                     </IconButton>
                                 </span>
                             </div>
-                            <h1>Relationship Page</h1> <br/>
-                            <FriendsList 
-                                followers={followers}
-                                currentAuthorID={currentAuthorID}
-                                isEmpty={isEmpty}
-                            />
+                            <h1>Followers</h1> <br/>
+                            {!followers.length ? (
+                                <span className="empty-followers">If you had any followers, they would show up here :)</span>
+                            ) : (
+                                <FollowersList 
+                                    followers={followers}
+                                    currentAuthorID={currentAuthorID}
+                                />
+                            )}
+
                         </Container>
                     </div>
                 ) : (
@@ -157,7 +162,7 @@ function RelationshipPage() {
                             </span>
                         </div>
                         <h1>Search Results</h1> <br/>
-                        <FriendsList 
+                        <FollowersList 
                             followers={followers}
                             currentAuthorID={currentAuthorID}
                             isEmpty={isEmpty}
@@ -169,4 +174,4 @@ function RelationshipPage() {
     )
 }
 
-export default RelationshipPage;
+export default FollowersPage;

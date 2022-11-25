@@ -1,7 +1,7 @@
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 
-import { getCurrentAuthorID, getAccessToken, setAxiosDefaults } from "../utils";
+import { getCurrentAuthorID, getAccessToken, retrieveCurrentAuthor, setAxiosDefaults } from "../utils";
 
 class AuthService {
     async login(username, password, rememberMe) {
@@ -60,6 +60,7 @@ class AuthService {
     }
 
     storeCurrentAuthor() {
+        setAxiosDefaults();
         const accessToken = getAccessToken();
         const authorID = jwtDecode(accessToken)["author_id"].split("authors/")[1];
         return axios.get('authors/' + authorID).then(response => {
@@ -79,6 +80,7 @@ class AuthService {
     }
 
     async getAuthorDetails(authorID) {
+        setAxiosDefaults();
         const response = await axios.get("/authors/" + authorID);
         if (response.status === 200) {
             return response.data
@@ -86,6 +88,7 @@ class AuthService {
     }
 
     async getAllAuthors() {
+        setAxiosDefaults();
         const response = await axios.get("/authors")
         console.log(response.data)
         // console.log("/service/authors" + aID + "/followers")
@@ -116,58 +119,14 @@ class AuthService {
 
     async getAuthorFollowers() {
         setAxiosDefaults();
-        const authorID = "" //getCurrentAuthorID();
-        const data = {
-            type: "followers",
-            items: [
-                {
-                    type: "author",
-                    id: "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                    url: "http://127.0.0.1:5454/authors/1d698d25ff008f7538453c120f581471",
-                    host: "http://127.0.0.1:5454/",
-                    displayName: "Greg Johnson",
-                    github: "http://github.com/gjohnson",
-                    profileImage: "https://i.imgur.com/k7XVwpB.jpeg",
-                },
-                {
-                    type: "author",
-                    id: "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                    host: "http://127.0.0.1:5454/",
-                    displayName: "Lara Croft",
-                    url: "http://127.0.0.1:5454/authors/9de17f29c12e8f97bcbbd34cc908f1baba40658e",
-                    github: "http://github.com/laracroft",
-                    profileImage: "https://i.imgur.com/k7XVwpB.jpeg",
-                },
-                {
-                    type: "author",
-                    id: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908f1658e",
-                    host: "http://127.0.0.1:8000/",
-                    displayName: "Byron Tung",
-                    url: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908f1658e",
-                    github: "http://github.com/byrontung",
-                    profileImage: "https://i.imgur.com/LRoLTlK.jpeg",
-                },
-                {
-                    type: "author",
-                    id: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908fff1658e",
-                    host: "http://127.0.0.1:8000/",
-                    displayName: "Tyron Bung",
-                    url: "http://127.0.0.1:8000/authors/9de17f29c12e8f97bcbbd34cc908fff1658e",
-                    github: "http://github.com/tyronbung",
-                },
-            ],
-        };
-        // setFollowers(decode)
-        const response = await axios.get("/service/authors/" + authorID + "/followers")
-        console.log(response)
-        // console.log("/service/authors" + aID + "/followers")
-        // setFollowers(res["items"]);
-        if (response.status === 200) {
-            return data //temp
-            // return response.data
-        }
+        const authorID = getCurrentAuthorID();
+        const response = await axios.get("/authors/" + authorID + "/followers");
         return response.data
     }
+
+    // async getPostDetails() {
+
+    // }
 
     async getFollowStatus(foreignID) {
         setAxiosDefaults();
@@ -176,11 +135,38 @@ class AuthService {
         return response.data
     }
 
-    async followAuthor(foreignID) {
+    async getInboxItems(type="", authorID) {
         setAxiosDefaults();
-        const authorID = getCurrentAuthorID();
-        const response = await axios.put("/authors/" + foreignID + "/followers/" + authorID);
+        const response = await axios.get("/authors/" + authorID + "/inbox");
         return response.data
+    }
+
+    async sendInboxItem(type, authorID, postID="", comment="", ) {
+        setAxiosDefaults();
+        const currentAuthor = retrieveCurrentAuthor();
+        const author = await this.getAuthorDetails(authorID)
+        let body = {
+            type: type,
+            actor: currentAuthor,
+            author: author
+        };
+        if (type === "post") {
+            body.content = "";
+            body.categories = "";
+        } else if (type === "follow") {
+            body.summary = currentAuthor.displayName + " wants to follow " + author.displayName
+        } else if (type === "like") {
+            body.context = {};
+            body.summary = "";
+            body.object = {};
+        } else if (type === "comment") {
+            body.post = postID;
+            body.comment = comment;
+        }
+        // const response = await axios.put("/authors/" + foreignID + "/followers/" + authorID);
+        const response = await axios.post("/authors/" + authorID + "/inbox", body);
+        console.log(response.data)
+        // return response.data
     }
 
     async unfollowAuthor(foreignID) {

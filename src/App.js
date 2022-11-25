@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 
 import { PublicRoute as Pub, PrivateRoute as Priv } from "./components/AuthRoutes";
 
@@ -10,7 +10,8 @@ import ProfilePage from "./pages/ProfilePage";
 import AccountPage from "./pages/AccountPage";
 import InboxPage from "./pages/InboxPage";
 import GithubPage from "./pages/GithubPage";
-import RelationshipPage from "./pages/RelationshipPage";
+import FollowersPage from "./pages/FollowersPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 function App() {
     return (
@@ -18,13 +19,13 @@ function App() {
             <Routes>
                 <Route path="/" element={<Pub><LoginPage/></Pub>}/>
                 <Route path="/register" element={<Pub><RegisterPage/></Pub>}/>
+                <Route path="*" element={<NotFoundPage/>}/>
 
                 <Route path="/homepage" element={<Priv><HomePage/></Priv>}/>
                 <Route path="/profile/:authorID" element={<Priv><ProfilePage/></Priv>}/>
                 <Route path="/account" element={<Priv><AccountPage/></Priv>}/>
                 <Route path="/inbox" element={<Priv><InboxPage/></Priv>}/>
-                <Route path="/friends" element={<Priv><FriendsPage/></Priv>}/>
-                <Route path="/relationships" element={<Priv><RelationshipPage/></Priv>}/>
+                <Route path="/followers" element={<Priv><FollowersPage/></Priv>}/>
                 <Route path="/github" element={<Priv><GithubPage/></Priv>}/>
             </Routes>
         </Router>
