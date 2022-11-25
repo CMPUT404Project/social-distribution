@@ -12,7 +12,9 @@ class AuthorView(GenericAPIView):
     """
     queryset = Author.objects.all()
     serializer_class = AuthorsSerializer
-    @swagger_auto_schema(responses={200: AuthorsSwaggerResponseSerializer})
+    tag = "Authors"
+
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorsSwaggerResponseSerializer})
     def get(self, request):
         authors = Author.objects.all()
         pagination = CustomPagination()
@@ -23,8 +25,10 @@ class AuthorView(GenericAPIView):
 class AuthorDetail(GenericAPIView):
     serializer_class = AuthorDRFSerializer
     queryset = Author.objects.all()
+    tag = "Author"
     # permission_classes = [permissions.IsAuthenticated]
-    @swagger_auto_schema(responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
+
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def get(self, request, aid):
         """
         retrieve aid's profile (remote supported)
@@ -38,7 +42,7 @@ class AuthorDetail(GenericAPIView):
         serializer = AuthorSerializer(author)
         return Response(serializer.data, status=200)
 
-    @swagger_auto_schema(responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def put(self, request, aid):
         """
         update aid's profile

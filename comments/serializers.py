@@ -84,9 +84,10 @@ class CommentSwaggerRequestSerializer(serializers.ModelSerializer):
     author = AuthorSwaggerRequestSerializer(required=True)
     comment = serializers.CharField(required=True)
     post = serializers.UUIDField(required=True)
+    type = serializers.SerializerMethodField()
     published = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%SZ", required=False)
     class Meta:
         model = Comment
-        fields = ['author', 'comment', 'post', 'contentType', 'published']
+        fields = ['type', 'author', 'comment', 'post', 'contentType', 'published']
 
 
