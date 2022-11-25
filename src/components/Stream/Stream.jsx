@@ -1,13 +1,4 @@
-import {
-    Avatar,
-    Box,
-    Card,
-    Grid,
-    Menu,
-    MenuItem,
-    TextField,
-    Typography,
-} from "@mui/material";
+import { Avatar, Box, Card, Grid, Menu, MenuItem, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
@@ -228,8 +219,20 @@ export const Post = (props) => {
     const [show, setShow] = useState(false);
     const [anchor, setAnchor] = useState(null);
     const [post, setPost] = useState("");
+    const [comments, setComments] = useState([]);
 
-    let comments = props.data.commentsSrc.comments;
+    // console.log(props)
+
+    const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
+    const pID = props.data.id.split("/posts/")[1];
+
+    axios.get("/authors/" + aID + "/posts/" + pID + "/comments", {
+        headers: {
+            Authorization: "Bearer " + AuthService.getAccessToken(),
+        },
+    }).then((res) => {setComments(res.data.comments)})
+
+    // let comments = props.data.comments;
 
     /* 
     Not implemented yet, but will check if you can follow/send friend request to user.
@@ -269,11 +272,7 @@ export const Post = (props) => {
     return (
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             {show && (
-                <Menu
-                    onClose={() => setShow(!show)}
-                    open={show}
-                    anchorEl={anchor}
-                >
+                <Menu onClose={() => setShow(!show)} open={show} anchorEl={anchor}>
                     <MenuItem>Follow</MenuItem>
                     <MenuItem>Send Friend Request</MenuItem>
                 </Menu>
@@ -295,14 +294,8 @@ export const Post = (props) => {
                     }}
                     onClick={onClickHandler}
                 >
-                    <Avatar
-                        alt="user image"
-                        src={props.data.author.profileImage}
-                        style={{ margin: "1ex 1ex" }}
-                    />
-                    <Typography variant="h5">
-                        {props.data.author.displayName}
-                    </Typography>
+                    <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
+                    <Typography variant="h5">{props.data.author.displayName}</Typography>
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
                 <Typography variant="h6" textAlign="left">
@@ -320,11 +313,7 @@ export const Post = (props) => {
                             display: "flex",
                         }}
                     >
-                        <Avatar
-                            alt="user image"
-                            src={com["author"]["profileImage"]}
-                            style={{ margin: "1ex 1ex" }}
-                        />
+                        <Avatar alt="user image" src={com["author"]["profileImage"]} style={{ margin: "1ex 1ex" }} />
                         <Typography variant="body1" padding="1em">
                             {com["comment"]}
                         </Typography>
@@ -349,20 +338,16 @@ function Stream() {
     const [posts, setPosts] = useState([]);
 
     const [accessToken, setAccessToken] = useState(
-        localStorage.getItem("access_token") ||
-            sessionStorage.getItem("access_token")
+        localStorage.getItem("access_token") || sessionStorage.getItem("access_token")
     );
     const [refreshToken, setRefreshToken] = useState(
-        localStorage.getItem("refresh_token") ||
-            sessionStorage.getItem("refresh_token")
+        localStorage.getItem("refresh_token") || sessionStorage.getItem("refresh_token")
     );
 
     useEffect(() => {
-        const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split(
-            "/authors/"
-        )[1];
+        const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
         axios
-            .get("/authors/" + aID + "/inbox", {
+            .get("/authors/" + aID + "/inbox?type=posts", {
                 headers: { Authorization: "Bearer " + accessToken },
             })
             .then((res) => {
