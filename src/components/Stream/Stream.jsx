@@ -231,7 +231,6 @@ export const Post = (props) => {
 
     let comments = props.data.commentsSrc.comments;
 
-
     /* 
     Not implemented yet, but will check if you can follow/send friend request to user.
     */
@@ -259,7 +258,7 @@ export const Post = (props) => {
             // TODO: uncomment out once variable data is done
             // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
             //     headers: {
-            //         Authorization: "Bearer " + props.accessToken,
+            //         Authorization: "Bearer " + AuthService.getAccessToken(),
             //     },
             //     data,
             // })
@@ -306,7 +305,9 @@ export const Post = (props) => {
                     </Typography>
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
-                <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
+                <Typography variant="h6" textAlign="left">
+                    {props.data.content}
+                </Typography>
             </Card>
             {comments.map((com) => {
                 return (
@@ -345,37 +346,49 @@ export const Post = (props) => {
 };
 
 function Stream() {
-    const [post, setPost] = useState({});
+    const [posts, setPosts] = useState([]);
 
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token'));
+    const [accessToken, setAccessToken] = useState(
+        localStorage.getItem("access_token") ||
+            sessionStorage.getItem("access_token")
+    );
+    const [refreshToken, setRefreshToken] = useState(
+        localStorage.getItem("refresh_token") ||
+            sessionStorage.getItem("refresh_token")
+    );
 
     useEffect(() => {
-        if (accessToken) {
-            const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1]
-            axios
-                .get("/authors/" + aID + "/inbox", {
-                    headers: { Authorization: "Bearer " + accessToken },
-                })
-                .then((res) => {
-                    console.log(res)
-                    setPost(res.data);
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
-        }
-    }, [accessToken]);
+        const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split(
+            "/authors/"
+        )[1];
+        axios
+            .get("/authors/" + aID + "/inbox", {
+                headers: { Authorization: "Bearer " + accessToken },
+            })
+            .then((res) => {
+                // console.log(res)
+                setPosts(res.data.items);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     let fakeData = data;
     return (
         <Grid container justifyContent="center" minHeight={"100%"}>
-            {fakeData.map((d) => {
-                return <Post key={d.id} data={d} accessToken={accessToken} />;
-            })}
-            {/* {post.map((d) => {
-                return <Post key={d.id} data={d} accessToken={accessToken} />;
+            {/* {fakeData.length === 0 ? <h1>bruh no posts</h1>:fakeData.map((d) => {
+                return <Post key={d.id} data={d} accessToken={accessToken} />
             })} */}
+            {posts.length === 0 ? (
+                <h1>You currently have no posts!</h1>
+            ) : (
+                posts.map((post) => {
+                    if (post.type === "post") {
+                        return <Post key={post.id} data={post} />;
+                    }
+                })
+            )}
         </Grid>
     );
 }
