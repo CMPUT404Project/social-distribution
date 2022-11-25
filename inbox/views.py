@@ -5,6 +5,7 @@ from .serializers import InboxSerializer, InboxSwaggerSerializer, InboxCommentsS
 from .models import Inbox
 from .models import Post
 from .models import Comment
+from backend.permissions import CustomDjangoModelPermissions
 from comments.serializers import CommentRemoteCreationSerializer, CommentSerializer, CommentSwaggerResponseSerializer, CommentSwaggerRequestSerializer
 from likes.serializers import CommentLikeCreationSerializer, PostLikeCreationSerializer, LikeSerializer, LikeSwaggerRequestSerializer, LikeSwaggerResponseSerializer
 from likes.models import Like
@@ -135,6 +136,7 @@ def handle_comment_type_inbox(data, inbox):
 class InboxView(GenericAPIView):
     serializer_class = InboxSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     tag = "Inbox"
     @swagger_auto_schema(tags=[tag],responses={200: InboxSwaggerSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
@@ -203,21 +205,21 @@ class InboxView(GenericAPIView):
             return Response(str(e), status=400)
         data = request.data
         type = data.get('type')
-        if not type:
-            return Response("Please enter a valid type", status=400)
-        if type.lower() == "post":
-            return handle_post_type_inbox(data, inbox)
-        elif type.lower() == "like":
-            return handle_like_type_inbox(data, inbox)
-        elif type.lower() == "follow":
-            return handle_follow_type_inbox(data, author, inbox)
-        elif type.lower() == "comment":
-            return handle_comment_type_inbox(data, inbox)
-        return Response(status=204)
+        if type:
+            if type.lower() == "post":
+                return handle_post_type_inbox(data, inbox)
+            elif type.lower() == "like":
+                return handle_like_type_inbox(data, inbox)
+            elif type.lower() == "follow":
+                return handle_follow_type_inbox(data, author, inbox)
+            elif type.lower() == "comment":
+                return handle_comment_type_inbox(data, inbox)
+        return Response("Please enter a valid type", status=400)
     
 class InboxPostView(GenericAPIView):
     serializer_class = PostSwaggerRequestSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     tag = "Inbox"
     @swagger_auto_schema(tags=[tag], request_body=PostSwaggerRequestSerializer, responses={201: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
@@ -238,6 +240,7 @@ class InboxPostView(GenericAPIView):
 class InboxLikeView(GenericAPIView):
     serializer_class = LikeSwaggerRequestSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     tag = "Inbox"
     @swagger_auto_schema(tags=[tag], request_body=LikeSwaggerRequestSerializer, responses={201: LikeSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
@@ -258,6 +261,7 @@ class InboxLikeView(GenericAPIView):
 class InboxCommentView(GenericAPIView):
     serializer_class = CommentSwaggerRequestSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     tag="Inbox"
     @swagger_auto_schema(tags=[tag], request_body=CommentSwaggerRequestSerializer, responses={201: CommentSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
