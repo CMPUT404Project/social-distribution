@@ -4,11 +4,13 @@ from .models import Post
 from authors.models import Author
 from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer, PostCreationWithIDSerializer, PostsViewSerializer, PostSwaggerResponseSerializer, PostsSwaggerResponseSerializer
 from backend.pagination import CustomPagination
+from backend.permissions import CustomDjangoModelPermissions
 from drf_yasg.utils import swagger_auto_schema
 
 class PostView(GenericAPIView):
     serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(responses={200: PostsSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found"})
     def get(self, request, aid):
@@ -51,6 +53,7 @@ class PostView(GenericAPIView):
 class PostIDView(GenericAPIView):
     serializer_class = PostsViewSerializer
     queryset = Post.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
     def get(self, request, aid, pid):

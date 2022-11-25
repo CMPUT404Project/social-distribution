@@ -5,6 +5,7 @@ from .serializers import InboxSerializer, InboxSwaggerSerializer
 from .models import Inbox
 from .models import Post
 from .models import Comment
+from backend.permissions import CustomDjangoModelPermissions
 from comments.serializers import CommentRemoteCreationSerializer, CommentSerializer, CommentSwaggerResponseSerializer, CommentSwaggerRequestSerializer
 from likes.serializers import CommentLikeCreationSerializer, PostLikeCreationSerializer, LikeSerializer, LikeSwaggerRequestSerializer, LikeSwaggerResponseSerializer
 from likes.models import Like
@@ -105,6 +106,7 @@ def handle_comment_type_inbox(data, inbox):
 class InboxView(GenericAPIView):
     serializer_class = InboxSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(responses={200: InboxSwaggerSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def get(self, request, aid):
@@ -141,6 +143,7 @@ class InboxView(GenericAPIView):
 class InboxPostView(GenericAPIView):
     serializer_class = PostSwaggerRequestSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(request_body=PostSwaggerRequestSerializer, responses={201: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def post(self, request, aid):
@@ -160,6 +163,7 @@ class InboxPostView(GenericAPIView):
 class InboxLikeView(GenericAPIView):
     serializer_class = LikeSwaggerRequestSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(request_body=LikeSwaggerRequestSerializer, responses={201: LikeSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def post(self, request, aid):
@@ -179,6 +183,7 @@ class InboxLikeView(GenericAPIView):
 class InboxCommentView(GenericAPIView):
     serializer_class = CommentSwaggerRequestSerializer
     queryset = Inbox.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(request_body=CommentSwaggerRequestSerializer, responses={201: CommentSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def post(self, request, aid):

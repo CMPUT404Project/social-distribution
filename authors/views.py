@@ -2,6 +2,7 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from .models import Author
 from .serializers import AuthorSerializer, AuthorsSerializer, AuthorDRFSerializer, AuthorSwaggerResponseSerializer, AuthorsSwaggerResponseSerializer
+from backend.permissions import CustomDjangoModelPermissions
 from backend.pagination import CustomPagination
 from rest_framework.generics import GenericAPIView
 from drf_yasg.utils import swagger_auto_schema
@@ -12,6 +13,7 @@ class AuthorView(GenericAPIView):
     """
     queryset = Author.objects.all()
     serializer_class = AuthorsSerializer
+    permission_classes = [CustomDjangoModelPermissions]
     @swagger_auto_schema(responses={200: AuthorsSwaggerResponseSerializer})
     def get(self, request):
         authors = Author.objects.all()
@@ -23,7 +25,7 @@ class AuthorView(GenericAPIView):
 class AuthorDetail(GenericAPIView):
     serializer_class = AuthorDRFSerializer
     queryset = Author.objects.all()
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [CustomDjangoModelPermissions]
     @swagger_auto_schema(responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def get(self, request, aid):
         """

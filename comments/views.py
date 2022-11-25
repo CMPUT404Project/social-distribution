@@ -4,12 +4,14 @@ from posts.models import Post
 from comments.models import Comment
 from comments.serializers import CommentSerializer, CommentsSerializer, CommentCreationSerializer, CommentViewSerializer, CommentsSwaggerResponseSerializer, CommentSwaggerResponseSerializer
 from backend.pagination import CustomPagination
+from backend.permissions import CustomDjangoModelPermissions
 from rest_framework.generics import GenericAPIView
 from drf_yasg.utils import swagger_auto_schema
 
 class CommentView(GenericAPIView):
     serializer_class = CommentViewSerializer
     queryset = Comment.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(responses={200: CommentsSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})  
     def get(self, request, aid, pid):
@@ -54,6 +56,7 @@ class CommentView(GenericAPIView):
 class CommentIDView(GenericAPIView):
     serializer_class = CommentsSerializer
     queryset = Comment.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
     @swagger_auto_schema(responses={200: CommentSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found/Comment cannot be found"})  
     def get(self, request, aid, pid, cid):
