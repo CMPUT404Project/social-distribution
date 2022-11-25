@@ -112,9 +112,8 @@ export const PostTextbox = () => {
         // );
         let tokens = [];
         if (tags !== "") {
-            const tokens = tags.split(",").map((word) => word.trim());
+            tokens = tags.split(",").map((word) => word.trim());
         }
-
         const data = {
             type: "post",
             title: title,
