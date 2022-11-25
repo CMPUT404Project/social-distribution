@@ -1,10 +1,14 @@
 import {
     Button,
-    Card, FormControl, MenuItem, Snackbar,
-    TextField
+    Card,
+    FormControl,
+    MenuItem,
+    Snackbar,
+    TextField,
 } from "@mui/material";
 import axios from "axios";
 import React, { useState } from "react";
+import { useEffect } from "react";
 import AuthService from "../../services/AuthService";
 
 export const PostTextbox = () => {
@@ -20,10 +24,17 @@ export const PostTextbox = () => {
     const [description, setDescription] = useState("");
     const [open, setOpen] = useState(false);
     const [alert, setAlert] = useState("");
+    const [visibilityLogic, setVisibilityLogic] = useState(false);
 
     const handleVisibilityChange = (e) => {
         setVisibility(e.target.value);
     };
+
+    useEffect(() => {
+        if (unlisted === true) {
+            setVisibility("PUBLIC");
+        }
+    }, [unlisted]);
 
     // TODO: trim only works for frontend viewing, not for the backend array. Somehow trim category before it enters array?
     // const filterOptions = createFilterOptions({
@@ -31,20 +42,60 @@ export const PostTextbox = () => {
     // });
 
     const handleUnlistedChange = (e) => {
-        setUnlisted(!unlisted);
+        if (unlisted === true) {
+            setVisibilityLogic(false);
+        } else {
+            setVisibilityLogic(true);
+        }
+        console.log(e.target.value);
+        setUnlisted(e.target.value);
     };
 
     // https://stackoverflow.com/a/18593669
     const validateURL = (str) => {
-        // console.log(/^(http|https):\/\/(([a-zA-Z0-9$\-_.+!*'(),;:&=]|%[0-9a-fA-F]{2})+@)?(((25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])){3})|localhost|([a-zA-Z0-9\-\u00C0-\u017F]+\.)+([a-zA-Z]{2,}))(:[0-9]+)?(\/(([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*(\/([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*)*)?(\?([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?(\#([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?)?$/.test(
-        //     str
-        //  || str === ""))
         return (
             /^(http|https):\/\/(([a-zA-Z0-9$\-_.+!*'(),;:&=]|%[0-9a-fA-F]{2})+@)?(((25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])){3})|localhost|([a-zA-Z0-9\-\u00C0-\u017F]+\.)+([a-zA-Z]{2,}))(:[0-9]+)?(\/(([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*(\/([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*)*)?(\?([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?(\#([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?)?$/.test(
                 str
             ) || str === ""
         );
     };
+
+    // if visibility is friends then make a
+    //     GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers -> [users]
+    //          for each from item in users ->
+    // GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
+
+    // const FriendsPostRequest = (data) => {
+    //     const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split(
+    //         "/authors/"
+    //     )[1];
+    //     axios
+    //         .get("/service/authors/" + aID + "/followers", {
+    //             headers: {
+    //                 Authorization: "Bearer " + AuthService.getAccessToken(),
+    //                 // contenttype???
+    //             },
+    //         })
+    //         .then((res) => {
+    //             const followers = res.items;
+    //             followers.forEach((user) => {
+    //                 let fID = user.id.split("/authors/")[1];
+
+    //                 axios.post(
+    //                     "/service/authors/" + fID + "/inbox/post",
+    //                     data,
+    //                     {
+    //                         headers: {
+    //                             Authorization:
+    //                                 "Bearer " + AuthService.getAccessToken(),
+    //                             // contenttype???
+    //                         },
+    //                     }
+    //                 );
+    //             });
+    //         })
+    //         .catch((res) => console.log(res));
+    // };
 
     const onFormSubmit = (e) => {
         // console.log(
@@ -58,24 +109,25 @@ export const PostTextbox = () => {
         //     contentType,
         //     unlisted
         // );
-        if (tags !== ""){
-            tags.split(",").map((word) => word.trim())
+        let tokens = [];
+        if (tags !== "") {
+            const tokens = tags.split(",").map((word) => word.trim());
         }
-        // console.log(tags)
-
 
         const data = {
+            type: "post",
             title: title,
             source: source,
             origin: origin,
             content: content,
             visibility: visibility,
-            categories: tags,
+            categories: tokens,
             description: description,
             contentType: contentType,
             unlisted: unlisted,
+            author: AuthService.retrieveCurrentUser(),
         };
-        // console.log(data);
+
         const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split(
             "/authors/"
         )[1];
@@ -86,7 +138,61 @@ export const PostTextbox = () => {
                     ContentType: "application/JSON",
                 },
             })
-            .then(() => {
+            .then((createdPost) => {
+                // the response should be the whole post, which I send to the users.
+                axios.get("/authors/" + aID + "/followers").then((res) => {
+                    let followers = res.items;
+                    followers.forEach((user) => {
+                        let faID = user.id.split("/authors/")[1];
+                        if (data.visibility === "PUBLIC") {
+                            if (user.host === "https://social-distribution-404.herokuapp.com") {
+                                axios.post(
+                                    "/authors/" + faID + "/inbox/posts",
+                                    createdPost,
+                                    {
+                                        headers: {
+                                            Authorization:
+                                                "Bearer " + AuthService.getAccessToken(),
+                                            ContentType: "application/JSON",
+                                        },
+                                    }
+                                );
+                            }
+                            elif (user.host === "https://true-friends-404.herokuapp.com"){
+                                //pass for now
+                            }
+                            elif (user.host === "https://cmput404-team13.herokuapp.com"){
+                                //pass for now
+                            }
+                        }
+                        if (data.visibility === "FRIEND") {
+                            // axios.get(user.host + "/authors/" + faID + "/followers/" + aID)
+                            // axios.get("/authors/" + faID + "/followers/" + aID)
+                            if (user.host === "https://social-distribution-404.herokuapp.com") {
+                                axios.post(
+                                    "/authors/" + faID + "/inbox/posts",
+                                    createdPost,
+                                    {
+                                        headers: {
+                                            Authorization:
+                                                "Bearer " + AuthService.getAccessToken(),
+                                            ContentType: "application/JSON",
+                                        },
+                                    }
+                                );
+                            }
+                            elif (user.host === "https://true-friends-404.herokuapp.com"){
+                                //pass for now
+                            }
+                            elif (user.host === "https://cmput404-team13.herokuapp.com"){
+                                //pass for now
+                            }
+                        }
+                    });
+                });
+            })
+            .catch(() => setAlert("Could not submit post."))
+            .finally(() => {
                 setAlert("Post submitted!");
                 setTitle("");
                 setSource("");
@@ -97,9 +203,8 @@ export const PostTextbox = () => {
                 setDescription("");
                 setContentType("text/plain");
                 setUnlisted(false);
-            })
-            .catch(() => setAlert("Could not submit post."))
-            .finally(() => setOpen(true));
+                setOpen(true);
+            });
     };
 
     const onSourceChange = (e) => {
@@ -126,7 +231,7 @@ export const PostTextbox = () => {
         <Card>
             <Snackbar
                 open={open}
-                anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+                anchorOrigin={{ vertical: "top", horizontal: "center" }}
                 autoHideDuration={3000}
                 onClose={() => setOpen(false)}
                 message={alert}
@@ -137,7 +242,7 @@ export const PostTextbox = () => {
                     variant="filled"
                     value={title}
                     multiline
-                    style={{ backgroundColor: "#E5E5E5", borderRadius: "5px" }}
+                    style={{ borderRadius: "5px" }}
                     onInput={(e) => setTitle(e.target.value)}
                     required
                 />
@@ -146,7 +251,6 @@ export const PostTextbox = () => {
                     variant="filled"
                     value={description}
                     multiline
-                    style={{ backgroundColor: "#E5E5E5", borderRadius: "5px" }}
                     onInput={(e) => setDescription(e.target.value)}
                 />
                 <TextField
@@ -154,7 +258,6 @@ export const PostTextbox = () => {
                     variant="filled"
                     value={content}
                     multiline
-                    style={{ backgroundColor: "#E5E5E5", borderRadius: "5px" }}
                     onInput={(e) => setContent(e.target.value)}
                     required
                 />
@@ -173,15 +276,29 @@ export const PostTextbox = () => {
                     error={!validateURL(origin)}
                 />
                 <TextField
+                    label={"Should this post be unlisted?"}
+                    select
+                    variant="filled"
+                    value={unlisted}
+                    // defaultValue={unlisted}
+                    onChange={handleUnlistedChange}
+                    // onSelect={handleUnlistedChange}
+                >
+                    <MenuItem value={true}>Yes</MenuItem>
+                    <MenuItem value={false}>No</MenuItem>
+                </TextField>
+                <TextField
                     label={"Visibility"}
                     select
                     variant="filled"
                     value={visibility}
+                    disabled={visibilityLogic}
                     onChange={handleVisibilityChange}
                 >
                     <MenuItem value="PUBLIC">Public</MenuItem>
                     <MenuItem value="FRIENDS">Friends</MenuItem>
                 </TextField>
+
                 <TextField
                     label="Content type?"
                     select
@@ -196,17 +313,7 @@ export const PostTextbox = () => {
                         </MenuItem>
                     ))}
                 </TextField>
-                <TextField
-                    label={"Should this post be unlisted?"}
-                    select
-                    variant="filled"
-                    value={unlisted}
-                    defaultValue={unlisted}
-                    onChange={handleUnlistedChange}
-                >
-                    <MenuItem value={true}>Yes</MenuItem>
-                    <MenuItem value={false}>No</MenuItem>
-                </TextField>
+
                 {/* <Autocomplete
                     multiple
                     freeSolo
@@ -237,13 +344,17 @@ export const PostTextbox = () => {
                     label={"Enter tags seperated by commas!"}
                     variant="filled"
                     value={tags}
-                    defaultValue={tags}
+                    // defaultValue={tags}
                     onInput={(e) => setTags(e.target.value)}
                 >
                     <MenuItem value={true}>Yes</MenuItem>
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
-                <Button variant="contained" sx={{borderRadius:0}} onClick={onFormSubmit}>
+                <Button
+                    variant="contained"
+                    sx={{ borderRadius: 0 }}
+                    onClick={onFormSubmit}
+                >
                     Send
                 </Button>
             </FormControl>
