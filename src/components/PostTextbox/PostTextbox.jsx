@@ -153,7 +153,7 @@ export const PostTextbox = () => {
                         },
                     })
                     .catch((res) => console.log(postWithAuthor));
-                // then to everyone elseD
+                // then to everyone else
                 // axios.get("/authors/" + aID + "/followers").then((res) => {
                 //     let followers = res.items;
                 //     followers.forEach((user) => {
