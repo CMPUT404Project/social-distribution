@@ -136,7 +136,7 @@ export const PostTextbox = () => {
                 postWithAuthor["author"] = userJSON;
                 // console.log(postWithAuthor);
                 axios
-                    .post("/authors/" + aID + "/inbox/posts", postWithAuthor, {
+                    .post("/authors/" + aID + "/inbox", postWithAuthor, {
                         headers: {
                             Authorization: "Bearer " + AuthService.getAccessToken(),
                             ContentType: "application/JSON",
@@ -206,17 +206,23 @@ export const PostTextbox = () => {
 
                             // Team 13
                             else if (user.host === "https://cmput404-team13.herokuapp.com") {
+                                axios.get("/authors/" + aID + "/posts/" + createdPost.data.id.split("/posts/")[1], {
+                                    headers: {
+                                        Authorization: "Bearer " + AuthService.getAccessToken(),
+                                    },
+                                })
                                 axios.put(
                                     "https://cmput404-team13.herokuapp.com",
                                     {
                                         author: { id: aID, displayName: userJSON.displayName },
-                                        originalAuthor: {}
+                                        originalAuthor: {id : createdPost.data.origin.split("/authors/")[1].split("/posts/")[0], displayName}
                                     },
                                     {
                                         headers: {
                                             Authorization: "Bearer " + AuthService.getAccessToken(),
                                             ContentType: "application/JSON",
                                             "Access-Control-Allow-Origin": "*",
+                                            
                                         },
                                     }
                                 );
@@ -224,7 +230,7 @@ export const PostTextbox = () => {
                         }
                         if (data.visibility === "FRIEND") {
                             axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
-                                // check type? maybe statusString.data?
+                                // check type? maybe statusString.data
                                 if (statusString) {
                                     if (user.host === "https://social-distribution-404.herokuapp.com") {
                                         axios.post("/authors/" + faID + "/inbox/posts", createdPost, {
