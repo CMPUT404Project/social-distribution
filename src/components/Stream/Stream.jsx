@@ -352,12 +352,13 @@ function Stream() {
 
     useEffect(() => {
         if (accessToken) {
-            const aID = jwtDecode(accessToken)["author_id"].split("/authors/")[1];
+            const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1]
             axios
-                .get("services/authors/" + aID + "/inbox", {
+                .get("/authors/" + aID + "/inbox", {
                     headers: { Authorization: "Bearer " + accessToken },
                 })
                 .then((res) => {
+                    console.log(res)
                     setPost(res.data);
                 })
                 .catch((err) => {
@@ -372,6 +373,9 @@ function Stream() {
             {fakeData.map((d) => {
                 return <Post key={d.id} data={d} accessToken={accessToken} />;
             })}
+            {/* {post.map((d) => {
+                return <Post key={d.id} data={d} accessToken={accessToken} />;
+            })} */}
         </Grid>
     );
 }
