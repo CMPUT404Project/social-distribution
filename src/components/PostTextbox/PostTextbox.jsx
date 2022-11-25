@@ -1,11 +1,4 @@
-import {
-    Button,
-    Card,
-    FormControl,
-    MenuItem,
-    Snackbar,
-    TextField,
-} from "@mui/material";
+import { Button, Card, FormControl, MenuItem, Snackbar, TextField } from "@mui/material";
 import axios from "axios";
 import React, { useState } from "react";
 import { useEffect } from "react";
@@ -127,10 +120,8 @@ export const PostTextbox = () => {
             unlisted: unlisted,
             author: JSON.parse(AuthService.retrieveCurrentUser()),
         };
-        const userJSON = JSON.parse(AuthService.retrieveCurrentUser())
-        const aID = userJSON.id.split(
-            "/authors/"
-        )[1];
+        const userJSON = JSON.parse(AuthService.retrieveCurrentUser());
+        const aID = userJSON.id.split("/authors/")[1];
         axios
             .post("/authors/" + aID + "/posts", data, {
                 headers: {
@@ -138,82 +129,101 @@ export const PostTextbox = () => {
                     ContentType: "application/JSON",
                 },
             })
+            // the response should be the whole post, which then is sent to the users.
             .then((createdPost) => {
-                // the response should be the whole post, which I send to the users.
                 // first send to current user's inbox
-                let postWithAuthor = createdPost.data
-                postWithAuthor["author"] = userJSON
+                let postWithAuthor = createdPost.data;
+                postWithAuthor["author"] = userJSON;
+                console.log(postWithAuthor);
                 axios
                     .post("/authors/" + aID + "/inbox/posts", postWithAuthor, {
                         headers: {
-                            Authorization:
-                                "Bearer " + AuthService.getAccessToken(),
+                            Authorization: "Bearer " + AuthService.getAccessToken(),
                             ContentType: "application/JSON",
                         },
                     })
                     .catch((res) => console.log(postWithAuthor));
                 // then to everyone else
-                // axios.get("/authors/" + aID + "/followers").then((res) => {
-                //     let followers = res.items;
-                //     followers.forEach((user) => {
-                //         let faID = user.id.split("/authors/")[1];
-                //         if (data.visibility === "PUBLIC") {
-                //             if (user.host === "https://social-distribution-404.herokuapp.com") {
-                //                 axios.post(
-                //                     "/authors/" + faID + "/inbox/posts",
-                //                     createdPost,
-                //                     {
-                //                         headers: {
-                //                             Authorization:
-                //                                 "Bearer " + AuthService.getAccessToken(),
-                //                             ContentType: "application/JSON",
-                //                         },
-                //                     }
-                //                 );
-                //             }
-                //             // Team 12
-                //             else if (user.host === "https://true-friends-404.herokuapp.com"){
+                axios.get("/authors/" + aID + "/followers").then((res) => {
+                    let followers = res.items;
+                    followers.forEach((user) => {
+                        let faID = user.id.split("/authors/")[1];
+                        if (data.visibility === "PUBLIC") {
+                            if (user.host === "https://social-distribution-404.herokuapp.com") {
+                                axios.post("/authors/" + faID + "/inbox/posts", createdPost, {
+                                    headers: {
+                                        Authorization: "Bearer " + AuthService.getAccessToken(),
+                                        ContentType: "application/JSON",
+                                    },
+                                });
+                            }
+                            // Team 12
+                            else if (user.host === "https://true-friends-404.herokuapp.com") {
+                                axios
+                                    .post(
+                                        "/authors/" + aID + "/" + sessionStorage.getItem("username") + "/posts/",
+                                        {
+                                            email: "team19@mail.com",
+                                            Password: "team19",
+                                        },
+                                        {
+                                            headers: {
+                                                ContentType: "application/json",
+                                            },
+                                        }
+                                    )
+                                    .then((res) => {
+                                        // not sure how to response is suppose to look like
+                                        let team12AccessToken = res.data.accessToken;
+                                        team12Data = createdPost;
+                                        team12Data["author"] = aID;
 
-                //             }
-                //             // Team 13
-                //             else if (user.host === "https://cmput404-team13.herokuapp.com"){
-
-                //             }
-                //         }
-                //         if (data.visibility === "FRIEND") {
-                //             axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
-                //                 if (statusString.toLowerCase().includes("true")) {
-                //                     if (user.host === "https://social-distribution-404.herokuapp.com") {
-                //                         axios.post(
-                //                             "/authors/" + faID + "/inbox/posts",
-                //                             createdPost,
-                //                             {
-                //                                 headers: {
-                //                                     Authorization:
-                //                                         "Bearer " + AuthService.getAccessToken(),
-                //                                     ContentType: "application/JSON",
-                //                                 },
-                //                             }
-                //                         );
-                //                     }
-                //                     // Team 12
-                //                     else if (user.host === "https://true-friends-404.herokuapp.com"){
-                //                         //pass for now
-                //                     }
-                //                     // Team 13
-                //                     else if (user.host === "https://cmput404-team13.herokuapp.com"){
-                //                         // let data13 = data
-                //                         // data13["published"] = Date()
-                //                         // url = user.host + "/authors/" + faID + "/inbox/" + createdPost.id.split("/posts/")[1]
-                //                         // axios.post
-                //                     }
-                //                 }
-                //             })
-                //             // axios.get("/authors/" + faID + "/followers/" + aID)
-
-                //         }
-                //     });
-                // });
+                                        // Since Team 12 does the inbox distribution on their end, we only need this call.
+                                        axios.post(
+                                            "/authors/" + aID + "/" + sessionStorage.getItem("username") + "/posts/",
+                                            data,
+                                            {
+                                                headers: {
+                                                    Authorization: team12AccessToken,
+                                                    ContentType: "application/json",
+                                                },
+                                            }
+                                        );
+                                    });
+                            }
+                            // Team 13
+                            else if (user.host === "https://cmput404-team13.herokuapp.com") {
+                                //pass for now, waiting for response from discord
+                            }
+                        }
+                        if (data.visibility === "FRIEND") {
+                            axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
+                                if (statusString.toLowerCase().includes("true")) {
+                                    if (user.host === "https://social-distribution-404.herokuapp.com") {
+                                        axios.post("/authors/" + faID + "/inbox/posts", createdPost, {
+                                            headers: {
+                                                Authorization: "Bearer " + AuthService.getAccessToken(),
+                                                ContentType: "application/JSON",
+                                            },
+                                        });
+                                    }
+                                    // Team 12
+                                    else if (user.host === "https://true-friends-404.herokuapp.com") {
+                                        //pass for now
+                                    }
+                                    // Team 13
+                                    else if (user.host === "https://cmput404-team13.herokuapp.com") {
+                                        // let data13 = data
+                                        // data13["published"] = Date()
+                                        // url = user.host + "/authors/" + faID + "/inbox/" + createdPost.id.split("/posts/")[1]
+                                        // axios.post
+                                    }
+                                }
+                            });
+                            // axios.get("/authors/" + faID + "/followers/" + aID)
+                        }
+                    });
+                });
             })
             .catch(() => setAlert("Could not submit post."))
             .finally(() => {
@@ -243,13 +253,7 @@ export const PostTextbox = () => {
         setContentType(e.target.value);
     };
 
-    const contentTypes = [
-        "text/plain",
-        "text/markdown",
-        "application/base64",
-        "image/png;base64",
-        "image/jpeg;base64",
-    ];
+    const contentTypes = ["text/plain", "text/markdown", "application/base64", "image/png;base64", "image/jpeg;base64"];
 
     return (
         <Card>
@@ -287,18 +291,8 @@ export const PostTextbox = () => {
                 />
                 {/* <InputLabel id="permissions">Permission</InputLabel> */}
                 {/* TODO: Are source and origin optional? */}
-                <TextField
-                    label="Source"
-                    variant="filled"
-                    onInput={onSourceChange}
-                    error={!validateURL(source)}
-                />
-                <TextField
-                    label="Origin"
-                    variant="filled"
-                    onInput={onOriginChange}
-                    error={!validateURL(origin)}
-                />
+                <TextField label="Source" variant="filled" onInput={onSourceChange} error={!validateURL(source)} />
+                <TextField label="Origin" variant="filled" onInput={onOriginChange} error={!validateURL(origin)} />
                 <TextField
                     label={"Should this post be unlisted?"}
                     select
@@ -375,11 +369,7 @@ export const PostTextbox = () => {
                     <MenuItem value={true}>Yes</MenuItem>
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
-                <Button
-                    variant="contained"
-                    sx={{ borderRadius: 0 }}
-                    onClick={onFormSubmit}
-                >
+                <Button variant="contained" sx={{ borderRadius: 0 }} onClick={onFormSubmit}>
                     Send
                 </Button>
             </FormControl>
