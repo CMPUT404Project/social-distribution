@@ -1,5 +1,4 @@
 import NavBar from "../components/NavBar/NavBar";
-
 import Stream from "../components/Stream/Stream";
 
 function HomePage() {
