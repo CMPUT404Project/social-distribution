@@ -1,5 +1,4 @@
 from authors.serializers import AuthorCreationSerializer
-from rest_framework.generics import ListAPIView
 from rest_framework.generics import GenericAPIView
 from rest_framework import permissions
 from rest_framework.response import Response
@@ -16,7 +15,7 @@ def get_tokens_for_user(user):
         'access': str(refresh.access_token),
     }
 
-class UserList(ListAPIView):
+class UserList(GenericAPIView):
     """
     Returns a list of all users in the system.
     """

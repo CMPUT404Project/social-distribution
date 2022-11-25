@@ -201,112 +201,112 @@
     }
  
      render() {
-         const { actor : { login }, repo: { name }, payload, created_at } = this.props.event;
-         const userUrl = `https://github.com/${login}`;
-         const repoUrl = `https://github.com/${name}`;
-         const repoComponent = (<a className="github-repo-url" href={repoUrl} target="_blank" rel="noreferrer">{name}</a>);
-         const timeComponent = (<div className="github-time">{millisecondsToStr(new Date() - new Date(created_at))}</div>);
-         
-         const { icon, userGravatar, comment, branch, commits, fork, pullRequestEvent, issue, followTargetUrl, memberUrl, gist, gollum, release } = this.renderTypes(this.props.event);
- 
-         const templates = {
-             CommitCommentEvent: (<>commented on commit {comment.commentUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
-             CreateEvent: (<>created {payload.ref_type} {branch.branchUrl} at {repoComponent} {timeComponent}</>),
-             DeleteEvent: (<>deleted {payload.ref_type} {payload.ref} at {repoComponent} {timeComponent}</>),
-             FollowEvent: (<>started following {followTargetUrl} {timeComponent}</>),
-             ForkEvent: (<>forked {repoComponent} to <a href={fork.forkUrl} target="_blank" rel="noreferrer">{fork.forkName}</a> {timeComponent}</>),
-             GistEvent: (<>{gist.actionType} {gist.gistUrl} {timeComponent}</>),
-             GollumEvent: (<>{gollum.actionType} the {repoComponent} wiki {timeComponent}<br/>{userGravatar}<small>{gollum.gollumUrl}</small></>),
-             IssueCommentEvent: (<>commented on {issue.issueType} {issue.issueUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
-             IssuesEvent: (<>{issue.action} issue {issue.issueUrl} {timeComponent}<br/>{userGravatar}<small>{issue.title}</small></>),
-             MemberEvent: (<>added {memberUrl} to {repoComponent} {timeComponent}</>),
-             PublicEvent: (<>open sourced {repoComponent} {timeComponent}</>),
-             PullRequestEvent: (<>{pullRequestEvent.eventType} pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{pullRequestEvent.pullRequest.title}</small>{pullRequestEvent.mergeMessage}</>),
-             PullRequestReviewEvent: (<>{pullRequestEvent.eventType} pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{pullRequestEvent.reviewBody}</small></>),
-             PullRequestReviewCommentEvent: (<>commented on pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
-             PushEvent:  (<><span>
-                             pushed to {branch.branchUrl} at {repoComponent}
-                             {timeComponent}
-                         </span>
-                         <ul className="commits">{commits.commitComponents}</ul>
-                         <small>
-                             <a href={commits.commitsUrl} target="_blank" rel="noreferrer">{commits.commitsMessage}</a>
-                         </small></>),
-             ReleaseEvent:   (<>released {release.tagLink} at {repoComponent} {timeComponent}<br/>
-                             {userGravatar}
-                             <small>
-                                 <span class="octicon octicon-cloud-download"></span>{release.zipLink}
-                             </small></>),
-             WatchEvent: (<>starred {repoComponent} {timeComponent}</>)
-         }
- 
-         return (
-             <div className="github-event">
-                 <span className={"github-event-octicon " + icon}></span>
-                 <div className="github-title">
-                     <a className="github-user-url" href={userUrl} target="_blank" rel="noreferrer">{login}</a> {" "}
-                     {templates[this.props.event.type]}
-                 </div>
-             </div>
-         );
+        const { actor : { login }, repo: { name }, payload, created_at } = this.props.event;
+        const userUrl = `https://github.com/${login}`;
+        const repoUrl = `https://github.com/${name}`;
+        const repoComponent = (<a className="github-repo-url" href={repoUrl} target="_blank" rel="noreferrer">{name}</a>);
+        const timeComponent = (<div className="github-time">{millisecondsToStr(new Date() - new Date(created_at))}</div>);
+        
+        const { icon, userGravatar, comment, branch, commits, fork, pullRequestEvent, issue, followTargetUrl, memberUrl, gist, gollum, release } = this.renderTypes(this.props.event);
+
+        const templates = {
+            CommitCommentEvent: (<>commented on commit {comment.commentUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
+            CreateEvent: (<>created {payload.ref_type} {branch.branchUrl} at {repoComponent} {timeComponent}</>),
+            DeleteEvent: (<>deleted {payload.ref_type} {payload.ref} at {repoComponent} {timeComponent}</>),
+            FollowEvent: (<>started following {followTargetUrl} {timeComponent}</>),
+            ForkEvent: (<>forked {repoComponent} to <a href={fork.forkUrl} target="_blank" rel="noreferrer">{fork.forkName}</a> {timeComponent}</>),
+            GistEvent: (<>{gist.actionType} {gist.gistUrl} {timeComponent}</>),
+            GollumEvent: (<>{gollum.actionType} the {repoComponent} wiki {timeComponent}<br/>{userGravatar}<small>{gollum.gollumUrl}</small></>),
+            IssueCommentEvent: (<>commented on {issue.issueType} {issue.issueUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
+            IssuesEvent: (<>{issue.action} issue {issue.issueUrl} {timeComponent}<br/>{userGravatar}<small>{issue.title}</small></>),
+            MemberEvent: (<>added {memberUrl} to {repoComponent} {timeComponent}</>),
+            PublicEvent: (<>open sourced {repoComponent} {timeComponent}</>),
+            PullRequestEvent: (<>{pullRequestEvent.eventType} pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{pullRequestEvent.pullRequest.title}</small>{pullRequestEvent.mergeMessage}</>),
+            PullRequestReviewEvent: (<>{pullRequestEvent.eventType} pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{pullRequestEvent.reviewBody}</small></>),
+            PullRequestReviewCommentEvent: (<>commented on pull request {pullRequestEvent.pullRequestUrl} {timeComponent}<br/>{userGravatar}<small>{comment.commentBody}</small></>),
+            PushEvent:  (<><span>
+                            pushed to {branch.branchUrl} at {repoComponent}
+                            {timeComponent}
+                        </span>
+                        <ul className="commits">{commits.commitComponents}</ul>
+                        <small>
+                            <a href={commits.commitsUrl} target="_blank" rel="noreferrer">{commits.commitsMessage}</a>
+                        </small></>),
+            ReleaseEvent:   (<>released {release.tagLink} at {repoComponent} {timeComponent}<br/>
+                            {userGravatar}
+                            <small>
+                                <span className="octicon octicon-cloud-download"></span>{release.zipLink}
+                            </small></>),
+            WatchEvent: (<>starred {repoComponent} {timeComponent}</>)
+        }
+
+        return (
+            <div className="github-event">
+                <span className={"github-event-octicon " + icon}></span>
+                <div className="github-title">
+                    <a className="github-user-url" href={userUrl} target="_blank" rel="noreferrer">{login}</a> {" "}
+                    {templates[this.props.event.type]}
+                </div>
+            </div>
+        );
      }
  }
  
  // Takes in milliseconds and converts it to a human readable time,
  // such as 'about 3 hours ago' or '23 days ago'
  function millisecondsToStr(milliseconds) {
-     function numberEnding(number) {
-         return (number > 1) ? 's ago' : ' ago';
-     }
-     var temp = Math.floor(milliseconds / 1000);
- 
-     var years = Math.floor(temp / 31536000);
-     if (years) return years + ' year' + numberEnding(years);
- 
-     var months = Math.floor((temp %= 31536000) / 2592000);
-     if (months) return months + ' month' + numberEnding(months);
- 
-     var days = Math.floor((temp %= 2592000) / 86400);
-     if (days) return days + ' day' + numberEnding(days);
- 
-     var hours = Math.floor((temp %= 86400) / 3600);
-     if (hours) return 'about ' + hours + ' hour' + numberEnding(hours);
- 
-     var minutes = Math.floor((temp %= 3600) / 60);
-     if (minutes) return minutes + ' minute' + numberEnding(minutes);
- 
-     var seconds = temp % 60;
-     if (seconds) return seconds + ' second' + numberEnding(seconds);
- 
-     return 'just now';
+    function numberEnding(number) {
+        return (number > 1) ? 's ago' : ' ago';
+    }
+    var temp = Math.floor(milliseconds / 1000);
+
+    var years = Math.floor(temp / 31536000);
+    if (years) return years + ' year' + numberEnding(years);
+
+    var months = Math.floor((temp %= 31536000) / 2592000);
+    if (months) return months + ' month' + numberEnding(months);
+
+    var days = Math.floor((temp %= 2592000) / 86400);
+    if (days) return days + ' day' + numberEnding(days);
+
+    var hours = Math.floor((temp %= 86400) / 3600);
+    if (hours) return 'about ' + hours + ' hour' + numberEnding(hours);
+
+    var minutes = Math.floor((temp %= 3600) / 60);
+    if (minutes) return minutes + ' minute' + numberEnding(minutes);
+
+    var seconds = temp % 60;
+    if (seconds) return seconds + ' second' + numberEnding(seconds);
+
+    return 'just now';
  }
  
  function pluralize(word, number) {
-     if (number !== 1) return word + 's';
-     return word;
+    if (number !== 1) return word + 's';
+    return word;
  }
  
  const icons = {
-     CommitCommentEvent: 'comment-discussion',
-     CreateEvent_repository: 'repo-create',
-     CreateEvent_tag: 'tag',
-     CreateEvent_branch: 'git-branch-create',
-     DeleteEvent: 'repo-delete',
-     FollowEvent: 'person-follow',
-     ForkEvent: 'repo-forked',
-     GistEvent: 'gist',
-     GollumEvent: 'repo',
-     IssuesEvent: 'issue-opened',
-     IssueCommentEvent: 'comment-discussion',
-     MemberEvent: 'person',
-     PublicEvent: 'globe',
-     PullRequestEvent: 'git-pull-request',
-     PullRequestReviewEvent_approved: 'check',
-     PullRequestReviewEvent_commented: 'comment-discussion',
-     PullRequestReviewEvent_changes_requested: 'alert',
-     PullRequestReviewCommentEvent: 'comment-discussion',
-     PushEvent: 'git-commit',
-     ReleaseEvent: 'tag',
-     WatchEvent: 'star'
+    CommitCommentEvent: 'comment-discussion',
+    CreateEvent_repository: 'repo-create',
+    CreateEvent_tag: 'tag',
+    CreateEvent_branch: 'git-branch-create',
+    DeleteEvent: 'repo-delete',
+    FollowEvent: 'person-follow',
+    ForkEvent: 'repo-forked',
+    GistEvent: 'gist',
+    GollumEvent: 'repo',
+    IssuesEvent: 'issue-opened',
+    IssueCommentEvent: 'comment-discussion',
+    MemberEvent: 'person',
+    PublicEvent: 'globe',
+    PullRequestEvent: 'git-pull-request',
+    PullRequestReviewEvent_approved: 'check',
+    PullRequestReviewEvent_commented: 'comment-discussion',
+    PullRequestReviewEvent_changes_requested: 'alert',
+    PullRequestReviewCommentEvent: 'comment-discussion',
+    PushEvent: 'git-commit',
+    ReleaseEvent: 'tag',
+    WatchEvent: 'star'
  }
  

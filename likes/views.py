@@ -1,21 +1,24 @@
 from rest_framework.generics import GenericAPIView
 from rest_framework.response import Response
 from likes.models import Like
-from likes.serializers import LikedSerializer, LikesSerializer
+from likes.serializers import LikedSerializer, LikesSerializer, LikeSwaggerResponseSerializer, LikesSwaggerResponseSerializer
 from authors.models import Author
 from posts.models import Post
 from comments.models import Comment
-import json
+from drf_yasg.utils import swagger_auto_schema
 
 class LikedView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
+    tag = "Liked"
+
+    @swagger_auto_schema(tags=[tag], responses={200: LikesSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found" })
     def get(self, request, aid):
         """
-        Get what public things given author has liked
+        list what public things aid liked (remote supported)
         """
         try:
-            liked = Author.objects.get(pk=aid).like_set.all()
+            liked = Author.objects.get(pk=aid).like_set.all().order_by('-published')
         except Author.DoesNotExist as e:
             return Response(str(e), status=404)
         except Exception as e:
@@ -26,9 +29,12 @@ class LikedView(GenericAPIView):
 class PostLikesView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
+    tag = "Likes"
+
+    @swagger_auto_schema(tags=[tag], responses={200: LikesSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found" })
     def get(self, request, aid, pid):
         """
-        Retrieve likes for a given post
+        a list of likes from other authors on aid's post pid
         """
         try:
             Author.objects.get(pk=aid)
@@ -37,13 +43,16 @@ class PostLikesView(GenericAPIView):
             return Response(str(e), status=404)
         except Exception as e:
             return Response(str(e), status=400)
-        like = post.like_set.all()
+        like = post.like_set.all().order_by('-published')
         serializer = LikesSerializer(like)
         return Response(serializer.data, status=200)
 
 class CommentLikesView(GenericAPIView):
     serializer_class = LikesSerializer
     queryset = Like.objects.all()
+    tag = "Likes"
+
+    @swagger_auto_schema(tags=[tag], responses={200: LikesSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found/Comment cannot be found" })
     def get(self, request, aid, pid, cid):
         """
         Retrieve likes for a given comment
@@ -56,6 +65,6 @@ class CommentLikesView(GenericAPIView):
             return Response(str(e), status=404)
         except Exception as e:
             return Response(str(e), status=400)
-        likes = comment.like_set.all()
+        likes = comment.like_set.all().order_by('-published')
         serializer = LikesSerializer(likes)
         return Response(serializer.data, status=200)

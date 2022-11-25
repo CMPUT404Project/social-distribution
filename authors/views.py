@@ -1,17 +1,20 @@
-from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework import permissions
 from .models import Author
-from .serializers import AuthorSerializer, AuthorsSerializer, AuthorViewSerializer
+from .serializers import AuthorSerializer, AuthorsSerializer, AuthorDRFSerializer, AuthorSwaggerResponseSerializer, AuthorsSwaggerResponseSerializer
 from backend.pagination import CustomPagination
 from rest_framework.generics import GenericAPIView
+from drf_yasg.utils import swagger_auto_schema
 
-class AuthorView(ListAPIView):
+class AuthorView(GenericAPIView):
     """
-    Retrieve all authors on server.
+    retrieve all profiles on the server (remote supported, paginated)
     """
     queryset = Author.objects.all()
     serializer_class = AuthorsSerializer
+    tag = "Authors"
+
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorsSwaggerResponseSerializer})
     def get(self, request):
         authors = Author.objects.all()
         pagination = CustomPagination()
@@ -20,12 +23,15 @@ class AuthorView(ListAPIView):
         return Response(serializer.data, status=200)
 
 class AuthorDetail(GenericAPIView):
-    serializer_class = AuthorViewSerializer
+    serializer_class = AuthorDRFSerializer
     queryset = Author.objects.all()
+    tag = "Author"
     # permission_classes = [permissions.IsAuthenticated]
+
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def get(self, request, aid):
         """
-        Retrieve a single author.
+        retrieve aid's profile (remote supported)
         """
         try:
             author = Author.objects.get(pk=aid)
@@ -36,9 +42,10 @@ class AuthorDetail(GenericAPIView):
         serializer = AuthorSerializer(author)
         return Response(serializer.data, status=200)
 
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def put(self, request, aid):
         """
-        Update a single author
+        update aid's profile
         """
         try:
             author = Author.objects.get(pk=aid)
