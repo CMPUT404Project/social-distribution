@@ -134,7 +134,7 @@ export const PostTextbox = () => {
                 // first send to current user's inbox
                 let postWithAuthor = createdPost.data;
                 postWithAuthor["author"] = userJSON;
-                console.log(postWithAuthor);
+                // console.log(postWithAuthor);
                 axios
                     .post("/authors/" + aID + "/inbox/posts", postWithAuthor, {
                         headers: {
@@ -142,47 +142,53 @@ export const PostTextbox = () => {
                             ContentType: "application/JSON",
                         },
                     })
-                    .catch((res) => console.log(postWithAuthor));
+                    .catch((res) => console.log(res));
                 // then to everyone else
                 axios.get("/authors/" + aID + "/followers").then((res) => {
                     let followers = res.items;
                     followers.forEach((user) => {
                         let faID = user.id.split("/authors/")[1];
                         // since team 12 is dealing with the posts' visibility and distribution themselves, all I have to do is send the post
-                        // if (user.host === "https://true-friends-404.herokuapp.com") {
-                        //     axios
-                        //         .post(
-                        //             "https://true-friends-404.herokuapp.com/api/token/obtain/",
-                        //             {
-                        //                 email: "team19@mail.com",
-                        //                 Password: "team19",
-                        //             },
-                        //             {
-                        //                 headers: {
-                        //                     ContentType: "application/json",
-                        //                 },
-                        //             }
-                        //         )
-                        //         .then((res) => {
-                        //             // not sure how to response is suppose to look like
-                        //             let team12AccessToken = res.data.accessToken;
-                        //             team12Data = createdPost;
-                        //             // author is just UUID for them not the whole author object
-                        //             team12Data["author"] = aID;
+                        if (user.host === "https://true-friends-404.herokuapp.com") {
+                            axios
+                                .post(
+                                    "https://true-friends-404.herokuapp.com/api/token/obtain/",
+                                    {
+                                        email: "team19@mail.com",
+                                        Password: "team19",
+                                    },
+                                    {
+                                        headers: {
+                                            ContentType: "application/json",
+                                            "Access-Control-Allow-Origin": "*",
+                                        },
+                                    }
+                                )
+                                .then((res) => {
+                                    // in future maybe save to cookies when the user logs in
+                                    let team12AccessToken = res.data.accessToken;
+                                    let team12Data = createdPost;
+                                    // author is just UUID for them not the whole author object
+                                    team12Data["author"] = aID;
 
-                        //             // Since Team 12 does the inbox distribution on their end, we only need this call.
-                        //             axios.post(
-                        //                 "/authors/" + aID + "/" + sessionStorage.getItem("username") + "/posts/",
-                        //                 data,
-                        //                 {
-                        //                     headers: {
-                        //                         Authorization: team12AccessToken,
-                        //                         ContentType: "application/json",
-                        //                     },
-                        //                 }
-                        //             );
-                        //         });
-                        // }
+                                    // Since Team 12 does the inbox distribution on their end, we only need this call.
+                                    axios.post(
+                                        "https://true-friends-404.herokuapp.com/authors/" +
+                                            aID +
+                                            "/" +
+                                            sessionStorage.getItem("username") +
+                                            "/posts/",
+                                        team12Data,
+                                        {
+                                            headers: {
+                                                Authorization: team12AccessToken,
+                                                "Content-Type": "application/json",
+                                                "Access-Control-Allow-Origin": "*",
+                                            },
+                                        }
+                                    );
+                                });
+                        }
 
                         if (data.visibility === "PUBLIC") {
                             if (user.host === "https://social-distribution-404.herokuapp.com") {
@@ -190,6 +196,7 @@ export const PostTextbox = () => {
                                     headers: {
                                         Authorization: "Bearer " + AuthService.getAccessToken(),
                                         ContentType: "application/JSON",
+                                        "Access-Control-Allow-Origin": "*",
                                     },
                                 });
                             }
@@ -199,12 +206,26 @@ export const PostTextbox = () => {
 
                             // Team 13
                             else if (user.host === "https://cmput404-team13.herokuapp.com") {
-                                //pass for now, waiting for response from discord
+                                axios.put(
+                                    "https://cmput404-team13.herokuapp.com",
+                                    {
+                                        author: { id: aID, displayName: userJSON.displayName },
+                                        originalAuthor: {}
+                                    },
+                                    {
+                                        headers: {
+                                            Authorization: "Bearer " + AuthService.getAccessToken(),
+                                            ContentType: "application/JSON",
+                                            "Access-Control-Allow-Origin": "*",
+                                        },
+                                    }
+                                );
                             }
                         }
                         if (data.visibility === "FRIEND") {
                             axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
-                                if (statusString.toLowerCase().includes("true")) {
+                                // check type? maybe statusString.data?
+                                if (statusString) {
                                     if (user.host === "https://social-distribution-404.herokuapp.com") {
                                         axios.post("/authors/" + faID + "/inbox/posts", createdPost, {
                                             headers: {
@@ -218,7 +239,6 @@ export const PostTextbox = () => {
                                     //  Implemeted above since they do not care if PUBLIC or PRIVATE is sent.
 
                                     // Team 13
-
                                     else if (user.host === "https://cmput404-team13.herokuapp.com") {
                                         // let data13 = data
                                         // data13["published"] = Date()
