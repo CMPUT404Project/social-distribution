@@ -53,6 +53,7 @@ export const PostTextbox = () => {
 
     // https://stackoverflow.com/a/18593669
     const validateURL = (str) => {
+        // console.log(AuthService.retrieveCurrentUser())
         return (
             /^(http|https):\/\/(([a-zA-Z0-9$\-_.+!*'(),;:&=]|%[0-9a-fA-F]{2})+@)?(((25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])){3})|localhost|([a-zA-Z0-9\-\u00C0-\u017F]+\.)+([a-zA-Z]{2,}))(:[0-9]+)?(\/(([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*(\/([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*)*)?(\?([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?(\#([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?)?$/.test(
                 str
@@ -127,7 +128,6 @@ export const PostTextbox = () => {
             unlisted: unlisted,
             author: AuthService.retrieveCurrentUser(),
         };
-
         const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split(
             "/authors/"
         )[1];
@@ -158,35 +158,46 @@ export const PostTextbox = () => {
                                     }
                                 );
                             }
-                            elif (user.host === "https://true-friends-404.herokuapp.com"){
-                                //pass for now
+                            // Team 12
+                            else if (user.host === "https://true-friends-404.herokuapp.com"){
+                                
                             }
-                            elif (user.host === "https://cmput404-team13.herokuapp.com"){
-                                //pass for now
+                            // Team 13
+                            else if (user.host === "https://cmput404-team13.herokuapp.com"){
+                                
                             }
                         }
                         if (data.visibility === "FRIEND") {
-                            // axios.get(user.host + "/authors/" + faID + "/followers/" + aID)
-                            // axios.get("/authors/" + faID + "/followers/" + aID)
-                            if (user.host === "https://social-distribution-404.herokuapp.com") {
-                                axios.post(
-                                    "/authors/" + faID + "/inbox/posts",
-                                    createdPost,
-                                    {
-                                        headers: {
-                                            Authorization:
-                                                "Bearer " + AuthService.getAccessToken(),
-                                            ContentType: "application/JSON",
-                                        },
+                            axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
+                                if (statusString.toLowerCase().includes("true")) {
+                                    if (user.host === "https://social-distribution-404.herokuapp.com") {
+                                        axios.post(
+                                            "/authors/" + faID + "/inbox/posts",
+                                            createdPost,
+                                            {
+                                                headers: {
+                                                    Authorization:
+                                                        "Bearer " + AuthService.getAccessToken(),
+                                                    ContentType: "application/JSON",
+                                                },
+                                            }
+                                        );
                                     }
-                                );
-                            }
-                            elif (user.host === "https://true-friends-404.herokuapp.com"){
-                                //pass for now
-                            }
-                            elif (user.host === "https://cmput404-team13.herokuapp.com"){
-                                //pass for now
-                            }
+                                    // Team 12
+                                    else if (user.host === "https://true-friends-404.herokuapp.com"){
+                                        //pass for now
+                                    }
+                                    // Team 13
+                                    else if (user.host === "https://cmput404-team13.herokuapp.com"){
+                                        // let data13 = data
+                                        // data13["published"] = Date()
+                                        // url = user.host + "/authors/" + faID + "/inbox/" + createdPost.id.split("/posts/")[1]
+                                        // axios.post
+                                    }
+                                }
+                            })
+                            // axios.get("/authors/" + faID + "/followers/" + aID)
+
                         }
                     });
                 });
@@ -297,6 +308,7 @@ export const PostTextbox = () => {
                 >
                     <MenuItem value="PUBLIC">Public</MenuItem>
                     <MenuItem value="FRIENDS">Friends</MenuItem>
+                    <MenuItem value="UNLISTED">Unlisted</MenuItem>
                 </TextField>
 
                 <TextField
