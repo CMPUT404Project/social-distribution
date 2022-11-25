@@ -1,13 +1,4 @@
-import {
-    Avatar,
-    Box,
-    Card,
-    Grid,
-    Menu,
-    MenuItem,
-    TextField,
-    Typography,
-} from "@mui/material";
+import { Avatar, Box, Card, Grid, Menu, MenuItem, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
@@ -228,9 +219,27 @@ export const Post = (props) => {
     const [show, setShow] = useState(false);
     const [anchor, setAnchor] = useState(null);
     const [post, setPost] = useState("");
+    const [comments, setComments] = useState([]);
 
-    let comments = props.data.commentsSrc.comments;
+    // console.log(props)
 
+    const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
+    const pID = props.data.id.split("/posts/")[1];
+
+    useEffect(() => {
+        axios
+            .get("/authors/" + aID + "/posts/" + pID + "/comments", {
+                headers: {
+                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                },
+            })
+            .then((res) => {
+                setComments(res.data.comments);
+            })
+            .catch((res) => console.log(res));
+    }, []);
+
+    // let comments = props.data.comments;
 
     /* 
     Not implemented yet, but will check if you can follow/send friend request to user.
@@ -252,19 +261,14 @@ export const Post = (props) => {
             let split = props.data.id.split("/");
             let aID = split[4];
             let pID = split[6];
-            // TODO: data variable should be sent
+            // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
             let data = { type: "comment" };
-            // console.log({
-            //     headers: {
-            //         Authorization: "Bearer " + props.accessToken,
-            //     },
-            //     data,
-            // });
+            console.log("postTextBox -> " + postTextBox.value);
 
             // TODO: uncomment out once variable data is done
             // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
             //     headers: {
-            //         Authorization: "Bearer " + props.accessToken,
+            //         Authorization: "Bearer " + AuthService.getAccessToken(),
             //     },
             //     data,
             // })
@@ -275,11 +279,7 @@ export const Post = (props) => {
     return (
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             {show && (
-                <Menu
-                    onClose={() => setShow(!show)}
-                    open={show}
-                    anchorEl={anchor}
-                >
+                <Menu onClose={() => setShow(!show)} open={show} anchorEl={anchor}>
                     <MenuItem>Follow</MenuItem>
                     <MenuItem>Send Friend Request</MenuItem>
                 </Menu>
@@ -301,17 +301,13 @@ export const Post = (props) => {
                     }}
                     onClick={onClickHandler}
                 >
-                    <Avatar
-                        alt="user image"
-                        src={props.data.author.profileImage}
-                        style={{ margin: "1ex 1ex" }}
-                    />
-                    <Typography variant="h5">
-                        {props.data.author.displayName}
-                    </Typography>
+                    <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
+                    <Typography variant="h5">{props.data.author.displayName}</Typography>
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
-                <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
+                <Typography variant="h6" textAlign="left">
+                    {props.data.content}
+                </Typography>
             </Card>
             {comments.map((com) => {
                 return (
@@ -324,11 +320,7 @@ export const Post = (props) => {
                             display: "flex",
                         }}
                     >
-                        <Avatar
-                            alt="user image"
-                            src={com["author"]["profileImage"]}
-                            style={{ margin: "1ex 1ex" }}
-                        />
+                        <Avatar alt="user image" src={com["author"]["profileImage"]} style={{ margin: "1ex 1ex" }} />
                         <Typography variant="body1" padding="1em">
                             {com["comment"]}
                         </Typography>
@@ -339,7 +331,7 @@ export const Post = (props) => {
                 id="commentData"
                 onKeyDown={handleEnter}
                 label="Post a comment!"
-                variant="outlined"
+                variant="filled"
                 style={{
                     backgroundColor: "#E5E5E5",
                     borderRadius: "0 0 5px 5px",
@@ -350,37 +342,45 @@ export const Post = (props) => {
 };
 
 function Stream() {
-    const [post, setPost] = useState({});
+    const [posts, setPosts] = useState([]);
 
-    const [accessToken, setAccessToken] = useState(localStorage.getItem('access_token') || sessionStorage.getItem('access_token'));
-    const [refreshToken, setRefreshToken] = useState(localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token'));
+    const [accessToken, setAccessToken] = useState(
+        localStorage.getItem("access_token") || sessionStorage.getItem("access_token")
+    );
+    const [refreshToken, setRefreshToken] = useState(
+        localStorage.getItem("refresh_token") || sessionStorage.getItem("refresh_token")
+    );
 
     useEffect(() => {
-        if (accessToken) {
-            try {
-                const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
-                axios
-                    .get("services/authors/" + aID + "posts", {
-                        headers: { Authorization: "Bearer " + accessToken },
-                    })
-                    .then((res) => {
-                        setPost(res.data);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            } catch (error) {
-                console.error(error)
-            }
-        }
-    }, [accessToken]);
+        const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
+        axios
+            .get("/authors/" + aID + "/inbox?type=posts", {
+                headers: { Authorization: "Bearer " + accessToken },
+            })
+            .then((res) => {
+                // console.log(res)
+                setPosts(res.data.items);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     let fakeData = data;
     return (
         <Grid container justifyContent="center" minHeight={"100%"}>
-            {fakeData.map((d) => {
-                return <Post key={d.id} data={d} accessToken={accessToken} />;
-            })}
+            {/* {fakeData.length === 0 ? <h1>bruh no posts</h1>:fakeData.map((d) => {
+                return <Post key={d.id} data={d} accessToken={accessToken} />
+            })} */}
+            {posts.length === 0 ? (
+                <h1>You currently have no posts!</h1>
+            ) : (
+                posts.map((post) => {
+                    if (post.type === "post") {
+                        return <Post key={post.id} data={post} />;
+                    }
+                })
+            )}
         </Grid>
     );
 }
