@@ -226,11 +226,18 @@ export const Post = (props) => {
     const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
     const pID = props.data.id.split("/posts/")[1];
 
-    axios.get("/authors/" + aID + "/posts/" + pID + "/comments", {
-        headers: {
-            Authorization: "Bearer " + AuthService.getAccessToken(),
-        },
-    }).then((res) => {setComments(res.data.comments)})
+    useEffect(() => {
+        axios
+            .get("/authors/" + aID + "/posts/" + pID + "/comments", {
+                headers: {
+                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                },
+            })
+            .then((res) => {
+                setComments(res.data.comments);
+            })
+            .catch((res) => console.log(res));
+    }, []);
 
     // let comments = props.data.comments;
 
