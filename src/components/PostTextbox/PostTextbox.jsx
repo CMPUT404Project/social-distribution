@@ -206,26 +206,36 @@ export const PostTextbox = () => {
 
                             // Team 13
                             else if (user.host === "https://cmput404-team13.herokuapp.com") {
-                                axios.get("/authors/" + aID + "/posts/" + createdPost.data.id.split("/posts/")[1], {
-                                    headers: {
-                                        Authorization: "Bearer " + AuthService.getAccessToken(),
-                                    },
-                                })
-                                axios.put(
-                                    "https://cmput404-team13.herokuapp.com",
-                                    {
-                                        author: { id: aID, displayName: userJSON.displayName },
-                                        originalAuthor: {id : createdPost.data.origin.split("/authors/")[1].split("/posts/")[0], displayName}
-                                    },
-                                    {
-                                        headers: {
-                                            Authorization: "Bearer " + AuthService.getAccessToken(),
-                                            ContentType: "application/JSON",
-                                            "Access-Control-Allow-Origin": "*",
-                                            
+                                axios
+                                    .put(
+                                        "https://cmput404-team13.herokuapp.com/authors/" + aID + "/posts/",
+                                        {
+                                            author: { id: aID, displayName: userJSON.displayName },
+                                            // originalAuthor: {
+                                            //     id: createdPost.data.origin.split("/authors/")[1].split("/posts/")[0],
+                                            //     displayName,
+                                            // },
+                                            Id: createdPost.data.id.split("/posts/")[1]
                                         },
-                                    }
-                                );
+                                        {
+                                            headers: {
+                                                Authorization: "Bearer " + AuthService.getAccessToken(),
+                                            },
+                                        }
+                                    )
+                                    .then((res) => {
+                                        // sourceDisplayName = res.data.axios.put(
+                                        //     "https://cmput404-team13.herokuapp.com",
+
+                                        //     {
+                                        //         headers: {
+                                        //             Authorization: "Bearer " + AuthService.getAccessToken(),
+                                        //             ContentType: "application/JSON",
+                                        //             "Access-Control-Allow-Origin": "*",
+                                        //         },
+                                        //     }
+                                        // );
+                                    });
                             }
                         }
                         if (data.visibility === "FRIEND") {
