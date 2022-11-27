@@ -331,9 +331,14 @@ export const Post = (props) => {
                         }}
                     >
                         <Avatar alt="user image" src={com["author"]["profileImage"]} style={{ margin: "1ex 1ex" }} />
-                        <Typography variant="body1" padding="1em">
-                            {com["comment"]}
-                        </Typography>
+                        <div>
+                            <Typography variant="body1" padding="1em" fontWeight="bold">
+                                {com.author.displayName}
+                            </Typography>
+                            <Typography variant="body1" padding="1em">
+                                {com["comment"]}
+                            </Typography>
+                        </div>
                     </Card>
                 );
             })}
