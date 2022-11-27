@@ -1,4 +1,4 @@
-import { Avatar, Box, Card, Grid, Menu, MenuItem, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Card, Grid, Menu, MenuItem, Pagination, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
@@ -233,6 +233,8 @@ export const Post = (props) => {
                 },
             })
             .then((res) => {
+                console.log("/authors/" + aID + "/posts/" + pID + "/comments")
+                console.log(AuthService.getAccessToken())
                 setComments(res.data.comments);
             })
             .catch((err) => console.log(err));
@@ -285,7 +287,6 @@ export const Post = (props) => {
                 });
         }
     };
-
     return (
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             {show && (
@@ -318,8 +319,10 @@ export const Post = (props) => {
                 <Typography variant="h6" textAlign="left">
                     {props.data.content}
                 </Typography>
+                
             </Card>
-            {comments.map((com) => {
+            {/* slice is to prevent mutation of the original array of comments */}
+            {comments.slice().reverse().map((com) => {
                 return (
                     <Card
                         key={com.id}
