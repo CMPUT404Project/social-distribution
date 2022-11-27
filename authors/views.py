@@ -1,55 +1,62 @@
-from django.http import HttpResponse
-from rest_framework.pagination import PageNumberPagination
-from rest_framework.generics import ListAPIView
-from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import permissions
-from authors.models import Author
-from django.http import HttpResponse
-from authors.serializers import AuthorSerializer, AuthorsSerializer
+from .models import Author
+from .serializers import AuthorSerializer, AuthorsSerializer, AuthorDRFSerializer, AuthorSwaggerResponseSerializer, AuthorsSwaggerResponseSerializer
+from backend.permissions import CustomDjangoModelPermissions
+from backend.pagination import CustomPagination
+from rest_framework.generics import GenericAPIView
+from drf_yasg.utils import swagger_auto_schema
 
-class AuthorView(ListAPIView):
+class AuthorView(GenericAPIView):
     """
-    Retrieve all authors on server.
+    retrieve all profiles on the server (remote supported, paginated)
     """
+    queryset = Author.objects.all()
     serializer_class = AuthorsSerializer
-    queryset = Author.objects.all()
-    def get(self, request):
-        author = Author.objects.all()
-        serializer = AuthorsSerializer(author)
-        return Response(serializer.data, status=200)
+    permission_classes = [CustomDjangoModelPermissions]
+    tag = "Authors"
     
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorsSwaggerResponseSerializer})
+    def get(self, request):
+        authors = Author.objects.all()
+        pagination = CustomPagination()
+        paginated_authors = pagination.paginate(authors, page=request.GET.get('page'), size=request.GET.get('size'))
+        serializer = AuthorsSerializer(paginated_authors)
+        return Response(serializer.data, status=200)
 
-class AuthorDetail(APIView):
-    serializer_class = AuthorSerializer
+class AuthorDetail(GenericAPIView):
+    serializer_class = AuthorDRFSerializer
     queryset = Author.objects.all()
+    permission_classes = [CustomDjangoModelPermissions]
 
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_object(self, pk):
-        try:
-            return Author.objects.get(pk=pk)
-        except Author.DoesNotExist:
-            raise HttpResponse.Http404
-
+    tag = "Author"
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def get(self, request, aid):
         """
-        Retrieve a single author.
+        retrieve aid's profile (remote supported)
         """
         try:
             author = Author.objects.get(pk=aid)
-        except Author.DoesNotExist:
-            return HttpResponse(status=404)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         serializer = AuthorSerializer(author)
         return Response(serializer.data, status=200)
 
+    @swagger_auto_schema(tags=[tag], responses={200: AuthorSwaggerResponseSerializer, 404: "Author cannot be found", 400: "Bad Request"})
     def put(self, request, aid):
         """
-        Update a single author
+        update aid's profile
         """
-        author = self.get_object(aid)
+        try:
+            author = Author.objects.get(pk=aid)
+        except Author.DoesNotExist as e:
+            return Response(str(e), status=404)
+        except Exception as e:
+            return Response(str(e), status=400)
         serializer = AuthorSerializer(author, data=request.data)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=204)
+            return Response(serializer.data, status=200)
         return Response(serializer.errors, status=400)

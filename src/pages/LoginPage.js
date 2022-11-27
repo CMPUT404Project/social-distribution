@@ -1,24 +1,26 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import axios from 'axios';
+import { useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import ClipLoader from 'react-spinners/ClipLoader';
 
-import { setAxiosAuthToken } from "../utils";
 import AuthService from "../services/AuthService";
+
 
 // Import Material UI Icons
 import CheckBoxOutlinedIcon from '@mui/icons-material/CheckBoxOutlined';
-import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import VisibilityIcon from '@mui/icons-material/Visibility';
-import PersonIcon from '@mui/icons-material/Person';
 import LockIcon from '@mui/icons-material/Lock';
+import PersonIcon from '@mui/icons-material/Person';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 
 // Import Material UI Components
+import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import IconButton from '@mui/material/IconButton';
-import Checkbox from '@mui/material/Checkbox';
 
 function LoginPage() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const from = location.state?.from || "/homepage";
     const [values, setValues] = useState({
         username: sessionStorage.getItem('username') || "",
         password: "",
@@ -28,6 +30,9 @@ function LoginPage() {
         showPassword: false,
         showError: false,
     })
+
+    const [isLoading, setLoading] = useState(false);
+
     const [errorMessage, setErrorMessage] = useState('Please fill in all the fields');
 
     useEffect(() => {
@@ -52,11 +57,15 @@ function LoginPage() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        setLoading(true);
         try {
             if (values.username && values.password) {
                 const response = await AuthService.login(values.username, values.password, rememberMe)
-                    .then(() => {
-                        navigate("/homepage", {replace: true})
+                    .then((response) => {
+                        sessionStorage.removeItem("username")
+                        localStorage.removeItem("username")
+                        setLoading(false);
+                        navigate(from, {replace: true})
                     }, error => {
                         return error
                     })
@@ -77,10 +86,17 @@ function LoginPage() {
             } else {
                 setErrorMessage("Failed to login. Try again");
             }
+            setLoading(false);
         };
     };
 
     return (
+        <>
+        {isLoading ? (
+            <div className="container" style={{alignItems: "flex-start"}}>
+                <ClipLoader color={'#fff'} loading={isLoading} size={150} />
+            </div>
+        ) : (
         <div className="container">
             <div className="login-card">
                 <span className="login-title">
@@ -150,7 +166,8 @@ function LoginPage() {
                     </Link>
                 </div>
             </div>
-        </div>
+        </div>)};
+        </>
     )
 }
 

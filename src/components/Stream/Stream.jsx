@@ -17,6 +17,7 @@ import React, { useEffect, useState } from "react";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 
 import AuthService from "../../services/AuthService";
+import { Comment } from "./Comment";
 
 let data = [
     {
@@ -56,7 +57,7 @@ let data = [
             // HATEOS url for Github API
             github: "http://github.com/laracroft",
             // Image from a public domain (optional, can be missing)
-            profileImage: "https://i.imgur.com/UH5RrFK.jpeg",
+            profileImage: "https://i.imgur.com/k7XVwpB.jpeg",
         },
         // categories this post fits into (a list of strings
         categories: ["web", "tutorial"],
@@ -228,113 +229,30 @@ let data = [
     },
 ];
 
-export const Comment = (props) => {
-    const [likeableComment, setLikeableComment] = useState(true);
-    const [likes, setLikes] = useState(0);
-
-    const split = props.data.id.split("/");
-    const aID = split[4];
-    const pID = split[6];
-    const cID = split[8];
-
-    const currentUser = JSON.parse(AuthService.retrieveCurrentUser());
-
-    // TODO: Uncomment when likes backend API is complete
-    // useEffect(() => {
-    //     axios
-    //         .get(
-    //             "/service/authors/" +
-    //                 aID +
-    //                 "/posts/" +
-    //                 pID +
-    //                 "/comments/" +
-    //                 cID +
-    //                 "/likes",
-    //             {
-    //                 headers: {
-    //                     Authorization: "Bearer " + props.accessToken,
-    //                 },
-    //             }
-    //         )
-    //         .then((res) => {
-    //             const likeList = res.data;
-    //             setLikes(likeList.length);
-    //         })
-    //         .catch((e) => {
-    //             console.log(e);
-    //         });
-    // }, []);
-
-    const handleLikeOnClick = (e) => {
-        setLikeableComment(!likeableComment);
-        data = {
-            summary: currentUser.displayName + " Likes your comment",
-            type: "Like",
-            author: currentUser,
-            object: props.data.id,
-        };
-        const aID = currentUser.id.split("/authors/")[1];
-        console.log(
-            "Make POST request to ->" +
-                "/service/authors/" +
-                aID +
-                "/inbox/" +
-                "\nData -> "
-        );
-        console.log(data);
-        // TODO: Uncomment when API is available
-        // axios.post("/service/authors/" + aID + "/inbox/", data, {
-        //     headers: {
-        //         Authorization: "Bearer " + props.accessToken,
-        //     },
-        // }).catch((err) => console.log(err));
-    };
-    return (
-        <Card
-            elevation={10}
-            style={{
-                backgroundColor: "#D3D3D3",
-                borderRadius: "0",
-                display: "flex",
-                alignItems: "center",
-            }}
-        >
-            <Tooltip title={props.data.author.displayName}>
-                <Avatar
-                    alt="user image"
-                    src={props.data["author"]["profileImage"]}
-                    style={{ margin: "1ex 1ex" }}
-                />
-            </Tooltip>
-            <Typography variant="body1" padding="1em">
-                {props.data["comment"]}
-            </Typography>
-            <Button
-                style={{
-                    marginLeft: "auto",
-                    marginRight: "1ex",
-                    height: "60%",
-                }}
-                variant={likeableComment ? "contained" : "disabled"}
-                onClick={handleLikeOnClick}
-                endIcon={<ThumbUpIcon />}
-            >
-                {likes}
-            </Button>
-        </Card>
-    );
-};
-
 export const Post = (props) => {
     const [show, setShow] = useState(false);
     const [anchor, setAnchor] = useState(null);
+    const [comments, setComments] = useState([]);
     const [likeablePost, setLikeablePost] = useState(true);
     const [likes, setLikes] = useState(0);
-    const [comments, setComments] = useState(props.data.commentsSrc.comments);
+    const [isCommentsSubmitted, setIsCommentSubmitted] = useState(false);
 
-    const split = props.data.id.split("/");
-    const aID = props.data.id.split("/")[4];
-    const pID = props.data.id.split("/")[6];
+    const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
+    const pID = props.data.id.split("/posts/")[1];
+
+    // isSubmitted is used to let the webpage know to reload the comments
+    useEffect(() => {
+        axios
+            .get("/authors/" + aID + "/posts/" + pID + "/comments", {
+                headers: {
+                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                },
+            })
+            .then((res) => {
+                setComments(res.data.comments);
+            })
+            .catch((err) => console.log(err));
+    }, [isCommentsSubmitted]);
 
     // TODO: Uncomment when likes backend API is complete
     // useEffect(() => {
@@ -350,36 +268,30 @@ export const Post = (props) => {
     //         });
     // }, []);
 
-    const currentUser = JSON.parse(AuthService.retrieveCurrentUser());
-    // console.log(props);
-    const handleLikeOnClick = () => {
-        setLikeablePost(!likeablePost);
-        data = {
-            summary: currentUser.displayName + " Likes your post",
-            type: "Like",
-            author: currentUser,
-            object: props.data.id,
-        };
-        const aID = currentUser.id.split("/authors/")[1];
-        console.log(
-            "Make POST request to ->" +
-                "/service/authors/" +
-                aID +
-                "/inbox/" +
-                "\nData -> "
-        );
-        console.log(data);
-        //     TODO: Uncomment when API is available
-        //     axios
-        //         .post("/service/authors/" + aID + "/inbox/", data, {
-        //             headers: {
-        //                 Authorization: "Bearer " + props.accessToken,
-        //             },
-        //         })
-        //         .catch((err) => {
-        //             console.log(err);
-        //         });
-    };
+    // const currentUser = JSON.parse(AuthService.retrieveCurrentUser());
+    // // console.log(props);
+    // const handleLikeOnClick = () => {
+    //     setLikeablePost(!likeablePost);
+    //     data = {
+    //         summary: currentUser.displayName + " Likes your post",
+    //         type: "Like",
+    //         author: currentUser,
+    //         object: props.data.id,
+    //     };
+    //     const aID = currentUser.id.split("/authors/")[1];
+    //     console.log("Make POST request to ->" + "/service/authors/" + aID + "/inbox/" + "\nData -> ");
+    //     console.log(data);
+    //     //     TODO: Uncomment when API is available
+    //     //     axios
+    //     //         .post("/service/authors/" + aID + "/inbox/", data, {
+    //     //             headers: {
+    //     //                 Authorization: "Bearer " + props.accessToken,
+    //     //             },
+    //     //         })
+    //     //         .catch((err) => {
+    //     //             console.log(err);
+    //     //         });
+    // };
 
     /* 
     Not implemented yet, but will check if you can follow/send friend request to user.
@@ -395,66 +307,48 @@ export const Post = (props) => {
     const handleEnter = (e) => {
         if (e.key === "Enter" && e.target.value !== "") {
             e.preventDefault();
-            const postTextBox = document.getElementById("commentData");
-            // console.log(props.data);
+            const postTextBox = e.target.value;
+
             let split = props.data.id.split("/");
             let aID = split[4];
             let pID = split[6];
+            // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
             let data = {
                 type: "comment",
-                comment: postTextBox.value,
-                contentType: "text/markdown",
-                published: new Date().toISOString(),
+                author: JSON.parse(AuthService.retrieveCurrentUser()),
+                comment: postTextBox,
+                post: props.data.id.split("/posts/")[1],
+                contentType: "text/plain",
             };
-            console.log("postTextBox -> " + postTextBox.value);
-            console.log(data);
 
-            // TODO: uncomment out once variable data is done
-            // axios
-            //     .post(
-            //         "service/authors/" + aID + "/posts/" + pID + "/comments",
-            //         data,
-            //         {
-            //             headers: {
-            //                 Authorization: "Bearer " + props.accessToken,
-            //             },
-            //         }
-            //     )
-            //    // TODO: if POST response returns the comment, then change to something
-            //    //like: setComments([...comments, res.data])
-            //     .then((res) => {
-            //         axios
-            //             .get(
-            //                 "/service/authors/" +
-            //                     aID +
-            //                     "/posts/" +
-            //                     pID +
-            //                     "/comments"
-            //             )
-            //             .then((res) => {
-            //                 data = res.data;
-            //                 setComments(data.comments);
-            //             });
-            //     })
-            //     .catch((err) => console.log(err));
-            postTextBox.value = "";
+            const postAuthorID = props.data.author.id.split("/authors/")[1];
+            axios
+                .post("/authors/" + postAuthorID + "/inbox", data, {
+                    headers: {
+                        Authorization: "Bearer " + AuthService.getAccessToken(),
+                        ContentType: "application/json",
+                    },
+                })
+                .then(() => {
+                    setIsCommentSubmitted(!isCommentsSubmitted);
+                    e.target.value = "";
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         }
     };
-
     return (
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             {show && (
-                <Menu
-                    onClose={() => setShow(!show)}
-                    open={show}
-                    anchorEl={anchor}
-                >
+                <Menu onClose={() => setShow(!show)} open={show} anchorEl={anchor}>
                     <MenuItem>Follow</MenuItem>
                     <MenuItem>Send Friend Request</MenuItem>
                 </Menu>
             )}
             <Card
                 style={{
+                    textAlign: "center",
                     padding: "2em",
                     margin: "2em 0 0",
                     borderRadius: "10px 10px 0 0",
@@ -466,33 +360,57 @@ export const Post = (props) => {
                         display: "flex",
                         flexDirection: "row",
                         alignItems: "center",
-                        textAlign: "center",
                     }}
                     onClick={onClickHandler}
                 >
-                    <Avatar
-                        alt="user image"
-                        src={props.data.author.profileImage}
-                        style={{ margin: "1ex 1ex" }}
-                    />
-                    <Typography variant="h5">
-                        {props.data.author.displayName}
-                    </Typography>
+                    <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
+                    <Typography variant="h5">{props.data.author.displayName}</Typography>
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
-                <Typography variant="h6">{props.data.content}</Typography>
-                <Button
-                    style={{ marginTop: "1ex" }}
-                    variant={likeablePost ? "contained" : "disabled"}
-                    onClick={handleLikeOnClick}
-                    endIcon={<ThumbUpIcon />}
-                >
-                    {likes}
-                </Button>
+                <Typography variant="h6" textAlign="left">
+                    {props.data.content}
+                </Typography>
             </Card>
-            {comments.map((com) => (
-                <Comment key={com.id} data={com} />
-            ))}
+            {/* slice is to prevent mutation of the original array of comments */}
+            {comments
+                .slice()
+                .reverse()
+                .map((com) => {
+                    return (
+                        <Comment key={com.id} data={com}/>
+                        // <Card
+                        //     key={com.id}
+                        //     elevation={10}
+                        //     style={{
+                        //         backgroundColor: "#D3D3D3",
+                        //         borderRadius: "0",
+                        //         display: "flex",
+                        //     }}
+                        // >
+                        //     <Avatar
+                        //         alt="user image"
+                        //         src={com["author"]["profileImage"]}
+                        //         style={{ margin: "1ex 1ex" }}
+                        //     />
+                        //     <div>
+                        //         <Typography variant="body1" padding="1em" fontWeight="bold">
+                        //             {com.author.displayName}
+                        //         </Typography>
+                        //         <Typography variant="body1" padding="1em">
+                        //             {com["comment"]}
+                        //         </Typography>
+                        //     </div>
+                        //     <Button
+                        //         style={{margin:"2em 0 2em auto", left: "-50px"}}
+                        //         variant={likeablePost ? "contained" : "disabled"}
+                        //         onClick={handleLikeOnClick}
+                        //         endIcon={<ThumbUpIcon />}
+                        //     >
+                        //         {likes}
+                        //     </Button>
+                        // </Card>
+                    );
+                })}
             <TextField
                 id="commentData"
                 onKeyDown={handleEnter}
@@ -508,43 +426,44 @@ export const Post = (props) => {
 };
 
 function Stream() {
-    const [post, setPost] = useState({});
+    const [posts, setPosts] = useState([]);
 
     const [accessToken, setAccessToken] = useState(
-        localStorage.getItem("access_token") ||
-            sessionStorage.getItem("access_token")
+        localStorage.getItem("access_token") || sessionStorage.getItem("access_token")
     );
     const [refreshToken, setRefreshToken] = useState(
-        localStorage.getItem("refresh_token") ||
-            sessionStorage.getItem("refresh_token")
+        localStorage.getItem("refresh_token") || sessionStorage.getItem("refresh_token")
     );
 
     useEffect(() => {
-        if (accessToken) {
-            try {
-                const aID =
-                    jwtDecode(accessToken)["author_id"].split("/authors")[1];
-                axios
-                    .get("services/authors/" + aID + "posts", {
-                        headers: { Authorization: "Bearer " + accessToken },
-                    })
-                    .then((res) => {
-                        setPost(res.data);
-                    })
-                    .catch((err) => {
-                        console.log(err);
-                    });
-            } catch (error) {
-                console.error(error);
-            }
-        }
-    }, [accessToken]);
+        const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
+        axios
+            .get("/authors/" + aID + "/inbox?type=posts", {
+                headers: { Authorization: "Bearer " + accessToken },
+            })
+            .then((res) => {
+                setPosts(res.data.items);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
+    let fakeData = data;
     return (
         <Grid container justifyContent="center" minHeight={"100%"}>
-            {data.map((d) => {
-                return <Post key={d.id} data={d} accessToken={accessToken} />;
-            })}
+            {/* {fakeData.length === 0 ? <h1>bruh no posts</h1>:fakeData.map((d) => {
+                return <Post key={d.id} data={d} accessToken={accessToken} />
+            })} */}
+            {posts.length === 0 ? (
+                <h1>You currently have no posts!</h1>
+            ) : (
+                posts.map((post) => {
+                    if (post.type === "post") {
+                        return <Post key={post.id} data={post} />;
+                    }
+                })
+            )}
         </Grid>
     );
 }
