@@ -232,8 +232,6 @@ export const Post = (props) => {
                 },
             })
             .then((res) => {
-                console.log("/authors/" + aID + "/posts/" + pID + "/comments")
-                console.log(AuthService.getAccessToken())
                 setComments(res.data.comments);
             })
             .catch((err) => console.log(err));
