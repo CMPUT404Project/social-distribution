@@ -1,6 +1,5 @@
-import { Avatar, Box, Card, Grid, Menu, MenuItem, Pagination, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Card, Grid, Menu, MenuItem, TextField, Typography } from "@mui/material";
 import axios from "axios";
-import jwtDecode from "jwt-decode";
 import React, { useEffect, useState } from "react";
 
 import AuthService from "../../services/AuthService";
