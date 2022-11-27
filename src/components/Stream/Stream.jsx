@@ -218,14 +218,13 @@ let data = [
 export const Post = (props) => {
     const [show, setShow] = useState(false);
     const [anchor, setAnchor] = useState(null);
-    const [post, setPost] = useState("");
     const [comments, setComments] = useState([]);
-
-    // console.log(props)
+    const [isCommentsSubmitted, setIsCommentSubmitted] = useState(false);
 
     const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
     const pID = props.data.id.split("/posts/")[1];
 
+    // isSubmitted is used to let the webpage know to reload the comments
     useEffect(() => {
         axios
             .get("/authors/" + aID + "/posts/" + pID + "/comments", {
@@ -236,8 +235,8 @@ export const Post = (props) => {
             .then((res) => {
                 setComments(res.data.comments);
             })
-            .catch((res) => console.log(res));
-    }, []);
+            .catch((err) => console.log(err));
+    }, [isCommentsSubmitted]);
 
     // let comments = props.data.comments;
 
@@ -250,29 +249,40 @@ export const Post = (props) => {
     };
 
     /* 
-
     When making a comment, pressing the "Enter" key will be the trigger for posting a comment.
     */
     const handleEnter = (e) => {
         if (e.key === "Enter" && e.target.value !== "") {
             e.preventDefault();
-            const postTextBox = document.getElementById("commentData");
-            // console.log(props.data);
+            const postTextBox = e.target.value;
+
             let split = props.data.id.split("/");
             let aID = split[4];
             let pID = split[6];
             // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
-            let data = { type: "comment" };
-            console.log("postTextBox -> " + postTextBox.value);
+            let data = {
+                type: "comment",
+                author: JSON.parse(AuthService.retrieveCurrentUser()),
+                comment: postTextBox,
+                post: props.data.id.split("/posts/")[1],
+                contentType: "text/plain",
+            };
 
-            // TODO: uncomment out once variable data is done
-            // axios.post("service/authors/" + aID + "/posts/" + pID + "/comments", {
-            //     headers: {
-            //         Authorization: "Bearer " + AuthService.getAccessToken(),
-            //     },
-            //     data,
-            // })
-            postTextBox.value = "";
+            const postAuthorID = props.data.author.id.split("/authors/")[1];
+            axios
+                .post("/authors/" + postAuthorID + "/inbox", data, {
+                    headers: {
+                        Authorization: "Bearer " + AuthService.getAccessToken(),
+                        ContentType: "application/json",
+                    },
+                })
+                .then(() => {
+                    setIsCommentSubmitted(!isCommentsSubmitted);
+                    e.target.value = "";
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
         }
     };
 
@@ -358,7 +368,6 @@ function Stream() {
                 headers: { Authorization: "Bearer " + accessToken },
             })
             .then((res) => {
-                // console.log(res)
                 setPosts(res.data.items);
             })
             .catch((err) => {
