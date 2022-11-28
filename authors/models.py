@@ -13,5 +13,7 @@ class Author(models.Model):
     followers = models.ManyToManyField("self", blank=True, symmetrical=False)
 
     def save(self, *args, **kwargs):
+        if self.host[-1] != '/':
+            self.host += '/'
         self.url = str(self.host) + "authors/" + str(self.id)
         super().save(*args, **kwargs)

@@ -17,15 +17,15 @@ from followRequests.models import FollowRequest
 from followRequests.serializers import FollowRequestSerializer, FollowRequestCreationSerializer, FollowRequestSwaggerRequestSerializer, FollowRequestSwaggerResponseSerializer
 
 def check_author_and_create_serialization(data):
-    author = Author.objects.filter(url=data.get('author').get('url')).first()
     data['author']['id'] = data.get('author').get('id').split('/')[-1]
+    author = Author.objects.filter(id=data['author']['id']).first()
     if not author:
         return AuthorRemoteCreationSerializer(data=data.get('author'))
     return AuthorRemoteCreationSerializer(author, data=data.get('author'))
 
 def handle_follow_type_inbox(data, author, inbox):
-    follow_actor = Author.objects.filter(url=data['actor']['url']).first()
-    data['actor']['id'] = data['actor']['id'].split('/')[-1]
+    data['actor']['id'] = data.get('actor').get('id').split('/')[-1]
+    follow_actor = Author.objects.filter(id=data['actor']['id']).first()
     if not follow_actor:
         serializer = AuthorRemoteCreationSerializer(data=data['actor'])
     serializer = AuthorRemoteCreationSerializer(follow_actor, data=data['actor'])
