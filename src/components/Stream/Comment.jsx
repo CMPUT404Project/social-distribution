@@ -49,11 +49,11 @@ export const Comment = (props) => {
                 },
             })
             .catch((err) => {
-                if (err.response.status == 409){
-                    console.log("You already like this post!")
+                if (err.response.status == 409) {
+                    console.log("You already like this post!");
+                } else {
+                    console.log(err);
                 }
-                else{console.log(err);}
-                
             });
     };
 
