@@ -4,13 +4,14 @@ import ClipLoader from 'react-spinners/ClipLoader';
 
 import NavBar from "../components/NavBar/NavBar";
 import AuthService from "../services/AuthService";
+import { retrieveCurrentAuthor } from "../utils";
 
 import axios from 'axios';
 
 const BASE_URL = "https://api.github.com/users/";
 
 function GithubPage() {
-    const author = JSON.parse(AuthService.retrieveCurrentAuthor());
+    const author = retrieveCurrentAuthor();
     const [values, setValues] = useState({
         fullname: "",
         username: author.github.split('.com/')[1],

@@ -6,6 +6,7 @@ import { Container, TextField } from "@mui/material";
 import FollowersList from "../components/FriendsList/FollowersList";
 import NavBar from "../components/NavBar/NavBar";
 import AuthService from "../services/AuthService";
+import {retrieveCurrentAuthor} from "../utils/index"
 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
@@ -15,7 +16,7 @@ import './FollowersPage.css'
 const teams = ["12", "13"]
 
 function FollowersPage() {
-    const author = JSON.parse(AuthService.retrieveCurrentAuthor())
+    const author = retrieveCurrentAuthor();
     const currentAuthorID = author.id.split("authors/")[1];
     const [followers, setFollowers] = useState([]);
     const [allAuthors, setAllAuthors] = useState([]);
@@ -31,7 +32,6 @@ function FollowersPage() {
     }, []);
 
     useEffect(() => {
-        console.log(followers)
         if (allAuthors.length > 0) {
             setLoading(false)
         }
@@ -165,7 +165,6 @@ function FollowersPage() {
                         <FollowersList 
                             followers={followers}
                             currentAuthorID={currentAuthorID}
-                            isEmpty={isEmpty}
                         />
                     </Container>
                 </div> 

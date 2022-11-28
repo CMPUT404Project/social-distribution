@@ -96,8 +96,7 @@ export const User = (props) => {
 export default class FollowersList extends Component {
     propTypes: {
         followers: PropTypes.isRequired,
-        currentAuthorID: PropTypes.isRequired,
-        isEmpty: PropTypes.isRequired
+        currentAuthorID: PropTypes.isRequired
     }
 
     renderEvents() {

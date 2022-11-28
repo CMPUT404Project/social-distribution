@@ -23,6 +23,7 @@ import {
     Snackbar
 } from '@mui/material';
 import { useEffect } from "react";
+import { type } from "@testing-library/user-event/dist/type";
 
 function SlideTransition(props: SlideProps) {
     return <Slide{...props} direction="down"/>;
@@ -38,7 +39,9 @@ function ProfilePage() {
         profileImage: defaultAuthor.profileImage || "",
     })
 
+    const [isExistingRequest, setIsExistingRequest] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
+    const [isFriend, setIsFriend] = useState(false);
 
     const [editState, setEditState] = useState(false)
     const [isLoading, setLoading] = useState(true);
@@ -61,10 +64,11 @@ function ProfilePage() {
             })
             setLoading(false);
         } else {
+            checkFollowStatus(currentAuthorID);
             setEditState(false);
             setIsAuthor(false);
+            checkExistingRequest(currentAuthorID);
             getAuthorDetails();
-            checkFollowStatus();
         };
     }, [authorID])
 
@@ -78,10 +82,26 @@ function ProfilePage() {
         })
     }
 
-    const checkFollowStatus = async () => {
-        await AuthService.getFollowStatus(authorID).then((data) => {
+    const checkFollowStatus = async (currentAuthorID) => {
+        await AuthService.getFollowStatus(currentAuthorID, authorID).then(async (data) => {
             setIsFollowing(data)
+            if (data) {
+                await AuthService.getFollowStatus(authorID, currentAuthorID).then((data2) => {
+                    setIsFriend(data2)
+                })
+            }
             setLoading(false);
+        })
+    }
+
+    const checkExistingRequest = async (currentAuthorID) => {
+        await AuthService.getInboxItems(type="follows", authorID).then((data) => {
+            data.items.forEach(followRequest => {
+                let followRequestID = followRequest.actor.id.split("authors/")[1]
+                if (followRequestID === currentAuthorID) {
+                    setIsExistingRequest(true);
+                }
+            });
         })
     }
 
@@ -178,16 +198,15 @@ function ProfilePage() {
     }
 
     const handleFollow = async (event) => {
-        let alterText = "";
+        console.log(isFollowing);
         let response = "";
         try {
             setLoading(true)
-            if (event.target.innerText === "SEND FOLLOW REQUEST") {
-                alterText = "already";
+            if (event.target.textContent === "Send Follow Request") {
                 const response = await AuthService.sendInboxItem("follow", authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
                             errorMessage: "Sent a follow request to " + authorValues.displayName})
-                    setIsFollowing(true);
+                    setIsExistingRequest(true)
                     handleOpen();
                 }, error => {
                     return error;
@@ -195,12 +214,25 @@ function ProfilePage() {
                 if (response) {
                     throw response;
                 };
-            } else if (event.target.innerText === "UNFOLLOW") {
-                alterText = "don't";
+            } else if (event.target.textContent === "Cancel pending follow request") {
+                const response = await AuthService.cancelFollowRequest(authorID).then(() => {
+                    setAlertDetails({alertSeverity: "success", 
+                            errorMessage: "Cancelled follow request to " + authorValues.displayName})
+                    setIsFollowing(false);
+                    setIsExistingRequest(false);
+                    handleOpen();
+                }, error => {
+                    return error;
+                });
+                if (response) {
+                    throw response;
+                };
+            } else if (event.target.textContent === "Unfollow") {
                 const response = await AuthService.unfollowAuthor(authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
-                            errorMessage: "Successfully unfollowed " + authorValues.displayName})
+                            errorMessage: "Unfollowed " + authorValues.displayName})
                     setIsFollowing(false);
+                    setIsExistingRequest(false);
                     handleOpen();
                 }, error => {
                     return error;
@@ -209,7 +241,6 @@ function ProfilePage() {
                     throw response;
                 };
             }
-
         } catch (error) {
             console.log(error.response);
             if (error.response.status === 404) {
@@ -263,28 +294,17 @@ function ProfilePage() {
             </Snackbar>
             <div className="container" style={{alignItems: "flex-start"}}>
                 <div className="profile-details-card">
-                    <div className="test-container">
-                        <span className="profile-title">
-                            {isAuthor ? ("Edit Profile") : authorValues.displayName ? (authorValues.displayName + "'s Profile") : ("UNKNOWN Profile")}
-                        </span>
-                        {!isAuthor ? (
-                            <Button 
-                                variant="contained"
-                                sx={{
-                                    position: "absolute",
-                                    top: 0,
-                                    right: 0,
-                                    fontWeight: "600"}}
-                                onClick={handleFollow}
-                            >
-                                {isFollowing ? ("Unfollow") : ("Send Follow Request")}
-                            </Button>
-                        ) : (<></>)}
-                    </div>
-
+                    <span className="profile-title">
+                        {isAuthor ? ("Edit Profile") : authorValues.displayName ? (authorValues.displayName + "'s Profile") : ("UNKNOWN Profile")}
+                    </span>
                     <Avatar 
                         src={authorValues.profileImage}
-                        sx={{width: 150, height: 150, margin: "auto", border: "2px solid black"}}
+                        sx={{
+                            width: 150,
+                            height: 150,
+                            margin: "auto",
+                            border: isFriend ? "5px solid gold" : "2px solid black"
+                        }}
                     />
                     <div className="edit-container">
                             <div className="edit-field-label">
@@ -376,7 +396,20 @@ function ProfilePage() {
                             />
                         </div>
                     </div>
-                    {!isAuthor ? (<></>) : editState ? (
+                    {!isAuthor ? (
+                        <div className="follow-btn-container">
+                            <Button 
+                                variant="contained"
+                                sx={{fontWeight: "600"}}
+                                onClick={handleFollow}
+                            >
+                                {isFollowing ? ("Unfollow") 
+                                : isExistingRequest ? ("Cancel pending follow request") 
+                                : ("Send Follow Request")}
+                            </Button>
+                        </div>
+                        
+                    ) : editState ? (
                         <div className="update-profile-btn-container">
                             <button className="update-profile-btn" onClick={handleUpdateProfile}>
                                 Update

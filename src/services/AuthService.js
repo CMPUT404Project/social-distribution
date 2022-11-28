@@ -75,7 +75,7 @@ class AuthService {
         });
     }
 
-    retrieveCurrentAuthor() {
+    retrieveCurrentUser() {
         return sessionStorage.getItem('author') || localStorage.getItem('author');
     }
 
@@ -124,20 +124,35 @@ class AuthService {
         return response.data
     }
 
-    // async getPostDetails() {
+    async getFollowStatus(authorID, foreignID) {
+        setAxiosDefaults();
+        // const authorID = getCurrentAuthorID();
+        console.log("/authors/" + foreignID + "/followers/" + authorID)
+        const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);
+        return response.data
+    }
 
-    // }
-
-    async getFollowStatus(foreignID) {
+    async cancelFollowRequest(foreignID) {
         setAxiosDefaults();
         const authorID = getCurrentAuthorID();
-        const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);
+        const response = await axios.delete("/authors/" + foreignID + "/followRequest/" + authorID);
+        return response.data
+    }
+
+    async unfollowAuthor(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.delete("/authors/" + foreignID + "/followers/" + authorID);
         return response.data
     }
 
     async getInboxItems(type="", authorID) {
         setAxiosDefaults();
-        const response = await axios.get("/authors/" + authorID + "/inbox");
+        let path = "/authors/" + authorID + "/inbox";
+        if (type) {
+            path = path + "?type=" + type;
+        }
+        const response = await axios.get(path);
         return response.data
     }
 
@@ -154,7 +169,7 @@ class AuthService {
             body.content = "";
             body.categories = "";
         } else if (type === "follow") {
-            body.summary = currentAuthor.displayName + " wants to follow " + author.displayName
+            body.summary = currentAuthor.displayName + " wants to follow you"
         } else if (type === "like") {
             body.context = {};
             body.summary = "";
@@ -167,13 +182,6 @@ class AuthService {
         const response = await axios.post("/authors/" + authorID + "/inbox", body);
         console.log(response.data)
         // return response.data
-    }
-
-    async unfollowAuthor(foreignID) {
-        setAxiosDefaults();
-        const authorID = getCurrentAuthorID();
-        const response = await axios.delete("/authors/" + foreignID + "/followers/" + authorID);
-        return response.data
     }
 }
 
