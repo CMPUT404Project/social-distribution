@@ -1,15 +1,13 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Avatar, Button, Card, Typography } from "@mui/material";
 import axios from "axios";
-import _ from "lodash";
-import React, { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import AuthService from "../../services/AuthService";
 
 export const Comment = (props) => {
-    const [likeablePost, setLikeablePost] = useState(true);
+    const [likeableComment, setLikeableComment] = useState(true);
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
-    const [likesFlag, setLikesFlag] = useState(false);
 
     const userJSON = JSON.parse(AuthService.retrieveCurrentUser());
     useEffect(() => {
@@ -27,16 +25,15 @@ export const Comment = (props) => {
                 setLikes(res.data.items.length);
                 setLikesList(res.data.items);
                 likesList.forEach((element) => {
-                    setLikeablePost(element.author.id !== userJSON.id);
+                    setLikeableComment(element.author.id !== userJSON.id);
                 });
             });
-    }, [likes]);
+    }, [likes, likeableComment]);
 
     const handleLikeOnClick = () => {
-        setLikeablePost(false);
         const data = {
             context: "http://TODO.com",
-            summary: userJSON.displayName + " Likes your post",
+            summary: userJSON.displayName + " Likes your comment",
             type: "Like",
             author: userJSON,
             object: props.data.id,
@@ -48,8 +45,11 @@ export const Comment = (props) => {
                     Authorization: "Bearer " + AuthService.getAccessToken(),
                 },
             })
+            .then(() => {
+                setLikeableComment(false);
+            })
             .catch((err) => {
-                if (err.response.status == 409) {
+                if (err.response.status === 409) {
                     console.log("You already like this post!");
                 } else {
                     console.log(err);
@@ -78,7 +78,7 @@ export const Comment = (props) => {
             </div>
             <Button
                 style={{ margin: "2em 0 2em auto", left: "-50px" }}
-                variant={likeablePost ? "contained" : "outlined"}
+                variant={likeableComment ? "contained" : "disabled"}
                 onClick={handleLikeOnClick}
                 endIcon={<ThumbUpIcon />}
             >
