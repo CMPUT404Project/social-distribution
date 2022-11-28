@@ -20,3 +20,12 @@ class UserCreationSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         if self.is_valid():
             return User.objects.create_user(username=validated_data.get("username"), password=validated_data.get("password"))
+
+class UserRegistrationSwaggerRequestSerializer(serializers.ModelSerializer):
+    profileImage = serializers.URLField(required=False)
+    github = serializers.URLField(required=False)
+    displayName = serializers.CharField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('username', 'password', 'displayName', 'github', 'profileImage')

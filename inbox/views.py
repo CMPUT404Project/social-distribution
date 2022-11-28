@@ -166,7 +166,6 @@ class InboxView(GenericAPIView):
         else:
             return Response("Please enter a valid query parameter", status=400)
         return Response(serializer.data, status=200)
-        
 
     @swagger_auto_schema(tags=[tag], responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Inbox cannot be found" })
     def delete(self, request, aid):
