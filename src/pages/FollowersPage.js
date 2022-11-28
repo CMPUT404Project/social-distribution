@@ -4,22 +4,26 @@ import ClipLoader from 'react-spinners/ClipLoader';
 import { Container, TextField } from "@mui/material";
 
 import FollowersList from "../components/FriendsList/FollowersList";
+import SearchResults from "../components/FriendsList/SearchResults";
 import NavBar from "../components/NavBar/NavBar";
 import AuthService from "../services/AuthService";
-import {retrieveCurrentAuthor} from "../utils/index"
+import RemoteAuthService from "../services/RemoteAuthService";
+import {retrieveCurrentAuthor} from "../utils/index";
 
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 
 import './FollowersPage.css'
 
-const teams = ["12", "13"]
+const teams = ["Team 12", "Team 13"]
 
 function FollowersPage() {
     const author = retrieveCurrentAuthor();
     const currentAuthorID = author.id.split("authors/")[1];
     const [followers, setFollowers] = useState([]);
-    const [allAuthors, setAllAuthors] = useState([]);
+    const [allLocalAuthors, setAllLocalAuthors] = useState([]);
+    const [allTeam12Authors, setAllTeam12Authors] = useState([]);
+    const [allTeam13Authors, setAllTeam13Authors] = useState([]);
 
     const [searchField, setSearchField] = useState("");
 
@@ -32,12 +36,19 @@ function FollowersPage() {
     }, []);
 
     useEffect(() => {
-        if (allAuthors.length > 0) {
+        if (allLocalAuthors.length > 0) {
             setLoading(false)
         }
     }, [searchField])
 
-    
+    useEffect(() => {
+        console.log("Local")
+        console.log(allLocalAuthors)
+        console.log("12")
+        console.log(allTeam12Authors)
+        console.log("13")
+        console.log(allTeam13Authors)
+    }, [allLocalAuthors, allTeam12Authors, allTeam13Authors])
 
     const getFollowerData = async () => {
         await AuthService.getAuthorFollowers().then((data) => {
@@ -56,13 +67,17 @@ function FollowersPage() {
     const getAllAuthors = async () => {
         await AuthService.getAllAuthors().then((data) => {
             if (data.items) {
-                setAllAuthors([...allAuthors, ...data.items])
+                setAllLocalAuthors([...allLocalAuthors, ...data.items])
             }
         })
         teams.forEach(team => {
-            AuthService.getRemoteAuthors(team).then((data) => {
-                if (data.items) {
-                    setAllAuthors([...allAuthors, ...data.items])
+            RemoteAuthService.getRemoteAuthors(team).then((data) => {
+                if (data) {
+                    if (team === "Team 12") {
+                        setAllTeam12Authors([...allTeam12Authors, ...data])
+                    } else if (team === "Team 13") {
+                        setAllTeam13Authors([...allTeam13Authors, ...data])
+                    }
                 }
             })
         });
@@ -161,11 +176,25 @@ function FollowersPage() {
                                 </IconButton>
                             </span>
                         </div>
-                        <h1>Search Results</h1> <br/>
-                        <FollowersList 
-                            followers={followers}
-                            currentAuthorID={currentAuthorID}
+                        <h1>Search Results</h1>
+                        <h3>Locals</h3>
+                        <SearchResults
+                            team={"Local"}
+                            input={searchField}
+                            authors={allLocalAuthors}
                         />
+                        {teams.map(team => {
+                            return <>
+                                <h3>{team}</h3>
+                                <SearchResults 
+                                    key={team.id}
+                                    team={team}
+                                    input={searchField}
+                                    authors={eval("all"+team.replace(" ",'')+"Authors")}
+                                />
+                            </>
+                        })}
+
                     </Container>
                 </div> 
             )}

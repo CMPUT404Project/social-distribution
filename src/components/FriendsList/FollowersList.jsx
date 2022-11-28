@@ -96,12 +96,11 @@ export const User = (props) => {
 export default class FollowersList extends Component {
     propTypes: {
         followers: PropTypes.isRequired,
-        currentAuthorID: PropTypes.isRequired
     }
 
     renderEvents() {
         return this.props.followers.map(follower => {
-            return <User key={follower.id} data={follower} currentAuthorID={this.props.currentAuthorID}></User>;
+            return <User key={follower.id} data={follower}></User>;
         })
     }
 

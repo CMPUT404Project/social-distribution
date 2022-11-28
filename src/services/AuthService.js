@@ -90,31 +90,10 @@ class AuthService {
     async getAllAuthors() {
         setAxiosDefaults();
         const response = await axios.get("/authors")
-        console.log(response.data)
-        // console.log("/service/authors" + aID + "/followers")
-        // setFollowers(res["items"]);
         if (response.status === 200) {
             return response.data 
         }
         return response.data
-    }
-
-    async getRemoteAuthors(remoteNode) {
-        let remoteAuthorsUrl = ""
-        if (remoteNode === "13") {
-            remoteAuthorsUrl = "https://cmput404-team13.herokuapp.com/authors?page=1&size=1000"
-        } else if (remoteNode === "12") {
-            remoteAuthorsUrl = "https://true-friends-404.herokuapp.com/authors/"
-        }
-        return await axios.get(remoteAuthorsUrl).then((response) => {
-            console.log(response)
-            return response.data;
-        }).catch((error) => {
-            if (error.response) {
-                console.log(error.response)
-            }
-            return [];
-        });
     }
 
     async getAuthorFollowers() {
@@ -126,8 +105,6 @@ class AuthService {
 
     async getFollowStatus(authorID, foreignID) {
         setAxiosDefaults();
-        // const authorID = getCurrentAuthorID();
-        console.log("/authors/" + foreignID + "/followers/" + authorID)
         const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);
         return response.data
     }
