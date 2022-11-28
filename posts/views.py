@@ -45,10 +45,8 @@ class PostView(GenericAPIView):
         data.update({"author": aid})
         serializer = PostCreationSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            post = Post.objects.get(pk=serializer.data.get('id'))
-            view_serializer = PostSerializer(post)
-            return Response(view_serializer.data, status=201)
+            post = serializer.save()
+            return Response(PostSerializer(post).data, status=201)
         return Response(serializer.errors, status=400)
 
 class PostIDView(GenericAPIView):
@@ -90,10 +88,8 @@ class PostIDView(GenericAPIView):
         data.update({"author": aid, "id": pid})
         serializer = PostCreationWithIDSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            post = Post.objects.get(pk=pid)
-            view_serializer = PostSerializer(post)
-            return Response(view_serializer.data, status=201)
+            post = serializer.save()
+            return Response(PostSerializer(post).data, status=201)
         return Response(serializer.errors, status=400)
         
     @swagger_auto_schema(tags=[tag], request_body=PostsViewSerializer, responses={200: PostSwaggerResponseSerializer, 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})
@@ -112,10 +108,8 @@ class PostIDView(GenericAPIView):
         data.update({"author": aid, "id": pid})
         serializer = PostCreationSerializer(post, data=data)
         if serializer.is_valid():
-            serializer.save()
-            post = Post.objects.get(pk=serializer.data.get('id'))
-            view_serializer = PostSerializer(post)
-            return Response(view_serializer.data, status=200)
+            post = serializer.save()
+            return Response(PostSerializer(post).data, status=200)
         return Response(serializer.errors, status=400)
 
     @swagger_auto_schema(tags=[tag], responses={204: "", 400: "Bad Request", 404: "Author cannot be found/Post cannot be found"})    
