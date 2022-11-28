@@ -198,7 +198,7 @@ export const PostTextbox = () => {
                             var originalAuthorData = {};
                             // if the current user is where the post originated
                             if (data.origin === createdPost.id) {
-                                originalAuthor = {
+                                originalAuthorData = {
                                     id: aID,
                                     displayName: userJSON.displayName,
                                 };
