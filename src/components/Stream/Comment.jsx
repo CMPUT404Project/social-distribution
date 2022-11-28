@@ -1,48 +1,47 @@
-import {
-    Avatar,
-    Box,
-    Button,
-    Card,
-    Grid,
-    Menu,
-    MenuItem,
-    SvgIcon,
-    TextField,
-    Tooltip,
-    Typography,
-} from "@mui/material";
-import axios from "axios";
-import jwtDecode from "jwt-decode";
-import React, { useEffect, useState } from "react";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
+import { Avatar, Button, Card, Typography } from "@mui/material";
+import axios from "axios";
+import _ from "lodash";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import AuthService from "../../services/AuthService";
 
 export const Comment = (props) => {
     const [likeablePost, setLikeablePost] = useState(true);
+    const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
+    const [likesFlag, setLikesFlag] = useState(false);
 
-    const userJSON = JSON.parse(AuthService.retrieveCurrentUser())
-    console.log(props)
+    const userJSON = JSON.parse(AuthService.retrieveCurrentUser());
     useEffect(() => {
-        const commentURITokens = props.data.id.split("/")
-        const aid = commentURITokens[4]
-        const pid = commentURITokens[6]
-        const cid = commentURITokens[8]
-        axios.get("/authors/" + aid + "/posts/" + pid + "/comments/" + cid)
-    }, [])
+        const commentURITokens = props.data.id.split("/");
+        const aid = commentURITokens[4];
+        const pid = commentURITokens[6];
+        const cid = commentURITokens[8];
+        axios
+            .get("/authors/" + aid + "/posts/" + pid + "/comments/" + cid + "/likes", {
+                headers: {
+                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                },
+            })
+            .then((res) => {
+                setLikes(res.data.items.length);
+                setLikesList(res.data.items);
+                likesList.forEach((element) => {
+                    setLikeablePost(element.author.id !== userJSON.id);
+                });
+            });
+    }, [likes]);
 
     const handleLikeOnClick = () => {
-        setLikeablePost(!likeablePost);
+        setLikeablePost(false);
         const data = {
-            context: "TODO",
+            context: "http://TODO.com",
             summary: userJSON.displayName + " Likes your post",
             type: "Like",
             author: userJSON,
             object: props.data.id,
         };
         const aID = userJSON.id.split("/authors/")[1];
-        // console.log("Make POST request to ->" + "/service/authors/" + aID + "/inbox/" + "\nData -> ");
-        console.log(data); 
         axios
             .post("/authors/" + aID + "/inbox", data, {
                 headers: {
@@ -50,7 +49,11 @@ export const Comment = (props) => {
                 },
             })
             .catch((err) => {
-                console.log(err);
+                if (err.response.status == 409){
+                    console.log("You already like this post!")
+                }
+                else{console.log(err);}
+                
             });
     };
 
