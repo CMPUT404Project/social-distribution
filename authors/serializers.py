@@ -2,6 +2,7 @@ from rest_framework import serializers
 from .models import Author
 
 class AuthorDRFSerializer(serializers.ModelSerializer):
+    displayName = serializers.CharField(required=True)
     class Meta:
         model = Author
         fields = ['displayName', 'github', 'profileImage']
@@ -10,7 +11,6 @@ class AuthorSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.SerializerMethodField()
     host = serializers.UUIDField(read_only=True)
-
     class Meta:
         model = Author
         fields = ['type', 'id', 'host', 'url',
@@ -38,12 +38,14 @@ class AuthorsSerializer(serializers.ModelSerializer):
         return 'authors'
 
 class AuthorCreationSerializer(serializers.ModelSerializer):
+    displayName = serializers.CharField(required=True)
     class Meta:
         model = Author
-        fields = ['host', 'user']
+        fields = ['host', 'user', 'displayName', 'github', 'profileImage']
 
 class AuthorRemoteCreationSerializer(serializers.ModelSerializer):
     id = serializers.UUIDField()
+    displayName = serializers.CharField(required=True)
     class Meta:
         model = Author
         fields = ['id', 'host', 'url',
@@ -80,6 +82,7 @@ class AuthorSwaggerRequestSerializer(serializers.ModelSerializer):
     id = serializers.URLField(required=True)
     host = serializers.URLField(required=True)
     url = serializers.URLField(required=True)
+    displayName = serializers.CharField(required=True)
     
     class Meta:
         model = Author
