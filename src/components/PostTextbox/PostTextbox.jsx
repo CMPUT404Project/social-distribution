@@ -187,7 +187,7 @@ export const PostTextbox = () => {
                 setOrigin("");
                 setContent("");
                 setVisibility("PUBLIC");
-                setTags([]);
+                setTags("");
                 setDescription("");
                 setContentType("text/plain");
                 setUnlisted(false);

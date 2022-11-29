@@ -73,7 +73,7 @@ class FollowerDetailView(GenericAPIView):
             return Response("Successfully added follower", status=201)
         return Response("Follower already exists", status=409)
 
-    @swagger_auto_schema(tags=[tag], responses={204: "", 409: "Follower already exists", 404: "Author cannot be found/Follower cannot be found", 400: "Bad Request"})
+    @swagger_auto_schema(tags=[tag], responses={204: "", 404: "Author cannot be found/Follower cannot be found", 400: "Bad Request"})
     def delete(self, request, aid, fid):
         """
         remove fid as a follower of aid
