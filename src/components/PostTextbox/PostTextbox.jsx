@@ -6,8 +6,6 @@ import AuthService from "../../services/AuthService";
 
 export const PostTextbox = () => {
     const [title, setTitle] = useState("");
-    const [source, setSource] = useState("");
-    const [origin, setOrigin] = useState("");
     const [content, setContent] = useState("");
     // TODO: Get markdown/base64 example to try.
     const [contentType, setContentType] = useState("text/plain");
@@ -29,11 +27,6 @@ export const PostTextbox = () => {
         }
     }, [unlisted]);
 
-    // TODO: trim only works for frontend viewing, not for the backend array. Somehow trim category before it enters array?
-    // const filterOptions = createFilterOptions({
-    //     trim: true,
-    // });
-
     const handleUnlistedChange = (e) => {
         if (unlisted === true) {
             setVisibilityLogic(false);
@@ -44,65 +37,7 @@ export const PostTextbox = () => {
         setUnlisted(e.target.value);
     };
 
-    // https://stackoverflow.com/a/18593669
-    const validateURL = (str) => {
-        // console.log(AuthService.retrieveCurrentUser())
-        return (
-            /^(http|https):\/\/(([a-zA-Z0-9$\-_.+!*'(),;:&=]|%[0-9a-fA-F]{2})+@)?(((25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])(\.(25[0-5]|2[0-4][0-9]|[0-1][0-9][0-9]|[1-9][0-9]|[0-9])){3})|localhost|([a-zA-Z0-9\-\u00C0-\u017F]+\.)+([a-zA-Z]{2,}))(:[0-9]+)?(\/(([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*(\/([a-zA-Z0-9$\-_.+!*'(),;:@&=]|%[0-9a-fA-F]{2})*)*)?(\?([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?(\#([a-zA-Z0-9$\-_.+!*'(),;:@&=\/?]|%[0-9a-fA-F]{2})*)?)?$/.test(
-                str
-            ) || str === ""
-        );
-    };
-
-    // if visibility is friends then make a
-    //     GET [local, remote]: get a list of authors who are AUTHOR_ID’s followers -> [users]
-    //          for each from item in users ->
-    // GET [local, remote] check if FOREIGN_AUTHOR_ID is a follower of AUTHOR_ID
-
-    // const FriendsPostRequest = (data) => {
-    //     const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split(
-    //         "/authors/"
-    //     )[1];
-    //     axios
-    //         .get("/service/authors/" + aID + "/followers", {
-    //             headers: {
-    //                 Authorization: "Bearer " + AuthService.getAccessToken(),
-    //                 // contenttype???
-    //             },
-    //         })
-    //         .then((res) => {
-    //             const followers = res.items;
-    //             followers.forEach((user) => {
-    //                 let fID = user.id.split("/authors/")[1];
-
-    //                 axios.post(
-    //                     "/service/authors/" + fID + "/inbox/post",
-    //                     data,
-    //                     {
-    //                         headers: {
-    //                             Authorization:
-    //                                 "Bearer " + AuthService.getAccessToken(),
-    //                             // contenttype???
-    //                         },
-    //                     }
-    //                 );
-    //             });
-    //         })
-    //         .catch((res) => console.log(res));
-    // };
-
     const onFormSubmit = (e) => {
-        // console.log(
-        //     title,
-        //     source,
-        //     origin,
-        //     content,
-        //     visibility,
-        //     tags,
-        //     description,
-        //     contentType,
-        //     unlisted
-        // );
         let tokens = [];
         if (tags !== "") {
             tokens = tags.split(",").map((word) => word.trim());
@@ -110,8 +45,6 @@ export const PostTextbox = () => {
         const data = {
             type: "post",
             title: title,
-            source: source,
-            origin: origin,
             content: content,
             visibility: visibility,
             categories: tokens,
@@ -151,10 +84,11 @@ export const PostTextbox = () => {
                     // Team 12 and 13 must be here since they only require 1 call per post.
                     followers.forEach((user) => {
                         let faID = user.id.split("/authors/")[1];
-                        console.log(user.host)
-                        console.log(user.host.includes("http://127.0.0.1:8000"))
-                        if (user.host.includes("https://social-distribution-404.herokuapp.com") || user.host.includes("http://127.0.0.1:8000") || user.host.includes("localhost")) {
-                            console.log("does it reach")
+                        if (
+                            user.host.includes("https://social-distribution-404.herokuapp.com") ||
+                            user.host.includes("http://127.0.0.1:8000") ||
+                            user.host.includes("localhost")
+                        ) {
                             if (data.visibility === "PUBLIC") {
                                 axios.post("/authors/" + faID + "/inbox", createdPost.data, {
                                     headers: {
@@ -186,8 +120,6 @@ export const PostTextbox = () => {
             .finally(() => {
                 setAlert("Post submitted!");
                 setTitle("");
-                setSource("");
-                setOrigin("");
                 setContent("");
                 setVisibility("PUBLIC");
                 setTags("");
@@ -196,14 +128,6 @@ export const PostTextbox = () => {
                 setUnlisted(false);
                 setOpen(true);
             });
-    };
-
-    const onSourceChange = (e) => {
-        setSource(e.target.value);
-    };
-
-    const onOriginChange = (e) => {
-        setOrigin(e.target.value);
     };
 
     const handleContentTypeChange = (e) => {
@@ -246,10 +170,6 @@ export const PostTextbox = () => {
                     multiline
                     onInput={(e) => setDescription(e.target.value)}
                 />
-                {/* <InputLabel id="permissions">Permission</InputLabel> */}
-                {/* TODO: Are source and origin optional? */}
-                <TextField label="Source" variant="filled" onInput={onSourceChange} error={!validateURL(source)} />
-                <TextField label="Origin" variant="filled" onInput={onOriginChange} error={!validateURL(origin)} />
                 <TextField
                     label={"Should this post be unlisted?"}
                     select
@@ -289,33 +209,6 @@ export const PostTextbox = () => {
                         </MenuItem>
                     ))}
                 </TextField>
-
-                {/* <Autocomplete
-                    multiple
-                    freeSolo
-                    filterOptions={filterOptions}
-                    options={[]}
-                    value={tags || []}
-                    // TODO: Tags in the empty can be white spaces BUT SHOULD NOT BE ABLE TO, for some reason my condition does not work, something to do with e.defaultMuiPrevented IMO or String.trim()
-                    onChange={(e, currentTags) => {
-                        if (e.key === "Enter") {
-                            if (e.target.value.trim() !== "") {
-                                setTags(currentTags);
-                            } else if (e.target.value.trim() === "") {
-                                e.target.value = "";
-                                e.defaultMuiPrevented = true;
-                            }
-                            // console.log(currentTags, tags);
-                        }
-                    }}
-                    renderInput={(params) => (
-                        <TextField
-                            {...params}
-                            variant="filled"
-                            label="Press enter to create a tag!"
-                        />
-                    )}
-                /> */}
                 <TextField
                     label={"Enter tags seperated by commas!"}
                     variant="filled"
