@@ -153,7 +153,7 @@ export const PostTextbox = () => {
                         let faID = user.id.split("/authors/")[1];
                         console.log(user.host)
                         console.log(user.host.includes("http://127.0.0.1:8000"))
-                        if (user.host.includes("https://social-distribution-404.herokuapp.com") || user.host.includes("http://127.0.0.1:8000")) {
+                        if (user.host.includes("https://social-distribution-404.herokuapp.com") || user.host.includes("http://127.0.0.1:8000") || user.host.includes("localhost")) {
                             console.log("does it reach")
                             if (data.visibility === "PUBLIC") {
                                 axios.post("/authors/" + faID + "/inbox", createdPost.data, {
