@@ -3,19 +3,31 @@ import jwtDecode from "jwt-decode";
 
 import { getCurrentAuthorID, getAccessToken, retrieveCurrentAuthor, setAxiosDefaults } from "../utils";
 
-class RemoteAuthService {
-    async getAuthorDetails(authorID) {
-        setAxiosDefaults();
-        const response = await axios.get("/authors/" + authorID);
-        if (response.status === 200) {
-            return response.data
-        }
+const team12Instance = axios.create({
+    baseURL: "https://cmput404-team13.herokuapp.com",
+    headers: {
+        'Content-type': "application/json",
+        'Authorization': "JWT eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjc4MzE3OTQ2LCJpYXQiOjE2Njk2Nzc5NDYsImp0aSI6ImRiMjIwMmZjNGVjOTQ2MzQ4ZWFhNzY5OGMyN2U3NmI4IiwidXNlcl9lbWFpbCI6InRlYW0xOUBtYWlsLmNvbSJ9.57aZOwQJMaOOoYHpzzoOTPWw3hz7c1jxvg1EVYoeMfg"
     }
-    
+})
+
+const team13Instance = axios.create({
+    baseURL: "https://true-friends-404.herokuapp.com"
+})
+
+class RemoteAuthService {
+
+    // async getAuthorDetails(remoteNode, authorID) {
+    //     if (remoteNode === "Team 12") {
+
+    //     } else if (remoteNode === "Team 13") {
+
+    //     }
+    // }
+
     async getRemoteAuthors(remoteNode) {
-        let remoteAuthorsUrl = ""
         if (remoteNode === "Team 13") {
-            remoteAuthorsUrl = "https://cmput404-team13.herokuapp.com/authors?page=1&size=1000"
+            let remoteAuthorsUrl = "https://cmput404-team13.herokuapp.com/authors?page=1&size=1000"
             return await axios.get(remoteAuthorsUrl).then((response) => {
                 return response.data.authorsPage;
             }).catch((error) => {
@@ -25,7 +37,7 @@ class RemoteAuthService {
                 return [];
             });
         } else if (remoteNode === "Team 12") {
-            remoteAuthorsUrl = "https://true-friends-404.herokuapp.com/authors/"
+            let remoteAuthorsUrl = "https://true-friends-404.herokuapp.com/authors/"
             return await axios.get(remoteAuthorsUrl, {
                 headers: {
                     'Content-type': "application/json",

@@ -32,7 +32,7 @@ export const User = (props) => {
     };
 
     const handleUserClick = (event) => {
-        if (team === "Local") {
+        if (team === "local") {
             navigate("/profile/" + foreignID)
         } else {
             navigate("/profile/remote/" + team + "/" + foreignID)

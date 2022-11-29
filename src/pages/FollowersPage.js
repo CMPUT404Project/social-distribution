@@ -41,15 +41,6 @@ function FollowersPage() {
         }
     }, [searchField])
 
-    useEffect(() => {
-        console.log("Local")
-        console.log(allLocalAuthors)
-        console.log("12")
-        console.log(allTeam12Authors)
-        console.log("13")
-        console.log(allTeam13Authors)
-    }, [allLocalAuthors, allTeam12Authors, allTeam13Authors])
-
     const getFollowerData = async () => {
         await AuthService.getAuthorFollowers().then((data) => {
             setFollowers(data.items);

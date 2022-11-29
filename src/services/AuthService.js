@@ -23,23 +23,20 @@ class AuthService {
             await setAxiosDefaults();
             await this.storeCurrentAuthor()
         }
-        return response.data
     }
 
     async register(username, password, body) {
         const response = await axios.post('api/users/register',
             {
                 username: username,
-                password: password
+                password: password,
+                ...body
             }
         )
         if (response.status === 201) {
             sessionStorage.setItem('access_token', response.data.access);
             sessionStorage.setItem('refresh_token', response.data.refresh);
             await setAxiosDefaults();
-            await this.storeCurrentAuthor()
-            const updateReponse = await this.updateAuthorDetails(body);
-            return updateReponse
         }
         return response.data
     }
@@ -123,7 +120,7 @@ class AuthService {
         return response.data
     }
 
-    async getInboxItems(type="", authorID) {
+    async getInboxItems(authorID, type="") {
         setAxiosDefaults();
         let path = "/authors/" + authorID + "/inbox";
         if (type) {

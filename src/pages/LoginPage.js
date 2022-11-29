@@ -61,9 +61,7 @@ function LoginPage() {
         try {
             if (values.username && values.password) {
                 const response = await AuthService.login(values.username, values.password, rememberMe)
-                    .then((response) => {
-                        sessionStorage.removeItem("username")
-                        localStorage.removeItem("username")
+                    .then(() => {
                         setLoading(false);
                         navigate(from, {replace: true})
                     }, error => {

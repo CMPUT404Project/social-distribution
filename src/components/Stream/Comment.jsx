@@ -2,6 +2,9 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Avatar, Button, Card, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+
+import {getAccessToken} from "../../utils/index"
+
 import AuthService from "../../services/AuthService";
 
 export const Comment = (props) => {
@@ -18,7 +21,7 @@ export const Comment = (props) => {
         axios
             .get("/authors/" + aid + "/posts/" + pid + "/comments/" + cid + "/likes", {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then((res) => {
@@ -42,7 +45,7 @@ export const Comment = (props) => {
         axios
             .post("/authors/" + aID + "/inbox", data, {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then(() => {

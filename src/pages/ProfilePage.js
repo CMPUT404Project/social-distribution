@@ -64,7 +64,7 @@ function ProfilePage() {
             })
         }
         const checkExistingRequest = async (currentAuthorID) => {
-            await AuthService.getInboxItems("follows", authorID).then((data) => {
+            await AuthService.getInboxItems(authorID, "follows").then((data) => {
                 data.items.forEach(followRequest => {
                     let followRequestID = followRequest.actor.id.split("authors/")[1]
                     if (followRequestID === currentAuthorID) {
@@ -325,7 +325,7 @@ function ProfilePage() {
                                         disabled={!editState}
                                         variant="outlined"
                                         name="profileImage"
-                                        placeholder="Leave blank to remove image"
+                                        placeholder={isAuthor ? "Leave blank to remove image" : "None"}
                                         value={authorValues.profileImage}
                                         onChange={handleInputChange("profileImage")}
                                         type="text" 
@@ -384,7 +384,7 @@ function ProfilePage() {
                                 disabled={!editState}
                                 variant="outlined"
                                 name="github"
-                                placeholder="Leave blank to remove Github"
+                                placeholder={isAuthor ? "Leave blank to remove Github" : "None"}
                                 value={authorValues.github}
                                 onChange={handleInputChange("github")}
                                 type="text" 
