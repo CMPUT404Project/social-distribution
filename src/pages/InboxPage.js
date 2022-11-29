@@ -35,7 +35,6 @@ function InboxPage() {
     useEffect(() => {
         const getInboxItems = async (currentAuthorID) => {
             await AuthService.getInboxItems(currentAuthorID).then((data) => {
-                console.log(data.items);
                 setInboxItems([...inboxItems, ...data.items])
             })
         }
@@ -57,7 +56,7 @@ function InboxPage() {
                     <Tab sx={{color: "rgba(0, 0, 0, 0.6)", fontSize: "20px"}} value={"Inbox"} label="Inbox" />
                     <Tab sx={{color: "rgba(0, 0, 0, 0.6)", fontSize: "20px"}} value={"Requests"} label="Requests" />
                 </Tabs>
-                <Container style={{paddingLeft: "150px"}}>
+                <Container style={{paddingTop: "15px",paddingLeft: "150px", paddingRight: "150px"}}>
                     <InboxItemsList tab={tabIndex} inboxItems={inboxItems}/>
                 </Container>
             </div>

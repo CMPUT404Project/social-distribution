@@ -134,17 +134,21 @@ export default class InboxItemsList extends Component {
         if (this.props.tab === "Inbox") {
             return this.props.inboxItems.map(inboxItem => {
                 console.log(inboxItem)
-                if (inboxItem.type === "comment") {
+                if (inboxItem.type.toLowerCase() === "comment") {
                     return <InboxCommentItem key={inboxItem.id} data={inboxItem}/>
-                } else if (inboxItem.type === "post") {
+                } else if (inboxItem.type.toLowerCase() === "post") {
                     return <InboxPostItem key={inboxItem.id} data={inboxItem}/>
-                } else if (inboxItem.type === "like") {
+                } else if (inboxItem.type.toLowerCase() === "like") {
                     return <InboxLikeItem key={inboxItem.id} data={inboxItem}/>
                 }
-                console.log(inboxItem.type)
-                return;
             })
-        }
+        } else if (this.props.tab === "Requests") {
+            return this.props.inboxItems.map(inboxItem => {
+                if (inboxItem.type.toLowerCase() === "follow") {
+                    return <InboxCommentItem key={inboxItem.id} data={inboxItem}/>
+                }
+            })
+        } 
     }
 
     render() {
