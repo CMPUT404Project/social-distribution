@@ -1,13 +1,5 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import {
-    Avatar,
-    Box,
-    Button,
-    Card,
-    Grid,
-    Menu,
-    MenuItem, TextField, Typography
-} from "@mui/material";
+import { Avatar, Box, Button, Card, Grid, Menu, MenuItem, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -223,21 +215,11 @@ function Stream() {
                     if (post.type === "post") {
                         return <Post key={post.id} data={post} />;
                     }
-                    return
+                    return;
                 })
             )}
         </Grid>
     );
 }
 
-
-// return (
-//     <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
-//         <div><PostTextbox /></div>
-        
-//         {fakeData.map((d) => {
-//             return <Post key={d.id} data={d} accessToken={accessToken} />;
-//         })}
-//     </Grid>
-// );
 export default Stream;
