@@ -25,7 +25,9 @@ export const Comment = (props) => {
                 setLikes(res.data.items.length);
                 setLikesList(res.data.items);
                 likesList.forEach((element) => {
-                    setLikeableComment(element.author.id !== userJSON.id);
+                    if (element.author.id !== userJSON.id) {
+                        setLikeableComment(false);
+                    }
                 });
             });
     }, [likes, likeableComment]);
@@ -38,22 +40,33 @@ export const Comment = (props) => {
             author: userJSON,
             object: props.data.id,
         };
-        const aID = userJSON.id.split("/authors/")[1];
+        // console.log(data);
+        // this gets the aID of the author's comment
         axios
-            .post("/authors/" + aID + "/inbox", data, {
+            .get(props.data.id, {
                 headers: {
                     Authorization: "Bearer " + AuthService.getAccessToken(),
                 },
             })
-            .then(() => {
-                setLikeableComment(false);
-            })
-            .catch((err) => {
-                if (err.response.status === 409) {
-                    console.log("You already like this post!");
-                } else {
-                    console.log(err);
-                }
+            .then((res) => {
+                let commenterUUID = res.data.author.id.split("/authors/")[1];
+                // send to inbox of the commenter on the post
+                axios
+                    .post("/authors/" + commenterUUID + "/inbox", data, {
+                        headers: {
+                            Authorization: "Bearer " + AuthService.getAccessToken(),
+                        },
+                    })
+                    .then(() => {
+                        setLikeableComment(false);
+                    })
+                    .catch((err) => {
+                        if (err.response.status === 409) {
+                            console.log("You already like this comment!");
+                        } else {
+                            console.log(err);
+                        }
+                    });
             });
     };
 

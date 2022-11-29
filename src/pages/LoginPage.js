@@ -62,8 +62,9 @@ function LoginPage() {
             if (values.username && values.password) {
                 const response = await AuthService.login(values.username, values.password, rememberMe)
                     .then((response) => {
-                        sessionStorage.removeItem("username")
-                        localStorage.removeItem("username")
+                        // this is commented out because team 12 needs username for endpoints
+                        // sessionStorage.removeItem("username")
+                        // localStorage.removeItem("username")
                         setLoading(false);
                         navigate(from, {replace: true})
                     }, error => {
