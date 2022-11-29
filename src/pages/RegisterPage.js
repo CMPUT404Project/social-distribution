@@ -91,7 +91,7 @@ function RegisterPage() {
                     setErrorMessage("Invalid Git username");
                     throw new Error("gitError")
                 } else {
-                    body.githubUrl = "https://github.com/" + values.git.toLowerCase();
+                    body.github = "https://github.com/" + values.git.toLowerCase();
                 }
             };
 
@@ -103,7 +103,7 @@ function RegisterPage() {
                     setErrorMessage("Could not load image");
                     throw new Error("imageError")
                 } else {
-                    body.imageUrl = values.imageUrl
+                    body.profileImage = values.imageUrl
                 };
             };
 

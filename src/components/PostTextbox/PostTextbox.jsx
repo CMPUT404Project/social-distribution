@@ -2,6 +2,8 @@ import { Button, Card, FormControl, MenuItem, Snackbar, TextField } from "@mui/m
 import axios from "axios";
 import React, { useState } from "react";
 import { useEffect } from "react";
+
+import { getAccessToken } from "../../utils";
 import AuthService from "../../services/AuthService";
 
 export const PostTextbox = () => {
@@ -42,12 +44,13 @@ export const PostTextbox = () => {
         if (tags !== "") {
             tokens = tags.split(",").map((word) => word.trim());
         }
+        console.log(tokens)
         const data = {
             type: "post",
             title: title,
             content: content,
             visibility: visibility,
-            categories: tokens,
+            categories: JSON.stringify(tokens),
             description: description,
             contentType: contentType,
             unlisted: unlisted,
@@ -59,7 +62,7 @@ export const PostTextbox = () => {
         axios
             .post("/authors/" + aID + "/posts", data, {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                     ContentType: "application/JSON",
                 },
             })
@@ -71,7 +74,7 @@ export const PostTextbox = () => {
                 axios
                     .post("/authors/" + aID + "/inbox", postWithAuthor, {
                         headers: {
-                            Authorization: "Bearer " + AuthService.getAccessToken(),
+                            Authorization: "Bearer " + getAccessToken(),
                             ContentType: "application/JSON",
                         },
                     })
@@ -92,7 +95,7 @@ export const PostTextbox = () => {
                             if (data.visibility === "PUBLIC") {
                                 axios.post("/authors/" + faID + "/inbox", createdPost.data, {
                                     headers: {
-                                        Authorization: "Bearer " + AuthService.getAccessToken(),
+                                        Authorization: "Bearer " + getAccessToken(),
                                         ContentType: "application/JSON",
                                         // "Access-Control-Allow-Origin": "*",
                                     },
@@ -105,7 +108,7 @@ export const PostTextbox = () => {
                                     if (statusString.data === true) {
                                         axios.post("/authors/" + faID + "/inbox", createdPost.data, {
                                             headers: {
-                                                Authorization: "Bearer " + AuthService.getAccessToken(),
+                                                Authorization: "Bearer " + getAccessToken(),
                                                 ContentType: "application/JSON",
                                             },
                                         });

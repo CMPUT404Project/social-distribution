@@ -2,6 +2,8 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Avatar, Button, Card, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+
+import { getAccessToken } from "../../utils";
 import AuthService from "../../services/AuthService";
 
 export const Comment = (props) => {
@@ -18,14 +20,14 @@ export const Comment = (props) => {
         axios
             .get("/authors/" + aid + "/posts/" + pid + "/comments/" + cid + "/likes", {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then((res) => {
                 setLikes(res.data.items.length);
                 setLikesList(res.data.items);
                 likesList.forEach((element) => {
-                    if (element.author.id !== userJSON.id) {
+                    if (element.author.id === userJSON.id) {
                         setLikeableComment(false);
                     }
                 });
@@ -45,7 +47,7 @@ export const Comment = (props) => {
         axios
             .get(props.data.id, {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then((res) => {
@@ -54,7 +56,7 @@ export const Comment = (props) => {
                 axios
                     .post("/authors/" + commenterUUID + "/inbox", data, {
                         headers: {
-                            Authorization: "Bearer " + AuthService.getAccessToken(),
+                            Authorization: "Bearer " + getAccessToken(),
                         },
                     })
                     .then(() => {

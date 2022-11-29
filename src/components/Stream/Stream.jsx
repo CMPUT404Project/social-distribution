@@ -3,6 +3,7 @@ import { Avatar, Box, Button, Card, Grid, Menu, MenuItem, TextField, Typography 
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
+import { getAccessToken } from "../../utils";
 import AuthService from "../../services/AuthService";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
@@ -24,7 +25,7 @@ export const Post = (props) => {
         axios
             .get("/authors/" + aID + "/posts/" + pID + "/comments", {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then((res) => {
@@ -37,14 +38,14 @@ export const Post = (props) => {
         axios
             .get("/authors/" + aID + "/posts/" + pID + "/likes", {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then((res) => {
                 setLikeList(res.data.items);
                 setLikes(res.data.items.length);
                 likeList.forEach((element) => {
-                    if (element.author.id !== currentUser.id) {
+                    if (element.author.id === currentUser.id) {
                         setLikeablePost(false);
                     }
                 });
@@ -69,7 +70,7 @@ export const Post = (props) => {
         axios
             .post("/authors/" + aID + "/inbox", data, {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                     ContentType: "application/json",
                 },
             })
@@ -108,7 +109,7 @@ export const Post = (props) => {
             axios
                 .post("/authors/" + postAuthorID + "/inbox", data, {
                     headers: {
-                        Authorization: "Bearer " + AuthService.getAccessToken(),
+                        Authorization: "Bearer " + getAccessToken(),
                         ContentType: "application/json",
                     },
                 })
