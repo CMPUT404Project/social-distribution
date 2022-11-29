@@ -12,6 +12,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 import AuthService from "../../services/AuthService";
+import {getAccessToken} from "../../utils/index"
 import { Comment } from "./Comment";
 
 export const Post = (props) => {
@@ -31,7 +32,7 @@ export const Post = (props) => {
         axios
             .get("/authors/" + aID + "/posts/" + pID + "/comments", {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then((res) => {
@@ -44,7 +45,7 @@ export const Post = (props) => {
         axios
             .get("/authors/" + aID + "/posts/" + pID + "/likes", {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                 },
             })
             .then((res) => {
@@ -73,7 +74,7 @@ export const Post = (props) => {
         axios
             .post("/authors/" + aID + "/inbox", data, {
                 headers: {
-                    Authorization: "Bearer " + AuthService.getAccessToken(),
+                    Authorization: "Bearer " + getAccessToken(),
                     ContentType: "application/json",
                 },
             })
@@ -112,7 +113,7 @@ export const Post = (props) => {
             axios
                 .post("/authors/" + postAuthorID + "/inbox", data, {
                     headers: {
-                        Authorization: "Bearer " + AuthService.getAccessToken(),
+                        Authorization: "Bearer " + getAccessToken(),
                         ContentType: "application/json",
                     },
                 })

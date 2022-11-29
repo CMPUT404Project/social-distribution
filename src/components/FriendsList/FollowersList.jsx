@@ -57,23 +57,6 @@ export const User = (props) => {
                                 alt="profile"
                             />
                         }
-                        // action={
-                        //     <Button
-                        //         variant="contained"
-                        //         component="span"
-                        //         disableRipple={true}
-                        //         sx={{
-                        //             backgroundColor: "#e0127c",
-                        //             '&:hover': {backgroundColor: "#e0127c"},
-                        //             fontWeight: "600"}}
-                        //         onMouseDown={e => {
-                        //             e.stopPropagation();
-                        //             handleUnfollow(props.currentAuthorID, foreignID);
-                        //         }}
-                        //     >
-                        //         Unfollow
-                        //     </Button>
-                        // }
                         title={
                             <Typography variant="h4">
                                 {displayName}

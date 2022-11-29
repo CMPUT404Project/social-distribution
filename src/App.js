@@ -7,8 +7,7 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import FriendsPage from "./pages/FriendsPage";
 import ProfilePage from "./pages/ProfilePage";
-import RemoteProfilePage from "./pages/RemoteProfilePage"
-import AccountPage from "./pages/AccountPage";
+import RemoteProfilePage from "./pages/RemoteProfilePage";
 import InboxPage from "./pages/InboxPage";
 import GithubPage from "./pages/GithubPage";
 import FollowersPage from "./pages/FollowersPage";
@@ -25,7 +24,6 @@ function App() {
                 <Route path="/homepage" element={<Priv><HomePage/></Priv>}/>
                 <Route path="/profile/:authorID" element={<Priv><ProfilePage/></Priv>}/>
                 <Route path="/profile/remote/:team/:authorID" element={<Priv><RemoteProfilePage/></Priv>}/>
-                <Route path="/account" element={<Priv><AccountPage/></Priv>}/>
                 <Route path="/inbox" element={<Priv><InboxPage/></Priv>}/>
                 <Route path="/followers" element={<Priv><FollowersPage/></Priv>}/>
                 <Route path="/github" element={<Priv><GithubPage/></Priv>}/>

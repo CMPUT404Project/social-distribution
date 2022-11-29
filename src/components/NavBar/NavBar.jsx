@@ -30,7 +30,7 @@ import "./NavBar.css";
 
 const pages = ['Inbox', 'Followers', 'Github'];
 // Keep logout last in array
-const settings = ['Profile', 'Account', 'Logout'];
+const settings = ['Profile', 'Logout'];
 
 function NavBar() {
     const navigate = useNavigate();
@@ -169,7 +169,7 @@ function NavBar() {
                         variant="h4"
                         noWrap
                         component="a"
-                        href=""
+                        href="/homepage"
                         sx={{
                             mr: 2,
                             display: { xs: 'flex', md: 'none' },
