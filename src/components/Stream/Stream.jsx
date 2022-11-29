@@ -52,7 +52,9 @@ export const Post = (props) => {
                 setLikeList(res.data.items);
                 setLikes(res.data.items.length);
                 likeList.forEach((element) => {
-                    setLikeablePost(element.author.id !== currentUser.id);
+                    if (element.author.id !== currentUser.id) {
+                        setLikeablePost(false);
+                    }
                 });
             })
             .catch((e) => {
@@ -70,6 +72,7 @@ export const Post = (props) => {
             author: currentUser,
             object: props.data.id,
         };
+        // send inbox to author of post
         const aID = currentUser.id.split("/authors/")[1];
         axios
             .post("/authors/" + aID + "/inbox", data, {
