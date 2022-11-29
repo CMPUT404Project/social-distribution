@@ -18,7 +18,7 @@ class FollowRequestDetail(GenericAPIView):
         delete a follow request
         """
         try:
-            follow_request = FollowRequest.objects.get(actor=fid, objects=aid)
+            follow_request = FollowRequest.objects.get(actor=fid, object=aid)
         except FollowRequest.DoesNotExist as e:
             return Response(str(e), status=404)
         except Exception as e:

@@ -49,10 +49,8 @@ class CommentView(GenericAPIView):
         data.update({"post": pid, "author": aid})
         serializer = CommentCreationSerializer(data=data)
         if serializer.is_valid():
-            serializer.save()
-            comment = Comment.objects.get(pk=serializer.data.get('id'))
-            view_serializer = CommentSerializer(comment)
-            return Response(view_serializer.data, status=201)
+            comment = serializer.save()
+            return Response(CommentSerializer(comment).data, status=201)
         return Response(serializer.errors, status=400)
 
 class CommentIDView(GenericAPIView):

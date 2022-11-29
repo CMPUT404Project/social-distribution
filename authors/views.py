@@ -18,7 +18,7 @@ class AuthorView(GenericAPIView):
     
     @swagger_auto_schema(tags=[tag], responses={200: AuthorsSwaggerResponseSerializer})
     def get(self, request):
-        authors = Author.objects.all()
+        authors = Author.objects.exclude(user=None)
         pagination = CustomPagination()
         paginated_authors = pagination.paginate(authors, page=request.GET.get('page'), size=request.GET.get('size'))
         serializer = AuthorsSerializer(paginated_authors)
@@ -55,8 +55,8 @@ class AuthorDetail(GenericAPIView):
             return Response(str(e), status=404)
         except Exception as e:
             return Response(str(e), status=400)
-        serializer = AuthorSerializer(author, data=request.data)
+        serializer = AuthorDRFSerializer(author, data=request.data)
         if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=200)
+            author = serializer.save()
+            return Response(AuthorSerializer(author).data, status=200)
         return Response(serializer.errors, status=400)
