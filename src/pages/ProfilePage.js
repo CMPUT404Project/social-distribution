@@ -23,7 +23,6 @@ import {
     Snackbar
 } from '@mui/material';
 import { useEffect } from "react";
-import { type } from "@testing-library/user-event/dist/type";
 
 function SlideTransition(props: SlideProps) {
     return <Slide{...props} direction="down"/>;
@@ -53,6 +52,36 @@ function ProfilePage() {
     })
 
     useEffect(() => {
+        const checkFollowStatus = async (currentAuthorID) => {
+            await AuthService.getFollowStatus(currentAuthorID, authorID).then(async (data) => {
+                setIsFollowing(data)
+                if (data) {
+                    await AuthService.getFollowStatus(authorID, currentAuthorID).then((data2) => {
+                        setIsFriend(data2)
+                    })
+                }
+                setLoading(false);
+            })
+        }
+        const checkExistingRequest = async (currentAuthorID) => {
+            await AuthService.getInboxItems(authorID, "follows").then((data) => {
+                data.items.forEach(followRequest => {
+                    let followRequestID = followRequest.actor.id.split("authors/")[1]
+                    if (followRequestID === currentAuthorID) {
+                        setIsExistingRequest(true);
+                    }
+                });
+            })
+        }
+        const getAuthorDetails = async () => {
+            await AuthService.getAuthorDetails(authorID).then((data) => {
+                setAuthorValues({
+                    displayName: data.displayName,
+                    github: data.github,
+                    profileImage: data.profileImage
+                })
+            })
+        }
         setLoading(true);
         let currentAuthorID = getCurrentAuthorID();
         if (authorID === currentAuthorID) {
@@ -70,40 +99,7 @@ function ProfilePage() {
             checkExistingRequest(currentAuthorID);
             getAuthorDetails();
         };
-    }, [authorID])
-
-    const getAuthorDetails = async () => {
-        await AuthService.getAuthorDetails(authorID).then((data) => {
-            setAuthorValues({
-                displayName: data.displayName,
-                github: data.github,
-                profileImage: data.profileImage
-            })
-        })
-    }
-
-    const checkFollowStatus = async (currentAuthorID) => {
-        await AuthService.getFollowStatus(currentAuthorID, authorID).then(async (data) => {
-            setIsFollowing(data)
-            if (data) {
-                await AuthService.getFollowStatus(authorID, currentAuthorID).then((data2) => {
-                    setIsFriend(data2)
-                })
-            }
-            setLoading(false);
-        })
-    }
-
-    const checkExistingRequest = async (currentAuthorID) => {
-        await AuthService.getInboxItems(type="follows", authorID).then((data) => {
-            data.items.forEach(followRequest => {
-                let followRequestID = followRequest.actor.id.split("authors/")[1]
-                if (followRequestID === currentAuthorID) {
-                    setIsExistingRequest(true);
-                }
-            });
-        })
-    }
+    }, [authorID, defaultAuthor])
 
     const handleInputChange = (prop) => (event) => {
         setAuthorValues({ ...authorValues, [prop]: event.target.value });
@@ -199,7 +195,6 @@ function ProfilePage() {
 
     const handleFollow = async (event) => {
         console.log(isFollowing);
-        let response = "";
         try {
             setLoading(true)
             if (event.target.textContent === "Send Follow Request") {
@@ -330,7 +325,7 @@ function ProfilePage() {
                                         disabled={!editState}
                                         variant="outlined"
                                         name="profileImage"
-                                        placeholder="Leave blank to remove image"
+                                        placeholder={isAuthor ? "Leave blank to remove image" : "None"}
                                         value={authorValues.profileImage}
                                         onChange={handleInputChange("profileImage")}
                                         type="text" 
@@ -389,7 +384,7 @@ function ProfilePage() {
                                 disabled={!editState}
                                 variant="outlined"
                                 name="github"
-                                placeholder="Leave blank to remove Github"
+                                placeholder={isAuthor ? "Leave blank to remove Github" : "None"}
                                 value={authorValues.github}
                                 onChange={handleInputChange("github")}
                                 type="text" 
