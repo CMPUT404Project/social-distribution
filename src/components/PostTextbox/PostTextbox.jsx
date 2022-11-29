@@ -146,14 +146,17 @@ export const PostTextbox = () => {
 
                 // then to everyone else
                 axios.get("/authors/" + aID + "/followers").then((res) => {
-                    let followers = res.items;
+                    let followers = res.data.items;
+                    // console.log(followers)
                     // Team 12 and 13 must be here since they only require 1 call per post.
                     followers.forEach((user) => {
-                        console.log(user)
                         let faID = user.id.split("/authors/")[1];
-                        if (user.host === "https://social-distribution-404.herokuapp.com/") {
+                        console.log(user.host)
+                        console.log(user.host.includes("http://127.0.0.1:8000"))
+                        if (user.host.includes("https://social-distribution-404.herokuapp.com") || user.host.includes("http://127.0.0.1:8000")) {
+                            console.log("does it reach")
                             if (data.visibility === "PUBLIC") {
-                                axios.post("/authors/" + faID + "/inbox/posts", createdPost.data, {
+                                axios.post("/authors/" + faID + "/inbox", createdPost.data, {
                                     headers: {
                                         Authorization: "Bearer " + AuthService.getAccessToken(),
                                         ContentType: "application/JSON",
@@ -166,7 +169,7 @@ export const PostTextbox = () => {
                                 axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
                                     // if true, then send. else ignore.
                                     if (statusString.data === true) {
-                                        axios.post("/authors/" + faID + "/inbox/posts", createdPost.data, {
+                                        axios.post("/authors/" + faID + "/inbox", createdPost.data, {
                                             headers: {
                                                 Authorization: "Bearer " + AuthService.getAccessToken(),
                                                 ContentType: "application/JSON",

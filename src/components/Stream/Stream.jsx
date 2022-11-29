@@ -12,11 +12,12 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 import AuthService from "../../services/AuthService";
+import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
 
 export const Post = (props) => {
-    const [show, setShow] = useState(false);
-    const [anchor, setAnchor] = useState(null);
+    // const [show, setShow] = useState(false);
+    // const [anchor, setAnchor] = useState(null);
     const [comments, setComments] = useState([]);
     const [likeablePost, setLikeablePost] = useState(true);
     const [likes, setLikes] = useState(0);
@@ -86,10 +87,10 @@ export const Post = (props) => {
     /* 
     Not implemented yet, but will check if you can follow/send friend request to user. Might be deleted.
     */
-    const onClickHandler = (e) => {
-        setAnchor(e.currentTarget);
-        setShow(!show);
-    };
+    // const onClickHandler = (e) => {
+    //     setAnchor(e.currentTarget);
+    //     setShow(!show);
+    // };
 
     /* 
     When making a comment, pressing the "Enter" key will be the trigger for posting a comment.
@@ -128,12 +129,12 @@ export const Post = (props) => {
     return (
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             {/* will probably remove feature of following someone through stream */}
-            {show && (
+            {/* {show && (
                 <Menu onClose={() => setShow(!show)} open={show} anchorEl={anchor}>
                     <MenuItem>Follow</MenuItem>
                     <MenuItem>Send Friend Request</MenuItem>
                 </Menu>
-            )}
+            )} */}
             <Card
                 style={{
                     textAlign: "center",
@@ -149,7 +150,7 @@ export const Post = (props) => {
                         flexDirection: "row",
                         alignItems: "center",
                     }}
-                    onClick={onClickHandler}
+                    // onClick={onClickHandler}
                 >
                     <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
                     <Typography variant="h5">{props.data.author.displayName}</Typography>
@@ -210,10 +211,8 @@ function Stream() {
     }, []);
 
     return (
-        <Grid container justifyContent="center" minHeight={"100%"}>
-            {/* {fakeData.length === 0 ? <h1>bruh no posts</h1>:fakeData.map((d) => {
-                return <Post key={d.id} data={d} accessToken={accessToken} />
-            })} */}
+        <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
+            <PostTextbox />
             {posts.length === 0 ? (
                 <h1>You currently have no posts!</h1>
             ) : (
@@ -228,4 +227,14 @@ function Stream() {
     );
 }
 
+
+// return (
+//     <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
+//         <div><PostTextbox /></div>
+        
+//         {fakeData.map((d) => {
+//             return <Post key={d.id} data={d} accessToken={accessToken} />;
+//         })}
+//     </Grid>
+// );
 export default Stream;
