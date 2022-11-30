@@ -10,6 +10,7 @@ import {
     capitalizeFirstLetter
 } from "../utils";
 import AuthService from "../services/AuthService";
+import RemoteAuthService from "../services/RemoteAuthService";
 import NavBar from "../components/NavBar/NavBar";
 
 // Import Material UI Components
@@ -19,6 +20,7 @@ import {
     Avatar,
     Button,
     TextField,
+    Typography,
     Slide,
     Snackbar
 } from '@mui/material';
@@ -30,19 +32,17 @@ function SlideTransition(props: SlideProps) {
 
 function ProfilePage() {
     const {team, authorID} = useParams();
-    const [isAuthor, setIsAuthor] = useState(true);
-    const [defaultAuthor, setDefaultAuthor] = useState(retrieveCurrentAuthor());
     const [authorValues, setAuthorValues] = useState({
-        displayName: defaultAuthor.displayName || "",
-        github: defaultAuthor.github.split(".com/")[1] || "",
-        profileImage: defaultAuthor.profileImage || "",
+        displayName: "",
+        github: "",
+        profileImage: "",
     })
+    const [remoteNode, setRemoteNode] = useState(`${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`)
 
     const [isExistingRequest, setIsExistingRequest] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
 
-    const [editState, setEditState] = useState(false)
     const [isLoading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
 
@@ -53,15 +53,14 @@ function ProfilePage() {
 
     useEffect(() => {
         const checkFollowStatus = async (currentAuthorID) => {
-            await AuthService.getFollowStatus(currentAuthorID, authorID).then(async (data) => {
+            const response = await AuthService.getFollowStatus(currentAuthorID, authorID).then((data) => {
                 setIsFollowing(data)
-                if (data) {
-                    await AuthService.getFollowStatus(authorID, currentAuthorID).then((data2) => {
-                        setIsFriend(data2)
-                    })
-                }
-                setLoading(false);
-            })
+            }, error => {
+                return error.response
+            });
+            if (response) {
+                setIsFollowing(false)
+            }
         }
         const checkExistingRequest = async (currentAuthorID) => {
             await AuthService.getInboxItems("follows", authorID).then((data) => {
@@ -74,48 +73,21 @@ function ProfilePage() {
             })
         }
         const getAuthorDetails = async () => {
-            await AuthService.getAuthorDetails(authorID).then((data) => {
-                setAuthorValues({
-                    displayName: data.displayName,
-                    github: data.github,
-                    profileImage: data.profileImage
-                })
-            })
-        }
-        setLoading(true);
-        let currentAuthorID = getCurrentAuthorID();
-        if (authorID === currentAuthorID) {
-            setIsAuthor(true);
+            const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
-                displayName: defaultAuthor.displayName || "",
-                github: defaultAuthor.github.split(".com/")[1] || "",
-                profileImage: defaultAuthor.profileImage || "",
+                displayName: response.displayName || response.username,
+                github: response.github.split(".com/")[1],
+                profileImage: response.profileImage,
             })
             setLoading(false);
-        } else {
-            console.log(team)
-            // checkFollowStatus(currentAuthorID);
-            // setEditState(false);
-            // setIsAuthor(false);
-            // checkExistingRequest(currentAuthorID);
-            // getAuthorDetails();
-        };
-    }, [authorID, defaultAuthor])
-
-    const handleInputChange = (prop) => (event) => {
-        setAuthorValues({ ...authorValues, [prop]: event.target.value });
-    };
-
-    const handleEditButton = (prop) => () => {
-        if (prop === "Cancel") {
-            setAuthorValues({
-                displayName: defaultAuthor.displayName || "",
-                github: defaultAuthor.github.split(".com/")[1] || "",
-                profileImage: defaultAuthor.profileImage || "",
-            })
         }
-        setEditState(!editState);
-    }
+        let currentAuthorID = getCurrentAuthorID();
+        setLoading(true);
+        checkFollowStatus(currentAuthorID);
+        // checkExistingRequest(currentAuthorID);
+        getAuthorDetails();
+    }, [authorID])
+
 
     const handleFollow = async (event) => {
         console.log(isFollowing);
@@ -133,6 +105,7 @@ function ProfilePage() {
                 if (response) {
                     throw response;
                 };
+
             } else if (event.target.textContent === "Cancel pending follow request") {
                 const response = await AuthService.cancelFollowRequest(authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
@@ -214,7 +187,7 @@ function ProfilePage() {
             <div className="container" style={{alignItems: "flex-start"}}>
                 <div className="profile-details-card">
                     <span className="profile-title">
-                        {isAuthor ? ("Edit Profile") : authorValues.displayName ? (authorValues.displayName + "'s Profile") : ("UNKNOWN Profile")}
+                        {authorValues.displayName + "'s Profile"}
                     </span>
                     <Avatar 
                         src={authorValues.profileImage}
@@ -231,29 +204,20 @@ function ProfilePage() {
                             </div>
                             <div className="edit-container">
                                 <div className="edit-field">
-                                    <TextField
-                                        style={{width: "100%", backgroundColor: "#e6e6e6"}}
-                                        sx={{
-                                            '& legend': {display: 'none'},
-                                            '& fieldset': {top: 0},
-                                            '& .MuiOutlinedInput-root.Mui-focused': {
-                                                '& > fieldset': {
-                                                    border : "3px solid #e0127c"
-                                                }
-                                            }
-                                        }}
-                                        InputLabelProps={{ sx: {display: 'none'}}}
-                                        InputProps={{sx: {fontSize: '20px'}}}
-                                        inputProps={{maxLength: 200}}
-                                        required
-                                        disabled={!editState}
-                                        variant="outlined"
-                                        name="profileImage"
-                                        placeholder="Leave blank to remove image"
-                                        value={authorValues.profileImage}
-                                        onChange={handleInputChange("profileImage")}
-                                        type="text" 
-                                    />
+                                <Typography
+                                    style={{
+                                        width: "100%",
+                                        color: "rgb(0, 0, 0, 0.6)",
+                                        backgroundColor: "#e6e6e6",
+                                        padding: "16.5px 14px",
+                                        border: "1px solid black",
+                                        fontSize: '20px'
+                                    }}
+                                    noWrap
+                                    
+                                >
+                                    {authorValues.profileImage ? authorValues.profileImage : "None"}
+                                </Typography>
                                 </div>
                             </div>
                     </div>
@@ -262,28 +226,20 @@ function ProfilePage() {
                             Display Name
                         </div>
                         <div className="edit-field">
-                            <TextField
-                                style={{width: "100%", backgroundColor: "#e6e6e6"}}
-                                sx={{
-                                    '& legend': {display: 'none'},
-                                    '& fieldset': {top: 0},
-                                    '& .MuiOutlinedInput-root.Mui-focused': {
-                                        '& > fieldset': {
-                                            border : "3px solid #e0127c"
-                                        }
-                                    }
+                            <Typography
+                                style={{
+                                    width: "100%",
+                                    color: "rgb(0, 0, 0, 0.6)",
+                                    backgroundColor: "#e6e6e6",
+                                    padding: "16.5px 14px",
+                                    border: "1px solid black",
+                                    fontSize: '20px'
                                 }}
-                                InputLabelProps={{ sx: {display: 'none'}}}
-                                InputProps={{ sx: {fontSize: '20px'}}}
-                                required
-                                disabled={!editState}
-                                variant="outlined"
-                                name="displayName"
-                                placeholder="Required"
-                                value={authorValues.displayName}
-                                onChange={handleInputChange("displayName")}
-                                type="text" 
-                            />
+                                noWrap
+                                
+                            >
+                                {authorValues.displayName ? authorValues.displayName : "None"}
+                            </Typography>
                         </div>
                     </div>
                     <div className="edit-container">
@@ -291,28 +247,19 @@ function ProfilePage() {
                             Github Username
                         </div>
                         <div className="edit-field">
-                            <TextField
-                                style={{width: "100%", backgroundColor: "#e6e6e6"}}
-                                sx={{
-                                    '& legend': {display: 'none'},
-                                    '& fieldset': {top: 0},
-                                    '& .MuiOutlinedInput-root.Mui-focused': {
-                                        '& > fieldset': {
-                                            border : "3px solid #e0127c"
-                                        }
-                                    }
+                        <Typography
+                                style={{
+                                    width: "100%",
+                                    color: "rgb(0, 0, 0, 0.6)",
+                                    backgroundColor: "#e6e6e6",
+                                    padding: "16.5px 14px",
+                                    border: "1px solid black",
+                                    fontSize: '20px'
                                 }}
-                                InputLabelProps={{ sx: {display: 'none'}}}
-                                InputProps={{ sx: {fontSize: '20px'}}}
-                                required
-                                disabled={!editState}
-                                variant="outlined"
-                                name="github"
-                                placeholder="Leave blank to remove Github"
-                                value={authorValues.github}
-                                onChange={handleInputChange("github")}
-                                type="text" 
-                            />
+                                noWrap
+                            >
+                                {authorValues.github ? (<a href={authorValues.github} ></a>) : "None"}
+                            </Typography>
                         </div>
                     </div>
                     <div className="follow-btn-container">
