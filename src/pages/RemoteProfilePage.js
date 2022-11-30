@@ -29,7 +29,7 @@ function SlideTransition(props: SlideProps) {
 }
 
 function ProfilePage() {
-    const {authorID} = useParams();
+    const {team, authorID} = useParams();
     const [isAuthor, setIsAuthor] = useState(true);
     const [defaultAuthor, setDefaultAuthor] = useState(retrieveCurrentAuthor());
     const [authorValues, setAuthorValues] = useState({
@@ -64,7 +64,7 @@ function ProfilePage() {
             })
         }
         const checkExistingRequest = async (currentAuthorID) => {
-            await AuthService.getInboxItems(authorID, "follows").then((data) => {
+            await AuthService.getInboxItems("follows", authorID).then((data) => {
                 data.items.forEach(followRequest => {
                     let followRequestID = followRequest.actor.id.split("authors/")[1]
                     if (followRequestID === currentAuthorID) {
@@ -93,11 +93,12 @@ function ProfilePage() {
             })
             setLoading(false);
         } else {
-            checkFollowStatus(currentAuthorID);
-            setEditState(false);
-            setIsAuthor(false);
-            checkExistingRequest(currentAuthorID);
-            getAuthorDetails();
+            console.log(team)
+            // checkFollowStatus(currentAuthorID);
+            // setEditState(false);
+            // setIsAuthor(false);
+            // checkExistingRequest(currentAuthorID);
+            // getAuthorDetails();
         };
     }, [authorID, defaultAuthor])
 
@@ -114,82 +115,6 @@ function ProfilePage() {
             })
         }
         setEditState(!editState);
-    }
-
-    const handleUpdateProfile = async (event) => {
-        event.preventDefault();
-        let body = {};
-        try {
-            setLoading(true);
-            var imageError = false;
-            if (!regexPatterns.namePattern.test(authorValues.displayName)) {
-                throw new Error("displayNameError")
-            } else {
-                body.displayName = authorValues.displayName;
-            };
-            let defaultGit = defaultAuthor.github.split(".com/")[1] ? defaultAuthor.github.split(".com/")[1] : "";
-            if (authorValues.github !== defaultGit) {
-                if (authorValues.github) {
-                    if (!regexPatterns.gitPattern.test(authorValues.github)) {
-                        throw new Error("gitError")
-                    } else {
-                        body.github = "https://www.github.com/" + authorValues.github.toLowerCase();
-                    }
-                } else {
-                    body.github = "";
-                }
-            };
-            if (authorValues.profileImage !== defaultAuthor.profileImage) {
-                if (authorValues.profileImage) {
-                    await doesImageExist(authorValues.profileImage).then((value) => {
-                        if (!value) { imageError = true };
-                    });
-                    if (imageError) {
-                        throw new Error("imageError")
-                    } else {
-                        body.profileImage = authorValues.profileImage;
-                    };
-                } else {
-                    body.profileImage = "";
-                }
-            };
-            if (Object.keys(body).length !== 0) {
-                const response = await AuthService.updateAuthorDetails(body)
-                .then(() => {
-                    setDefaultAuthor(retrieveCurrentAuthor());
-                    setAlertDetails({alertSeverity: "success", 
-                        errorMessage: "Successfully updated profile"})
-                    handleOpen();
-                    setEditState(false);
-                }, error => {
-                    return error
-                })
-                if (response) {
-                    throw response
-                }
-            } else {
-                setAlertDetails({alertSeverity: "warning", 
-                    errorMessage: "Nothing was changed"})
-                handleOpen();
-                setEditState(false);
-            }
-        } catch (error) {
-            console.log(error)
-            if (error.message === "displayNameError") {
-                setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "Display name can only contain letters and numbers"})
-            } else if (error.message === "gitError") {
-                setAlertDetails({alertSeverity: "error",
-                    errorMessage: "Invalid Git usernames"})
-            } else if (error.message === "imageError") {
-                setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "Image could not be loaded" })
-            } else {
-                setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "Something went wrong. Try again later."})
-            }
-            handleOpen();
-        }
     }
 
     const handleFollow = async (event) => {
@@ -324,7 +249,7 @@ function ProfilePage() {
                                         disabled={!editState}
                                         variant="outlined"
                                         name="profileImage"
-                                        placeholder={isAuthor ? "Leave blank to remove image" : "None"}
+                                        placeholder="Leave blank to remove image"
                                         value={authorValues.profileImage}
                                         onChange={handleInputChange("profileImage")}
                                         type="text" 
@@ -383,43 +308,24 @@ function ProfilePage() {
                                 disabled={!editState}
                                 variant="outlined"
                                 name="github"
-                                placeholder={isAuthor ? "Leave blank to remove Github" : "None"}
+                                placeholder="Leave blank to remove Github"
                                 value={authorValues.github}
                                 onChange={handleInputChange("github")}
                                 type="text" 
                             />
                         </div>
                     </div>
-                    {!isAuthor ? (
-                        <div className="follow-btn-container">
-                            <Button 
-                                variant="contained"
-                                sx={{fontWeight: "600"}}
-                                onClick={handleFollow}
-                            >
-                                {isFollowing ? ("Unfollow") 
-                                : isExistingRequest ? ("Cancel pending follow request") 
-                                : ("Send Follow Request")}
-                            </Button>
-                        </div>
-                        
-                    ) : editState ? (
-                        <div className="update-profile-btn-container">
-                            <button className="update-profile-btn" onClick={handleUpdateProfile}>
-                                Update
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="edit-profile-btn-container">
-                            <button className="edit-profile-btn" onClick={handleEditButton()}>
-                                Edit Profile
-                            </button>
-                        </div>
-                    )}
-                    {editState ? (
-                        <div className="cancel-edit-profile-container">
-                            <button className="cancel-edit-profile" onClick={handleEditButton("Cancel")}>Cancel</button>
-                        </div>) : (<></>)}
+                    <div className="follow-btn-container">
+                        <Button 
+                            variant="contained"
+                            sx={{fontWeight: "600"}}
+                            onClick={handleFollow}
+                        >
+                            {isFollowing ? ("Unfollow") 
+                            : isExistingRequest ? ("Cancel pending follow request") 
+                            : ("Send Follow Request")}
+                        </Button>
+                    </div>
                 </div>
             </div>
             </>)};

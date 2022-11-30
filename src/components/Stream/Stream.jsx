@@ -21,8 +21,7 @@ export const Post = (props) => {
 
     // isSubmitted is used to let the webpage know to reload the comments
     useEffect(() => {
-        axios
-            .get("/authors/" + aID + "/posts/" + pID + "/comments", {
+        axios.get("/authors/" + aID + "/posts/" + pID + "/comments", {
                 headers: {
                     Authorization: "Bearer " + getAccessToken(),
                 },
@@ -66,7 +65,6 @@ export const Post = (props) => {
         };
         // send inbox to author of post
         const posterID = props.data.author.id.split("/authors/")[1];
-        console.log(posterID);
         axios
             .post("/authors/" + posterID + "/inbox", data, {
                 headers: {
@@ -205,6 +203,12 @@ function Stream() {
                 console.log(err);
             });
     }, []);
+
+    // Show new post when posting
+    // useEffect(() => {
+        
+    // },[posts])
+
 
     return (
         <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">

@@ -45,7 +45,6 @@ class AuthService {
         setAxiosDefaults();
         const authorID = getCurrentAuthorID();
         const response = await axios.put("/authors/" + authorID, body)
-        console.log(response)
         if (response.status === 200) {
             if (localStorage.getItem('access_token')) {
                 localStorage.setItem("author", JSON.stringify(response.data));
@@ -102,6 +101,20 @@ class AuthService {
         return response.data
     }
 
+    async acceptFollowRequest(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.put("/authors/" + authorID + "/followers/" + foreignID);
+        return response.data
+    }
+
+    async declineFollowRequest(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.delete("/authors/" + authorID + "/followRequest/" + foreignID);
+        return response.data
+    }
+
     async cancelFollowRequest(foreignID) {
         setAxiosDefaults();
         const authorID = getCurrentAuthorID();
@@ -149,8 +162,6 @@ class AuthService {
             body.comment = comment;
         }
         const response = await axios.post("/authors/" + authorID + "/inbox", body);
-        console.log(response.data)
-        // return response.data
     }
 }
 

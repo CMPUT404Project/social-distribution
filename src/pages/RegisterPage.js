@@ -109,7 +109,7 @@ function RegisterPage() {
 
             const response = await AuthService.register(values.username, values.password, body)
                 .then(() => {
-                    navigate("/login", {replace: true})
+                    navigate("/", {replace: true})
                 }, error => {
                     return error
                 })

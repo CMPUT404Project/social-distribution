@@ -34,8 +34,7 @@ class RemoteAuthService {
     async getRemoteAuthors(remoteNode) {
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 13") {
-            let remoteAuthorsUrl = "https://cmput404-team13.herokuapp.com/authors?page=1&size=1000"
-            return await axios.get(remoteAuthorsUrl).then((response) => {
+            return await team13Instance.get("/authors?page=1&size=1000").then((response) => {
                 return response.data.authorsPage;
             }).catch((error) => {
                 if (error.response) {
@@ -44,8 +43,7 @@ class RemoteAuthService {
                 return [];
             });
         } else if (remoteNode === "Team 12") {
-            let remoteAuthorsUrl = "https://true-friends-404.herokuapp.com/authors/"
-            return await axios.get(remoteAuthorsUrl).then((response) => {
+            return await team12Instance.get("/authors/").then((response) => {
                 return response.data;
             }).catch((error) => {
                 if (error.response) {

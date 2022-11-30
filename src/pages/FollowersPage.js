@@ -7,9 +7,10 @@ import FollowersList from "../components/FriendsList/FollowersList";
 import SearchResults from "../components/FriendsList/SearchResults";
 import NavBar from "../components/NavBar/NavBar";
 import AuthService from "../services/AuthService";
+import RemoteAuthService from "../services/RemoteAuthService";
 import {retrieveCurrentAuthor} from "../utils/index";
 
-import IconButton from '@mui/material/IconButton';
+import Icon from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 
 import './FollowersPage.css'
@@ -60,6 +61,17 @@ function FollowersPage() {
                 setAllLocalAuthors([...allLocalAuthors, ...data.items])
             }
         })
+        teams.forEach(team => {
+            RemoteAuthService.getRemoteAuthors(team).then((data) => {
+                if (data) {
+                    if (team === "Team 12") {
+                        setAllTeam12Authors([...allTeam12Authors, ...data])
+                    } else if (team === "Team 13") {
+                        setAllTeam13Authors([...allTeam13Authors, ...data])
+                    }
+                }
+            })
+        });
     }
 
     const handleInputChange = () => (event) => {
@@ -103,9 +115,7 @@ function FollowersPage() {
                                     type="text"
                                 />
                                 <span className="search-icon">
-                                    <IconButton onClick={() => {console.log("Yo")}}>
-                                        <SearchIcon fontSize="large"/>
-                                    </IconButton>
+                                    <SearchIcon fontSize="large"/>
                                 </span>
                             </div>
                             <h1>Followers</h1> <br/>
@@ -150,17 +160,28 @@ function FollowersPage() {
                                 type="text"
                             />
                             <span className="search-icon">
-                                <IconButton onClick={() => {console.log("Yo")}}>
-                                    <SearchIcon fontSize="large"/>
-                                </IconButton>
+                                <SearchIcon fontSize="large"/>
                             </span>
                         </div>
                         <h1>Search Results</h1>
                         <h3>Locals</h3>
                         <SearchResults
+                            team={"Local"}
                             input={searchField}
                             authors={allLocalAuthors}
                         />
+                        {teams.map((team, index) => {
+                            return <>
+                                <h3>{team}</h3>
+                                <SearchResults 
+                                    key={team.id}
+                                    team={team}
+                                    input={searchField}
+                                    authors={eval("all"+team.replace(" ",'')+"Authors")}
+                                />
+                            </>
+                        })}
+
                     </Container>
                 </div> 
             )}
