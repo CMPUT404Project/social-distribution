@@ -92,16 +92,13 @@ def handle_like_type_inbox(data, inbox):
             inbox.save()
             return Response(LikeSerializer(like).data, status=201)
     if "comments" in object_url:
-        post_author = object_url[-5]
-        post = object_url[-3]
-        comment = Comment.objects.filter(id=id, post=post, author=post_author).first()
+        comment = Comment.objects.filter(id=id).first()
         if not comment:
             return Response("The comment cannot be found", status=404)
         data['comment'] = str(comment.id)
         serializer = CommentLikeCreationSerializer(data=data)
     elif "posts" in object_url:
-        post_author = object_url[-3]
-        post = Post.objects.filter(id=id, author=post_author).first()
+        post = Post.objects.filter(id=id).first()
         if not post:
             return Response("The post cannot be found", status=404)
         data['post'] = str(post.id)

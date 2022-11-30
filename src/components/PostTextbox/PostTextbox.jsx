@@ -3,7 +3,7 @@ import axios from "axios";
 import React, { useState } from "react";
 import { useEffect } from "react";
 
-import { getAccessToken } from "../../utils";
+import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import AuthService from "../../services/AuthService";
 
 export const PostTextbox = () => {
@@ -54,9 +54,9 @@ export const PostTextbox = () => {
             description: description,
             contentType: contentType,
             unlisted: unlisted,
-            author: JSON.parse(AuthService.retrieveCurrentUser()),
+            author: retrieveCurrentAuthor(),
         };
-        const userJSON = JSON.parse(AuthService.retrieveCurrentUser());
+        const userJSON = retrieveCurrentAuthor();
         const aID = userJSON.id.split("/authors/")[1];
         // create post
         axios
@@ -81,7 +81,11 @@ export const PostTextbox = () => {
                     .catch((res) => console.log(res));
 
                 // then to everyone else
-                axios.get("/authors/" + aID + "/followers").then((res) => {
+                axios.get("/authors/" + aID + "/followers", {
+                    headers: {
+                        Authorization: "Bearer " + getAccessToken()
+                    },
+                }).then((res) => {
                     let followers = res.data.items;
                     // console.log(followers)
                     // Team 12 and 13 must be here since they only require 1 call per post.
@@ -103,7 +107,11 @@ export const PostTextbox = () => {
                             }
                             //
                             if (data.visibility.includes("FRIEND")) {
-                                axios.get(user.host + "/authors/" + faID + "/followers/" + aID).then((statusString) => {
+                                axios.get(user.host + "/authors/" + faID + "/followers/" + aID, {
+                                    headers: {
+                                        Authorization: "Bearer " + getAccessToken()
+                                    },
+                                }).then((statusString) => {
                                     // if true, then send. else ignore.
                                     if (statusString.data === true) {
                                         axios.post("/authors/" + faID + "/inbox", createdPost.data, {

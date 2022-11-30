@@ -52,7 +52,7 @@ function NavBar() {
         if (accessToken) {
             try {
                 setAuthorID(getCurrentAuthorID());
-                const decode = jwt_decode(accessToken)["author_id"].split("/authors");
+                const decode = jwt_decode(accessToken)["author_id"].split("/authors/");
                 axios
                     .get("/authors/" + decode[1], {
                         headers: {

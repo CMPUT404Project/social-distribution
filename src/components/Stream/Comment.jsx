@@ -3,7 +3,7 @@ import { Avatar, Button, Card, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-import { getAccessToken } from "../../utils";
+import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import AuthService from "../../services/AuthService";
 
 export const Comment = (props) => {
@@ -11,7 +11,7 @@ export const Comment = (props) => {
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
 
-    const userJSON = JSON.parse(AuthService.retrieveCurrentUser());
+    const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
         const commentURITokens = props.data.id.split("/");
         const aid = commentURITokens[4];

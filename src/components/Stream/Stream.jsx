@@ -3,7 +3,7 @@ import { Avatar, Box, Button, Card, Grid, Menu, MenuItem, TextField, Typography 
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-import { getAccessToken } from "../../utils";
+import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import AuthService from "../../services/AuthService";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
@@ -17,7 +17,7 @@ export const Post = (props) => {
     const [likeList, setLikeList] = useState([]);
     const [isCommentsSubmitted, setIsCommentSubmitted] = useState(false);
 
-    const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
+    const aID = retrieveCurrentAuthor().id.split("/authors/")[1];
     const pID = props.data.id.split("/posts/")[1];
 
     // isSubmitted is used to let the webpage know to reload the comments
@@ -55,9 +55,10 @@ export const Post = (props) => {
             });
     }, [likes, likeablePost]);
 
-    const currentUser = JSON.parse(AuthService.retrieveCurrentUser());
+    const currentUser = retrieveCurrentAuthor();
 
     const handleLikeOnClick = (e) => {
+        
         var data = {
             type: "Like",
             context: "http://TODO.com",
@@ -66,9 +67,10 @@ export const Post = (props) => {
             object: props.data.id,
         };
         // send inbox to author of post
-        const aID = currentUser.id.split("/authors/")[1];
+        const posterID = props.data.author.id.split("/authors/")[1];
+        console.log(posterID)
         axios
-            .post("/authors/" + aID + "/inbox", data, {
+            .post("/authors/" + posterID + "/inbox", data, {
                 headers: {
                     Authorization: "Bearer " + getAccessToken(),
                     ContentType: "application/json",
@@ -99,7 +101,7 @@ export const Post = (props) => {
             // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
             let data = {
                 type: "comment",
-                author: JSON.parse(AuthService.retrieveCurrentUser()),
+                author: retrieveCurrentAuthor(),
                 comment: postTextBox,
                 post: props.data.id.split("/posts/")[1],
                 contentType: "text/plain",
@@ -193,7 +195,7 @@ function Stream() {
     );
 
     useEffect(() => {
-        const aID = JSON.parse(AuthService.retrieveCurrentUser()).id.split("/authors/")[1];
+        const aID = retrieveCurrentAuthor().id.split("/authors/")[1];
         axios
             .get("/authors/" + aID + "/inbox?type=posts", {
                 headers: { Authorization: "Bearer " + accessToken },

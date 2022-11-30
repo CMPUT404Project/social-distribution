@@ -122,12 +122,10 @@ function ProfilePage() {
         try {
             setLoading(true);
             var imageError = false;
-            if (authorValues.displayName !== defaultAuthor.displayName) {
-                if (!regexPatterns.namePattern.test(authorValues.displayName)) {
-                    throw new Error("displayNameError")
-                } else {
-                    body.displayName = authorValues.displayName;
-                };
+            if (!regexPatterns.namePattern.test(authorValues.displayName)) {
+                throw new Error("displayNameError")
+            } else {
+                body.displayName = authorValues.displayName;
             };
             let defaultGit = defaultAuthor.github.split(".com/")[1] ? defaultAuthor.github.split(".com/")[1] : "";
             if (authorValues.github !== defaultGit) {
@@ -155,24 +153,18 @@ function ProfilePage() {
                     body.profileImage = "";
                 }
             };
-            if (Object.keys(body).length !== 0) {
-                const response = await AuthService.updateAuthorDetails(body)
-                .then(() => {
-                    setDefaultAuthor(JSON.parse(AuthService.retrieveCurrentAuthor()));
-                    setAlertDetails({alertSeverity: "success", 
-                        errorMessage: "Successfully updated profile"})
-                    handleOpen();
-                    setEditState(false);
-                }, error => {
-                    return error
-                })
-                if (response) {
-                    throw response
-                }
-            } else {
-                setAlertDetails({alertSeverity: "warning", 
-                    errorMessage: "Nothing was changed"})
+            const response = await AuthService.updateAuthorDetails(body)
+            .then(() => {
+                setDefaultAuthor(retrieveCurrentAuthor());
+                setAlertDetails({alertSeverity: "success", 
+                    errorMessage: "Successfully updated profile"})
                 handleOpen();
+                setEditState(false);
+            }, error => {
+                return error
+            })
+            if (response) {
+                throw response
             }
         } catch (error) {
             console.log(error)

@@ -12,7 +12,7 @@ class Post(models.Model):
     ]
     VISIBILITY_TYPES = [
         ("PUBLIC", "PUBLIC"),
-        ("FRIEND", "FRIEND")
+        ("FRIENDS", "FRIENDS")
     ]
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     source = models.URLField(max_length=200, blank=True)

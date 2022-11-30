@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { Component, PropTypes, useEffect, useState } from "react";
-import { Navigate, redirect } from "react-router-dom";
+import { useNavigate, redirect } from "react-router-dom";
 
 //Import MUI components
 import { 
@@ -17,17 +17,21 @@ import AuthService from "../../services/AuthService";
 import "./FriendsList.css";
 
 export const User = (props) => {
-    const displayName = props.data.displayName;
+    const navigate = useNavigate();
+    const displayName = props.data.displayName || props.data.username;
     const github = props.data.github;
     const profileImage = props.data.profileImage
         ? props.data.profileImage
         : "https://i.imgur.com/w3UEu8o.jpeg";
-    const foreignID = props.data.id.split("authors/")[1];
-
+    const foreignID = props.data.id.split("authors/")[1] || props.data.id;
 
     const handleUnfollow = (faID) => {
         console.log(faID)
     };
+
+    const handleUserClick = (event) => {
+        navigate("/profile/" + foreignID)
+    }
 
     return (
         <Grid>
@@ -35,11 +39,10 @@ export const User = (props) => {
                 className="hoverCard"
                 style={{ margin: 3}}
                 elevation={15}
-                
             >
                 <CardActionArea 
                     style={{padding: "2% 2%"}}
-                    onMouseDown={() => {console.log(props.data.url)}}
+                    onClick={handleUserClick}
                 >
                     <CardHeader
                         avatar={
@@ -52,23 +55,6 @@ export const User = (props) => {
                                 src={profileImage}
                                 alt="profile"
                             />
-                        }
-                        action={
-                            <Button
-                                variant="contained"
-                                component="span"
-                                disableRipple={true}
-                                sx={{
-                                    backgroundColor: "#e0127c",
-                                    '&:hover': {backgroundColor: "#e0127c"},
-                                    fontWeight: "600"}}
-                                onMouseDown={e => {
-                                    e.stopPropagation();
-                                    handleUnfollow(props.currentAuthorID, foreignID);
-                                }}
-                            >
-                                Unfollow
-                            </Button>
                         }
                         title={
                             <Typography variant="h4">
@@ -91,21 +77,27 @@ export const User = (props) => {
 
 export default class SearchResults extends Component {
     propTypes: {
-        followers: PropTypes.isRequired,
-        currentAuthorID: PropTypes.isRequired,
-        isEmpty: PropTypes.isRequired
+        authors: PropTypes.isRequired,
+        input: PropTypes.isRequired
     }
 
     renderEvents() {
-        return this.props.followers.map(follower => {
-            return <User key={follower.id} data={follower} currentAuthorID={this.props.currentAuthorID}></User>;
+        const filteredData = this.props.authors.filter((author) => {
+            if (this.props.input === '') {
+                return author;
+            } else {
+                return author.displayName.toLowerCase().includes(this.props.input.toLowerCase())
+            }
+        })
+        return filteredData.map(author => {
+            return <User key={author.id} data={author}></User>;
         })
     }
 
     render() {
         return (
             <div>
-                {this.props.isEmpty ? (<div className="empty-events">No followers to show</div>) : (this.renderEvents())}
+                {this.renderEvents()}
             </div>
         );
     }
