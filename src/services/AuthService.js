@@ -72,10 +72,6 @@ class AuthService {
         });
     }
 
-    retrieveCurrentUser() {
-        return sessionStorage.getItem('author') || localStorage.getItem('author');
-    }
-
     async getAuthorDetails(authorID) {
         setAxiosDefaults();
         const response = await axios.get("/authors/" + authorID);
@@ -103,6 +99,20 @@ class AuthService {
     async getFollowStatus(authorID, foreignID) {
         setAxiosDefaults();
         const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);
+        return response.data
+    }
+
+    async acceptFollowRequest(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.put("/authors/" + authorID + "/followers/" + foreignID);
+        return response.data
+    }
+
+    async declineFollowRequest(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.delete("/authors/" + authorID + "/followRequest/" + foreignID);
         return response.data
     }
 
@@ -152,7 +162,6 @@ class AuthService {
             body.post = postID;
             body.comment = comment;
         }
-        // const response = await axios.put("/authors/" + foreignID + "/followers/" + authorID);
         const response = await axios.post("/authors/" + authorID + "/inbox", body);
         console.log(response.data)
         // return response.data

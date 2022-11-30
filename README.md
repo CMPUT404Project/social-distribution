@@ -3,6 +3,8 @@
 ### For Linux and Mac Users (this will create a virtual environment in the current directory, and install all the requirements, as well as activate the newly created VENV):
 `python -m venv venv && pip install -r requirements.txt && source venv/bin/activate`
 
+# Adding Remote Nodes
+When adding a new node, need to first give them a user account with remote group permission, add their node to the nodes table, and add their credentials to access their api to our environment variable in heroku
 # Useful Commands
 **Start Server**
 
