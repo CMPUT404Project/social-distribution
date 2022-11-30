@@ -171,7 +171,7 @@ export const PostTextbox = () => {
                                         // clean up data of post
                                         delete team13data["categories"];
                                         delete team13data["count"];
-                                        team13data.id = createdPost.data.id.split("/posts/")[1];
+                                        team13data.author = { id: aID, displayName: userJSON.displayName };
                                         if (createdPost.data.origin === createdPost.data.id) {
                                             team13data.originalAuthor = {
                                                 id: aID,
@@ -179,11 +179,13 @@ export const PostTextbox = () => {
                                             };
                                         }
                                         // get the user info if it is not the current user
+                                        
                                         else {
                                             // ex: {source: "http://127.0.0.1:5454/authors/9de11658e/posts/76bd9e"}
                                             // I am assuming that the source I recieve follows this format
                                             // {host}/authors/{aid}/posts/{pid}
                                             let originURL = createdPost.data.origin;
+                                            // team13 requires originalAuthor displayName which we have to call the origin's authors server which we might not have access to.
                                             axios
                                                 .get(originURL, {
                                                     Authorization: "Bearer " + getAccessToken(),
@@ -195,8 +197,9 @@ export const PostTextbox = () => {
                                                     };
                                                 });
                                         }
-                                        // do this after comparing the postURI to originURI
-                                        team13data.author = { id: aID, displayName: userJSON.displayName };
+                                        // do this after comparing the origin and id
+                                        team13data.id = createdPost.data.id.split("/posts/")[1];
+                                        
                                         //create post on their server
                                         axios
                                             .put(
@@ -204,7 +207,7 @@ export const PostTextbox = () => {
                                                 team13data,
                                                 {
                                                     headers: {
-                                                        authorization: "Bearer " + jwt,
+                                                        Authorization: "Bearer " + jwt,
                                                         "Content-Type": "application/json",
                                                     },
                                                 }
@@ -217,11 +220,11 @@ export const PostTextbox = () => {
                                                             "https://cmput404-team13.herokuapp.com/inbox/public/" +
                                                                 aID +
                                                                 "/" +
-                                                                createdPost.data.id.split("/posts/")[1],
+                                                                team13data.id,
                                                             {},
                                                             {
                                                                 headers: {
-                                                                    authorization: "Bearer " + jwt,
+                                                                    Authorization: "Bearer " + jwt,
                                                                     "Content-Type": "application/json",
                                                                 },
                                                             }
@@ -237,7 +240,7 @@ export const PostTextbox = () => {
                                                             {},
                                                             {
                                                                 headers: {
-                                                                    authorization: "Bearer " + jwt,
+                                                                    Authorization: "Bearer " + jwt,
                                                                     "Content-Type": "application/json",
                                                                 },
                                                             }
