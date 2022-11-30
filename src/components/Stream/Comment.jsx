@@ -3,8 +3,7 @@ import { Avatar, Button, Card, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-import {getAccessToken} from "../../utils/index"
-
+import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import AuthService from "../../services/AuthService";
 
 export const Comment = (props) => {
@@ -12,7 +11,7 @@ export const Comment = (props) => {
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
 
-    const userJSON = JSON.parse(AuthService.retrieveCurrentUser());
+    const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
         const commentURITokens = props.data.id.split("/");
         const aid = commentURITokens[4];
@@ -28,7 +27,9 @@ export const Comment = (props) => {
                 setLikes(res.data.items.length);
                 setLikesList(res.data.items);
                 likesList.forEach((element) => {
-                    setLikeableComment(element.author.id !== userJSON.id);
+                    if (element.author.id === userJSON.id) {
+                        setLikeableComment(false);
+                    }
                 });
             });
     }, [likes, likeableComment]);
@@ -41,22 +42,33 @@ export const Comment = (props) => {
             author: userJSON,
             object: props.data.id,
         };
-        const aID = userJSON.id.split("/authors/")[1];
+        // console.log(data);
+        // this gets the aID of the author's comment
         axios
-            .post("/authors/" + aID + "/inbox", data, {
+            .get(props.data.id, {
                 headers: {
                     Authorization: "Bearer " + getAccessToken(),
                 },
             })
-            .then(() => {
-                setLikeableComment(false);
-            })
-            .catch((err) => {
-                if (err.response.status === 409) {
-                    console.log("You already like this post!");
-                } else {
-                    console.log(err);
-                }
+            .then((res) => {
+                let commenterUUID = res.data.author.id.split("/authors/")[1];
+                // send to inbox of the commenter on the post
+                axios
+                    .post("/authors/" + commenterUUID + "/inbox", data, {
+                        headers: {
+                            Authorization: "Bearer " + getAccessToken(),
+                        },
+                    })
+                    .then(() => {
+                        setLikeableComment(false);
+                    })
+                    .catch((err) => {
+                        if (err.response.status === 409) {
+                            console.log("You already like this comment!");
+                        } else {
+                            console.log(err);
+                        }
+                    });
             });
     };
 

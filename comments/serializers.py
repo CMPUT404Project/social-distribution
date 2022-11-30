@@ -31,7 +31,6 @@ class CommentCreationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comment
         fields = ['id', 'author', 'comment', 'post', 'contentType', 'published']
-
 class CommentRemoteCreationSerializer(serializers.ModelSerializer):
     url = serializers.URLField(required=True)
     class Meta:

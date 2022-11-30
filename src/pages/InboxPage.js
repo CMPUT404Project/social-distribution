@@ -42,6 +42,7 @@ function InboxPage() {
         getInboxItems(currentAuthorID);
     }, []);
 
+
     return (
         <>
         <NavBar />
@@ -57,7 +58,7 @@ function InboxPage() {
                     <Tab sx={{color: "rgba(0, 0, 0, 0.6)", fontSize: "20px"}} value={"Requests"} label="Requests" />
                 </Tabs>
                 <Container style={{paddingTop: "15px",paddingLeft: "150px", paddingRight: "150px"}}>
-                    <InboxItemsList tab={tabIndex} inboxItems={inboxItems}/>
+                    <InboxItemsList tab={tabIndex} inboxItems={inboxItems} setInboxItems={setInboxItems}/>
                 </Container>
             </div>
         </>

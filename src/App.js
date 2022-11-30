@@ -5,7 +5,6 @@ import { PublicRoute as Pub, PrivateRoute as Priv } from "./components/AuthRoute
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
-import FriendsPage from "./pages/FriendsPage";
 import ProfilePage from "./pages/ProfilePage";
 import RemoteProfilePage from "./pages/RemoteProfilePage";
 import InboxPage from "./pages/InboxPage";
@@ -19,7 +18,7 @@ function App() {
             <Routes>
                 <Route path="/" element={<Pub><LoginPage/></Pub>}/>
                 <Route path="/register" element={<Pub><RegisterPage/></Pub>}/>
-                <Route path="*" element={<NotFoundPage/>}/>
+                <Route path="*" element={<Pub><NotFoundPage/></Pub>}/>
 
                 <Route path="/homepage" element={<Priv><HomePage/></Priv>}/>
                 <Route path="/profile/:authorID" element={<Priv><ProfilePage/></Priv>}/>

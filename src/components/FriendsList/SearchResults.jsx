@@ -3,7 +3,8 @@ import React, { Component, PropTypes, useEffect, useState } from "react";
 import { useNavigate, redirect } from "react-router-dom";
 
 //Import MUI components
-import { 
+import {
+    Avatar,
     Button,
     Card,
     CardActionArea,
@@ -12,24 +13,16 @@ import {
     Typography
 } from "@mui/material";
 
-
 import AuthService from "../../services/AuthService";
-import "./FriendsList.css";
 
 export const User = (props) => {
     const navigate = useNavigate();
     const displayName = props.data.displayName || props.data.username;
     const github = props.data.github;
-    const profileImage = props.data.profileImage
-        ? props.data.profileImage
-        : "https://i.imgur.com/w3UEu8o.jpeg";
+    const profileImage = props.data.profileImage;
     const foreignID = props.data.id.split("authors/")[1] || props.data.id;
 
     const team = props.team.replace(" ",'').toLowerCase();
-
-    const handleUnfollow = (faID) => {
-        console.log(faID)
-    };
 
     const handleUserClick = (event) => {
         if (team === "local") {
@@ -52,14 +45,13 @@ export const User = (props) => {
                 >
                     <CardHeader
                         avatar={
-                            <img
-                                style={{
-                                    borderRadius: "50%",
-                                    height: "100px",
-                                    width: "100px",
-                                    objectFit: "cover"}}
+                            <Avatar 
+                                alt="user image"
                                 src={profileImage}
-                                alt="profile"
+                                sx={{borderRadius: "50%",
+                                height: "100px",
+                                width: "100px",
+                                objectFit: "cover"}}
                             />
                         }
                         title={
