@@ -39,7 +39,6 @@ function ProfilePage() {
     })
     const [remoteNode, setRemoteNode] = useState(`${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`)
 
-    const [isExistingRequest, setIsExistingRequest] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
 
@@ -48,7 +47,7 @@ function ProfilePage() {
 
     const [alertDetails, setAlertDetails] = useState({
         alertSeverity: 'error',
-        errorMessage: 'Failed to update. Please try again'
+        errorMessage: 'Something went wrong. Try again later.'
     })
 
     useEffect(() => {
@@ -62,16 +61,6 @@ function ProfilePage() {
                 setIsFollowing(false)
             }
         }
-        const checkExistingRequest = async (currentAuthorID) => {
-            await AuthService.getInboxItems("follows", authorID).then((data) => {
-                data.items.forEach(followRequest => {
-                    let followRequestID = followRequest.actor.id.split("authors/")[1]
-                    if (followRequestID === currentAuthorID) {
-                        setIsExistingRequest(true);
-                    }
-                });
-            })
-        }
         const getAuthorDetails = async () => {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
@@ -84,7 +73,6 @@ function ProfilePage() {
         let currentAuthorID = getCurrentAuthorID();
         setLoading(true);
         checkFollowStatus(currentAuthorID);
-        // checkExistingRequest(currentAuthorID);
         getAuthorDetails();
     }, [authorID])
 
@@ -94,10 +82,9 @@ function ProfilePage() {
         try {
             setLoading(true)
             if (event.target.textContent === "Send Follow Request") {
-                const response = await AuthService.sendInboxItem("follow", authorID).then(() => {
+                const response = await RemoteAuthService.sendRemoteFollowRequest(remoteNode, authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
                             errorMessage: "Sent a follow request to " + authorValues.displayName})
-                    setIsExistingRequest(true)
                     handleOpen();
                 }, error => {
                     return error;
@@ -105,26 +92,13 @@ function ProfilePage() {
                 if (response) {
                     throw response;
                 };
+                
 
-            } else if (event.target.textContent === "Cancel pending follow request") {
-                const response = await AuthService.cancelFollowRequest(authorID).then(() => {
-                    setAlertDetails({alertSeverity: "success", 
-                            errorMessage: "Cancelled follow request to " + authorValues.displayName})
-                    setIsFollowing(false);
-                    setIsExistingRequest(false);
-                    handleOpen();
-                }, error => {
-                    return error;
-                });
-                if (response) {
-                    throw response;
-                };
             } else if (event.target.textContent === "Unfollow") {
-                const response = await AuthService.unfollowAuthor(authorID).then(() => {
+                const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
                             errorMessage: "Unfollowed " + authorValues.displayName})
                     setIsFollowing(false);
-                    setIsExistingRequest(false);
                     handleOpen();
                 }, error => {
                     return error;
@@ -135,14 +109,8 @@ function ProfilePage() {
             }
         } catch (error) {
             console.log(error.response);
-            if (error.response.status === 404) {
+            if (error.response) {
                 setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "Author could not found"})
-            } else if (error.response.status === 409) {
-                setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "You've already sent a follow request to this author"})
-            } else {
-                setAlertDetails({alertSeverity: "warning", 
                     errorMessage: "Something went wrong. Try again later."})
             }
             handleOpen();
@@ -199,29 +167,6 @@ function ProfilePage() {
                         }}
                     />
                     <div className="edit-container">
-                            <div className="edit-field-label">
-                                Image
-                            </div>
-                            <div className="edit-container">
-                                <div className="edit-field">
-                                <Typography
-                                    style={{
-                                        width: "100%",
-                                        color: "rgb(0, 0, 0, 0.6)",
-                                        backgroundColor: "#e6e6e6",
-                                        padding: "16.5px 14px",
-                                        border: "1px solid black",
-                                        fontSize: '20px'
-                                    }}
-                                    noWrap
-                                    
-                                >
-                                    {authorValues.profileImage ? authorValues.profileImage : "None"}
-                                </Typography>
-                                </div>
-                            </div>
-                    </div>
-                    <div className="edit-container">
                         <div className="edit-field-label">
                             Display Name
                         </div>
@@ -244,7 +189,7 @@ function ProfilePage() {
                     </div>
                     <div className="edit-container">
                         <div className="edit-field-label">
-                            Github Username
+                            Github
                         </div>
                         <div className="edit-field">
                         <Typography
@@ -258,7 +203,7 @@ function ProfilePage() {
                                 }}
                                 noWrap
                             >
-                                {authorValues.github ? (<a href={authorValues.github} ></a>) : "None"}
+                                {authorValues.github ? (<a href={authorValues.github} target="_blank" rel="noreferrer">{authorValues.github}</a>) : "None"}
                             </Typography>
                         </div>
                     </div>
@@ -268,9 +213,7 @@ function ProfilePage() {
                             sx={{fontWeight: "600"}}
                             onClick={handleFollow}
                         >
-                            {isFollowing ? ("Unfollow") 
-                            : isExistingRequest ? ("Cancel pending follow request") 
-                            : ("Send Follow Request")}
+                            {isFollowing ? ("Unfollow") : ("Send Follow Request")}
                         </Button>
                     </div>
                 </div>
