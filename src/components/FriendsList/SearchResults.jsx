@@ -3,7 +3,8 @@ import React, { Component, PropTypes, useEffect, useState } from "react";
 import { useNavigate, redirect } from "react-router-dom";
 
 //Import MUI components
-import { 
+import {
+    Avatar,
     Button,
     Card,
     CardActionArea,
@@ -12,25 +13,23 @@ import {
     Typography
 } from "@mui/material";
 
-
 import AuthService from "../../services/AuthService";
-import "./FriendsList.css";
 
 export const User = (props) => {
     const navigate = useNavigate();
     const displayName = props.data.displayName || props.data.username;
     const github = props.data.github;
-    const profileImage = props.data.profileImage
-        ? props.data.profileImage
-        : "https://i.imgur.com/w3UEu8o.jpeg";
+    const profileImage = props.data.profileImage;
     const foreignID = props.data.id.split("authors/")[1] || props.data.id;
 
-    const handleUnfollow = (faID) => {
-        console.log(faID)
-    };
+    const team = props.team.replace(" ",'').toLowerCase();
 
     const handleUserClick = (event) => {
-        navigate("/profile/" + foreignID)
+        if (team === "local") {
+            navigate("/profile/" + foreignID)
+        } else {
+            navigate("/profile/remote/" + team + "/" + foreignID)
+        }
     }
 
     return (
@@ -46,14 +45,13 @@ export const User = (props) => {
                 >
                     <CardHeader
                         avatar={
-                            <img
-                                style={{
-                                    borderRadius: "50%",
-                                    height: "100px",
-                                    width: "100px",
-                                    objectFit: "cover"}}
+                            <Avatar 
+                                alt="user image"
                                 src={profileImage}
-                                alt="profile"
+                                sx={{borderRadius: "50%",
+                                height: "100px",
+                                width: "100px",
+                                objectFit: "cover"}}
                             />
                         }
                         title={
@@ -78,6 +76,7 @@ export const User = (props) => {
 export default class SearchResults extends Component {
     propTypes: {
         authors: PropTypes.isRequired,
+        team: PropTypes.isRequired,
         input: PropTypes.isRequired
     }
 
@@ -86,11 +85,15 @@ export default class SearchResults extends Component {
             if (this.props.input === '') {
                 return author;
             } else {
-                return author.displayName.toLowerCase().includes(this.props.input.toLowerCase())
+                if (this.props.team === "Team 12") {
+                    return author.username.toLowerCase().includes(this.props.input.toLowerCase())
+                } else {
+                    return author.displayName.toLowerCase().includes(this.props.input.toLowerCase())
+                }
             }
         })
         return filteredData.map(author => {
-            return <User key={author.id} data={author}></User>;
+            return <User key={author.id} team={this.props.team} data={author}></User>;
         })
     }
 

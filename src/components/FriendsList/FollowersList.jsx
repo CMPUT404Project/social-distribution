@@ -1,10 +1,9 @@
-import axios from "axios";
-import React, { Component, PropTypes, useEffect, useState } from "react";
-import { useNavigate, redirect } from "react-router-dom";
+import React, { Component, PropTypes } from "react";
+import { useNavigate } from "react-router-dom";
 
 //Import MUI components
-import { 
-    Button,
+import {
+    Avatar,
     Card,
     CardActionArea,
     CardHeader,
@@ -13,24 +12,17 @@ import {
 } from "@mui/material";
 
 
-import AuthService from "../../services/AuthService";
-import "./FriendsList.css";
+import "./FollowersList.css";
 
 export const User = (props) => {
     const navigate = useNavigate();
     const displayName = props.data.displayName;
     const github = props.data.github;
-    const profileImage = props.data.profileImage
-        ? props.data.profileImage
-        : "https://i.imgur.com/w3UEu8o.jpeg";
+    const profileImage = props.data.profileImage;
     const foreignID = props.data.id.split("authors/")[1];
 
-
-    const handleUnfollow = (faID) => {
-        console.log(faID)
-    };
-
     const handleUserClick = (event) => {
+        // NEED TO NAVIGATE TO REMOTE 
         navigate("/profile/" + foreignID)
     }
 
@@ -47,14 +39,13 @@ export const User = (props) => {
                 >
                     <CardHeader
                         avatar={
-                            <img
-                                style={{
-                                    borderRadius: "50%",
-                                    height: "100px",
-                                    width: "100px",
-                                    objectFit: "cover"}}
+                            <Avatar 
+                                alt="user image"
                                 src={profileImage}
-                                alt="profile"
+                                sx={{borderRadius: "50%",
+                                height: "100px",
+                                width: "100px",
+                                objectFit: "cover"}}
                             />
                         }
                         title={
@@ -79,12 +70,11 @@ export const User = (props) => {
 export default class FollowersList extends Component {
     propTypes: {
         followers: PropTypes.isRequired,
-        currentAuthorID: PropTypes.isRequired
     }
 
     renderEvents() {
         return this.props.followers.map(follower => {
-            return <User key={follower.id} data={follower} currentAuthorID={this.props.currentAuthorID}></User>;
+            return <User key={follower.id} data={follower}></User>;
         })
     }
 

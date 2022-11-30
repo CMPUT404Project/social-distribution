@@ -102,6 +102,20 @@ class AuthService {
         return response.data
     }
 
+    async acceptFollowRequest(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.put("/authors/" + authorID + "/followers/" + foreignID);
+        return response.data
+    }
+
+    async declineFollowRequest(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.delete("/authors/" + authorID + "/followRequest/" + foreignID);
+        return response.data
+    }
+
     async cancelFollowRequest(foreignID) {
         setAxiosDefaults();
         const authorID = getCurrentAuthorID();

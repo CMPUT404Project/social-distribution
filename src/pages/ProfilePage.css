@@ -9,10 +9,6 @@
     z-index: -100;
 }
 
-.Mui-disabled {
-    -webkit-text-fill-color: rgba(0, 0, 0, 0.354)!important
-}
-
 .profile-title {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 40px;
