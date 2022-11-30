@@ -6,6 +6,8 @@ from .serializers import UserSerializer, UserCreationSerializer
 from django.contrib.auth.models import User
 from backend.serializers import MyTokenObtainPairSerializer
 from inbox.serializers import InboxCreationSerializer
+from drf_yasg.utils import swagger_auto_schema
+from .serializers import UserRegistrationSwaggerRequestSerializer
 
 def get_tokens_for_user(user):
     refresh = MyTokenObtainPairSerializer().get_token(user)
@@ -29,11 +31,23 @@ class UserCreation(GenericAPIView):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    tag = "User"
+
+    @swagger_auto_schema(tags=[tag], request_body=UserRegistrationSwaggerRequestSerializer, responses={201: "{'access': 'youraccesstoken', \n'refresh': 'yourrefreshtoken'}"})
     def post(self, request, format=None):
         user_serializer = UserCreationSerializer(data=request.data)
         if user_serializer.is_valid():
             user = user_serializer.save()
-            new_author_data = {"host": request.scheme + "://" + request.get_host() + '/', "user":user.id, }
+            displayName = request.data.get('displayName')
+            profileImage = request.data.get('profileImage')
+            github = request.data.get('github')
+            new_author_data = {"host": request.scheme + "://" + request.get_host() + '/', "user":user.id}
+            if displayName:
+                new_author_data['displayName'] = displayName
+            if profileImage:
+                new_author_data['profileImage'] = profileImage
+            if github:
+                new_author_data['github'] = github
             author_serializer = AuthorCreationSerializer(data=new_author_data)
             if author_serializer.is_valid():
                 author = author_serializer.save()

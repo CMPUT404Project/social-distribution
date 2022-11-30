@@ -1,7 +1,7 @@
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 
-import { setAxiosAuthToken } from "../utils";
+import { getCurrentAuthorID, getAccessToken, retrieveCurrentAuthor, setAxiosDefaults } from "../utils";
 
 class AuthService {
     async login(username, password, rememberMe) {
@@ -20,32 +20,32 @@ class AuthService {
                 sessionStorage.setItem('refresh_token', response.data.refresh);
             }
             // Set auth token as default header for axios calls
-            await setAxiosAuthToken();
-            await this.storeCurrentUser()
+            await setAxiosDefaults();
+            await this.storeCurrentAuthor()
         }
-        return response.data
     }
 
     async register(username, password, body) {
         const response = await axios.post('api/users/register',
             {
                 username: username,
-                password: password
+                password: password,
+                ...body
             }
         )
         if (response.status === 201) {
             sessionStorage.setItem('access_token', response.data.access);
             sessionStorage.setItem('refresh_token', response.data.refresh);
-            setAxiosAuthToken(response.data.access);
-            const updateReponse = await this.updateUserDetails(body);
-            return updateReponse
+            await setAxiosDefaults();
         }
         return response.data
     }
 
-    async updateUserDetails(body) {
-        setAxiosAuthToken();
-        const response = await axios.put(jwtDecode(this.getAccessToken()).author_id, body)
+    async updateAuthorDetails(body) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.put("/authors/" + authorID, body)
+        console.log(response)
         if (response.status === 200) {
             if (localStorage.getItem('access_token')) {
                 localStorage.setItem("author", JSON.stringify(response.data));
@@ -56,8 +56,9 @@ class AuthService {
         return response.data
     }
 
-    storeCurrentUser() {
-        const accessToken = this.getAccessToken();
+    storeCurrentAuthor() {
+        setAxiosDefaults();
+        const accessToken = getAccessToken();
         const authorID = jwtDecode(accessToken)["author_id"].split("authors/")[1];
         return axios.get('authors/' + authorID).then(response => {
             if (localStorage.getItem('access_token')) {
@@ -71,16 +72,85 @@ class AuthService {
         });
     }
 
-    retrieveCurrentUser() {
-        return sessionStorage.getItem('author') || localStorage.getItem('author');
+    async getAuthorDetails(authorID) {
+        setAxiosDefaults();
+        const response = await axios.get("/authors/" + authorID);
+        if (response.status === 200) {
+            return response.data
+        }
     }
 
-    getAccessToken() {
-        return localStorage.getItem('access_token') || sessionStorage.getItem('access_token');
+    async getAllAuthors() {
+        setAxiosDefaults();
+        const response = await axios.get("/authors")
+        if (response.status === 200) {
+            return response.data 
+        }
+        return response.data
     }
 
-    getRefreshToken() {
-        return localStorage.getItem('refresh_token') || sessionStorage.getItem('refresh_token');
+    async getAuthorFollowers() {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.get("/authors/" + authorID + "/followers");
+        return response.data
+    }
+
+    async getFollowStatus(authorID, foreignID) {
+        setAxiosDefaults();
+        const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);
+        return response.data
+    }
+
+    async cancelFollowRequest(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.delete("/authors/" + foreignID + "/followRequest/" + authorID);
+        return response.data
+    }
+
+    async unfollowAuthor(foreignID) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        const response = await axios.delete("/authors/" + foreignID + "/followers/" + authorID);
+        return response.data
+    }
+
+    async getInboxItems(authorID, type="") {
+        setAxiosDefaults();
+        let path = "/authors/" + authorID + "/inbox";
+        if (type) {
+            path = path + "?type=" + type;
+        }
+        const response = await axios.get(path);
+        return response.data
+    }
+
+    async sendInboxItem(type, authorID, postID="", comment="", ) {
+        setAxiosDefaults();
+        const currentAuthor = retrieveCurrentAuthor();
+        const author = await this.getAuthorDetails(authorID)
+        let body = {
+            type: type,
+            actor: currentAuthor,
+            author: author
+        };
+        if (type === "post") {
+            body.content = "";
+            body.categories = "";
+        } else if (type === "follow") {
+            body.summary = currentAuthor.displayName + " wants to follow you"
+        } else if (type === "like") {
+            body.context = {};
+            body.summary = "";
+            body.object = {};
+        } else if (type === "comment") {
+            body.post = postID;
+            body.comment = comment;
+        }
+        const response = await axios.post("/authors/" + authorID + "/inbox", body);
+        console.log(response.data)
+        // return response.data
     }
 }
 

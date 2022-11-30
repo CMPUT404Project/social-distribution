@@ -12,7 +12,7 @@ class FollowRequestSerializer(serializers.ModelSerializer):
         fields = ['type', 'summary', 'actor', 'object', 'published']
 
     def get_type (self, obj):
-        return "Follow"
+        return "follow"
 
     def get_actor(self, obj):
         return AuthorSerializer(obj.actor).data

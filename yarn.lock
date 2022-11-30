@@ -6381,6 +6381,11 @@ mkdirp@~0.5.1:
   dependencies:
     minimist "^1.2.6"
 
+moment@^2.13.0:
+  version "2.29.4"
+  resolved "https://registry.yarnpkg.com/moment/-/moment-2.29.4.tgz#3dbe052889fe7c1b2ed966fcb3a77328964ef108"
+  integrity sha512-5LC9SOxjSc2HF6vO2CyuTDNivEdoz2IvyJJGj6X8DJ0eFyfszE0QiEd+iXmBvUP3WHxSjFH/vIsA0EN00cgr8w==
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz"
@@ -7562,6 +7567,13 @@ react-error-overlay@^6.0.11:
   version "6.0.11"
   resolved "https://registry.npmjs.org/react-error-overlay/-/react-error-overlay-6.0.11.tgz"
   integrity sha512-/6UZ2qgEyH2aqzYZgQPxEnz33NJ2gNsnHA2o5+o4wW9bLM/JYQitNP9xPhsXwC08hMMovfGe/8retsdDsczPRg==
+
+react-github-activity@^1.0.2:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/react-github-activity/-/react-github-activity-1.0.2.tgz#66cbd1725c361882fd28879b2f5aa8f2069be912"
+  integrity sha512-O/kBh4oMX7nxXQBEQpZnZFi3HFpP/O4KVS1OEcbXy9SwHhwucSZftaAu1fh7N9440IRBVUBO/spBHjaBrI5iMA==
+  dependencies:
+    moment "^2.13.0"
 
 react-is@^16.13.1, react-is@^16.7.0:
   version "16.13.1"

@@ -6,6 +6,7 @@
     overflow: hidden;
     transition: all 0.4s;
     min-width: 500px;
+    z-index: -100;
 }
 
 .Mui-disabled {
@@ -20,6 +21,12 @@
     width: 100%;
     display: block;
     padding-bottom: 10px;
+}
+
+.follow-button {
+    position: absolute;
+    top: 0;
+    right: 0;
 }
 
 .preview-image-container {
@@ -126,4 +133,12 @@
 .cancel-edit-profile:hover {
     color: #ff0000;
     border-color: #e0127c;
+}
+
+.follow-btn-container {
+    width: 100%;
+    padding-top: 25px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
 }

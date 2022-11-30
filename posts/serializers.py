@@ -222,7 +222,7 @@ class PostsSwaggerResponseSerializer(serializers.ModelSerializer):
 class PostSwaggerRequestSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.URLField(required=True)
-    title = serializers.URLField(required=True)
+    title = serializers.CharField(required=True)
     categories = serializers.CharField(required=True, allow_blank=True)
     author = AuthorSwaggerRequestSerializer(required=True)
     class Meta:

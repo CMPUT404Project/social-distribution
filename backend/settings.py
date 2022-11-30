@@ -30,15 +30,30 @@ DEBUG = True
 
 ALLOWED_HOSTS = [
     'http://localhost:3000',
-    'https://localhost:3000',
+    'http://localhost:8000',
     'https://true-friends-404.herokuapp.com',
     'https://cmput404-team13.herokuapp.com',
     'https://social-distribution-404.herokuapp.com',
 ]
 
+CORS_ORIGIN_WHITELIST = [
+    'http://localhost:3000',
+    'http://localhost:8000',
+    'https://true-friends-404.herokuapp.com',
+    'https://cmput404-team13.herokuapp.com',
+    'https://social-distribution-404.herokuapp.com',
+]
+
+CORS_ALLOW_METHODS = [
+    "DELETE",
+    "GET",
+    "OPTIONS",
+    "PATCH",
+    "POST",
+    "PUT",
+]
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
@@ -57,6 +72,7 @@ INSTALLED_APPS = [
     'likes',
     'inbox',
     'followRequests',
+    'nodes',
 ]
 
 MIDDLEWARE = [
@@ -69,6 +85,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -87,8 +104,6 @@ TEMPLATES = [
         },
     },
 ]
-
-CORS_ALLOW_ALL_ORIGINS = True
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 

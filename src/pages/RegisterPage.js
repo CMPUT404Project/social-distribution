@@ -91,7 +91,7 @@ function RegisterPage() {
                     setErrorMessage("Invalid Git username");
                     throw new Error("gitError")
                 } else {
-                    body.githubUrl = "https://github.com/" + values.git.toLowerCase();
+                    body.github = "https://github.com/" + values.git.toLowerCase();
                 }
             };
 
@@ -103,13 +103,13 @@ function RegisterPage() {
                     setErrorMessage("Could not load image");
                     throw new Error("imageError")
                 } else {
-                    body.imageUrl = values.imageUrl
+                    body.profileImage = values.imageUrl
                 };
             };
 
             const response = await AuthService.register(values.username, values.password, body)
                 .then(() => {
-                    navigate("/homepage", {replace: true})
+                    navigate("/login", {replace: true})
                 }, error => {
                     return error
                 })
