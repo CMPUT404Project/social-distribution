@@ -359,9 +359,9 @@ function Stream() {
     useEffect(() => {
         if (accessToken) {
             try {
-                const aID = jwtDecode(accessToken)["author_id"].split("/authors")[1];
+                const aID = jwtDecode(accessToken)["author_id"].split("/authors/")[1];
                 axios
-                    .get("services/authors/" + aID + "posts", {
+                    .get("/authors/" + aID + "/posts", {
                         headers: { Authorization: "Bearer " + accessToken },
                     })
                     .then((res) => {
