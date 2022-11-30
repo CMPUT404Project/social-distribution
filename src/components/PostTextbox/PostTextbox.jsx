@@ -202,7 +202,7 @@ export const PostTextbox = () => {
                                             .then((res) => {
                                                 //call endpoint depending on visibility for distribution
                                                 if (data.visibility.includes("PUBLIC")) {
-                                                    axios.post(`https://cmput404-team13.herokuapp.com/inbox/public/${aID}/${createdPost.data.id.split("/posts/")[1]}`,
+                                                    axios.post(`https://cmput404-team13.herokuapp.com/inbox/public/${aID}/${team13data.id}`,
                                                             {},
                                                             {
                                                                 headers: {
@@ -213,7 +213,7 @@ export const PostTextbox = () => {
                                                         )
                                                         .then(() => console.log("PUBLIC POST SUCCESSFUL"));
                                                 } else if (data.visibility.includes("FRIEND")) {
-                                                    axios.post(`https://cmput404-team13.herokuapp.com/inbox/friends/${aID}/${createdPost.data.id.split("/posts/")[1]}`,
+                                                    axios.post(`https://cmput404-team13.herokuapp.com/inbox/friends/${aID}/${team13data.id}`,
                                                             {},
                                                             {
                                                                 headers: {
