@@ -156,7 +156,7 @@ function ProfilePage() {
             if (Object.keys(body).length !== 0) {
                 const response = await AuthService.updateAuthorDetails(body)
                 .then(() => {
-                    setDefaultAuthor(JSON.parse(AuthService.retrieveCurrentAuthor()));
+                    setDefaultAuthor(retrieveCurrentAuthor());
                     setAlertDetails({alertSeverity: "success", 
                         errorMessage: "Successfully updated profile"})
                     handleOpen();
