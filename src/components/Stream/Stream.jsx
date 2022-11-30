@@ -1,10 +1,9 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import { Avatar, Box, Button, Card, Grid, Menu, MenuItem, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, Grid, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
-import AuthService from "../../services/AuthService";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
 
@@ -58,7 +57,6 @@ export const Post = (props) => {
     const currentUser = retrieveCurrentAuthor();
 
     const handleLikeOnClick = (e) => {
-        
         var data = {
             type: "Like",
             context: "http://TODO.com",
@@ -68,7 +66,7 @@ export const Post = (props) => {
         };
         // send inbox to author of post
         const posterID = props.data.author.id.split("/authors/")[1];
-        console.log(posterID)
+        console.log(posterID);
         axios
             .post("/authors/" + posterID + "/inbox", data, {
                 headers: {

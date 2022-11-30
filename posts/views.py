@@ -42,7 +42,7 @@ class PostView(GenericAPIView):
         except Exception as e:
             return Response(str(e), status=400)
         data = request.data.copy()
-        data.update({"author": aid})
+        data.update({"author": aid, "categories": str(data.get("categories", []))})
         serializer = PostCreationSerializer(data=data)
         if serializer.is_valid():
             post = serializer.save()
@@ -85,7 +85,7 @@ class PostIDView(GenericAPIView):
         if post is not None:
             return Response("A post with that id already exists", status=409)
         data = request.data.copy()
-        data.update({"author": aid, "id": pid})
+        data.update({"author": aid, "id": pid, "categories": str(data.get("categories", []))})
         serializer = PostCreationWithIDSerializer(data=data)
         if serializer.is_valid():
             post = serializer.save()
