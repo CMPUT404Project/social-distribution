@@ -55,8 +55,7 @@ export const PostTextbox = () => {
         const userJSON = retrieveCurrentAuthor();
         const aID = userJSON.id.split("/authors/")[1];
         // create post
-        axios
-            .post("/authors/" + aID + "/posts", data, {
+        axios.post(`/authors/${aID}/posts`, data, {
                 headers: {
                     Authorization: "Bearer " + getAccessToken(),
                     "Content-Type": "application/json",
@@ -67,8 +66,7 @@ export const PostTextbox = () => {
                 // first send to current user's inbox
                 let postWithAuthor = createdPost.data;
                 postWithAuthor["author"] = userJSON;
-                axios
-                    .post("/authors/" + aID + "/inbox", postWithAuthor, {
+                axios.post(`/authors/${aID}/inbox`, postWithAuthor, {
                         headers: {
                             Authorization: "Bearer " + getAccessToken(),
                             "Content-Type": "application/json",
@@ -77,9 +75,10 @@ export const PostTextbox = () => {
                     .catch((res) => console.log(res));
 
                 // then to everyone else
-                axios
-                    .get("/authors/" + aID + "/followers", {
-                        Authorization: "Bearer " + getAccessToken(),
+                axios.get(`/authors/${aID}/followers`, {
+                        headers: {
+                            Authorization: "Bearer " + getAccessToken(),
+                        }
                     })
                     .then((res) => {
                         let followers = res.data.items;
@@ -88,15 +87,13 @@ export const PostTextbox = () => {
                             "https://true-friends-404.herokuapp.com/",
                             "https://cmput404-team13.herokuapp.com/",
                         ];
-                        // console.log(res)
                         followers.forEach((user) => {
                             let faID = user.id.split("/authors/")[1];
 
                             // Team 12 implementation
                             if (
                                 user.host.includes("https://true-friends-404.herokuapp.com") &&
-                                hostArray.find((item) => item.includes("https://true-friends-404.herokuapp.com")) !==
-                                    undefined
+                                hostArray.find((item) => item.includes("https://true-friends-404.herokuapp.com")) !== undefined
                             ) {
                                 // remove team 12 from hostArray since they should only be called once per post in case they have multiple
                                 //   users that follow the current user
@@ -104,8 +101,7 @@ export const PostTextbox = () => {
                                     (item) => !item.includes("https://true-friends-404.herokuapp.com")
                                 );
                                 // get jwt token
-                                axios
-                                    .post(
+                                axios.post(
                                         "https://true-friends-404.herokuapp.com/api/token/obtain/",
                                         {
                                             email: process.env.REACT_APP_T12USER,
@@ -128,11 +124,7 @@ export const PostTextbox = () => {
                                         team12Data.id = team12Data.id.split("/posts/")[1];
 
                                         axios.post(
-                                            "https://true-friends-404.herokuapp.com/authors/" +
-                                                aID +
-                                                "/" +
-                                                sessionStorage.getItem("username") +
-                                                "/posts/",
+                                            `https://true-friends-404.herokuapp.com/authors/${aID}/${sessionStorage.getItem("username")}/posts/`,
                                             team12Data,
                                             {
                                                 headers: {
@@ -147,8 +139,7 @@ export const PostTextbox = () => {
                             // // Team 13 implementation
                             else if (
                                 user.host.includes("https://cmput404-team13.herokuapp.com") &&
-                                hostArray.find((item) => item.includes("https://cmput404-team13.herokuapp.com")) !==
-                                    undefined
+                                hostArray.find((item) => item.includes("https://cmput404-team13.herokuapp.com")) !== undefined
                             ) {
                                 // clear team13 from hostArray
                                 hostArray = hostArray.filter(
@@ -158,15 +149,12 @@ export const PostTextbox = () => {
                                 // if the current user is where the post originated
 
                                 // get jwt token
-                                axios
-                                    .put("https://cmput404-team13.herokuapp.com/users", {
+                                axios.put("https://cmput404-team13.herokuapp.com/users", {
                                         username: process.env.REACT_APP_T13USER,
                                         password: process.env.REACT_APP_T13PASS,
                                     })
                                     .then((res) => {
-                                        // const jwt = res.data.jwt;
-                                        const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImYxMTYzMzg3LWUxNzEtNDFiMy05YjU1LWQzYjQxMzU0ZjVjOSIsImV4cCI6MTcwMTMyNTg4OSwiaWF0IjoxNjY5Nzg5ODg5fQ.HikuZ10v8G__T80O0UpNFMzQxHO88ZDVZsjg5ELj4eQ"
-                                        console.log(res)
+                                        const jwt = process.env.REACT_APP_T13JWT
                                         let team13data = createdPost.data;
                                         // clean up data of post
                                         delete team13data["categories"];
@@ -186,9 +174,10 @@ export const PostTextbox = () => {
                                             // {host}/authors/{aid}/posts/{pid}
                                             let originURL = createdPost.data.origin;
                                             // team13 requires originalAuthor displayName which we have to call the origin's authors server which we might not have access to.
-                                            axios
-                                                .get(originURL, {
-                                                    Authorization: "Bearer " + getAccessToken(),
+                                            axios.get(originURL, {
+                                                    headers: {
+                                                        Authorization: "Bearer " + getAccessToken(),
+                                                    }
                                                 })
                                                 .then((res) => {
                                                     team13data.originalAuthor = {
@@ -201,9 +190,7 @@ export const PostTextbox = () => {
                                         team13data.id = createdPost.data.id.split("/posts/")[1];
                                         
                                         //create post on their server
-                                        axios
-                                            .put(
-                                                "https://cmput404-team13.herokuapp.com/authors/" + aID + "/posts",
+                                        axios.put(`https://cmput404-team13.herokuapp.com/authors/${aID}/posts`,
                                                 team13data,
                                                 {
                                                     headers: {
@@ -215,12 +202,7 @@ export const PostTextbox = () => {
                                             .then((res) => {
                                                 //call endpoint depending on visibility for distribution
                                                 if (data.visibility.includes("PUBLIC")) {
-                                                    axios
-                                                        .post(
-                                                            "https://cmput404-team13.herokuapp.com/inbox/public/" +
-                                                                aID +
-                                                                "/" +
-                                                                team13data.id,
+                                                    axios.post(`https://cmput404-team13.herokuapp.com/inbox/public/${aID}/${team13data.id}`,
                                                             {},
                                                             {
                                                                 headers: {
@@ -231,12 +213,7 @@ export const PostTextbox = () => {
                                                         )
                                                         .then(() => console.log("PUBLIC POST SUCCESSFUL"));
                                                 } else if (data.visibility.includes("FRIEND")) {
-                                                    axios
-                                                        .post(
-                                                            "https://cmput404-team13.herokuapp.com/inbox/friends/" +
-                                                                aID +
-                                                                "/" +
-                                                                createdPost.data.id.split("/posts/")[1],
+                                                    axios.post(`https://cmput404-team13.herokuapp.com/inbox/friends/${aID}/${createdPost.data.id.split("/posts/")[1]}`,
                                                             {},
                                                             {
                                                                 headers: {
@@ -261,7 +238,7 @@ export const PostTextbox = () => {
                             ) {
                                 // if PUBLIC send to all of current user's followers' inboxes
                                 if (data.visibility === "PUBLIC") {
-                                    axios.post("/authors/" + faID + "/inbox", createdPost.data, {
+                                    axios.post(`/authors/${faID}/inbox`, createdPost.data, {
                                         headers: {
                                             Authorization: "Bearer " + getAccessToken(),
                                             "Content-Type": "application/json",
@@ -270,8 +247,7 @@ export const PostTextbox = () => {
                                 }
                                 // if FRIEND then check if I follow the follower, if true then send to inbox
                                 if (data.visibility.includes("FRIEND")) {
-                                    axios
-                                        .get(user.host + "/authors/" + faID + "/followers/" + aID, {
+                                    axios.get(`${user.host}/authors/${faID}/followers/${aID}`, {
                                             headers: {
                                                 Authorization: "Bearer " + getAccessToken(),
                                             },
@@ -279,7 +255,7 @@ export const PostTextbox = () => {
                                         .then((statusString) => {
                                             // if true, then send. else ignore.
                                             if (statusString.data === true) {
-                                                axios.post("/authors/" + faID + "/inbox", createdPost.data, {
+                                                axios.post(`/authors/${faID}/inbox`, createdPost.data, {
                                                     headers: {
                                                         Authorization: "Bearer " + getAccessToken(),
                                                         "Content-Type": "application/json",
