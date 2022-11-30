@@ -95,6 +95,7 @@ class AuthService {
         return response.data
     }
 
+    // Checks if authorID follows foreignID
     async getFollowStatus(authorID, foreignID) {
         setAxiosDefaults();
         const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);

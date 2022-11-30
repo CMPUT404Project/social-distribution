@@ -19,6 +19,7 @@ import {
     Avatar,
     Button,
     TextField,
+    Typography,
     Slide,
     Snackbar
 } from '@mui/material';
@@ -300,7 +301,8 @@ function ProfilePage() {
                             border: isFriend ? "5px solid gold" : "2px solid black"
                         }}
                     />
-                    <div className="edit-container">
+                    {!isAuthor ? <></> :
+                    (<div className="edit-container">
                             <div className="edit-field-label">
                                 Image
                             </div>
@@ -331,13 +333,29 @@ function ProfilePage() {
                                     />
                                 </div>
                             </div>
-                    </div>
+                    </div>)}
                     <div className="edit-container">
                         <div className="edit-field-label">
                             Display Name
                         </div>
                         <div className="edit-field">
-                            <TextField
+                            {!isAuthor ? 
+                            <Typography
+                                style={{
+                                    width: "100%",
+                                    color: "rgb(0, 0, 0, 0.6)",
+                                    backgroundColor: "#e6e6e6",
+                                    padding: "16.5px 14px",
+                                    border: "1px solid black",
+                                    fontSize: '20px'
+                                }}
+                                noWrap
+                                
+                            >
+                                {authorValues.displayName ? authorValues.displayName : "None"}
+                            </Typography> 
+                                :
+                            (<TextField
                                 style={{width: "100%", backgroundColor: "#e6e6e6"}}
                                 sx={{
                                     '& legend': {display: 'none'},
@@ -358,15 +376,31 @@ function ProfilePage() {
                                 value={authorValues.displayName}
                                 onChange={handleInputChange("displayName")}
                                 type="text" 
-                            />
+                            />)}
                         </div>
                     </div>
                     <div className="edit-container">
                         <div className="edit-field-label">
-                            Github Username
+                            Github
                         </div>
                         <div className="edit-field">
-                            <TextField
+                            {!isAuthor ? 
+                            <Typography
+                                style={{
+                                    width: "100%",
+                                    color: "rgb(0, 0, 0, 0.6)",
+                                    backgroundColor: "#e6e6e6",
+                                    padding: "16.5px 14px",
+                                    border: "1px solid black",
+                                    fontSize: '20px'
+                                }}
+                                noWrap
+                                
+                            >
+                                {authorValues.github ? (<a href={authorValues.github} target="_blank" rel="noreferrer">{authorValues.github}</a>) : "None"}
+                            </Typography> 
+                                :
+                            (<TextField
                                 style={{width: "100%", backgroundColor: "#e6e6e6"}}
                                 sx={{
                                     '& legend': {display: 'none'},
@@ -387,7 +421,7 @@ function ProfilePage() {
                                 value={authorValues.github}
                                 onChange={handleInputChange("github")}
                                 type="text" 
-                            />
+                            />)}
                         </div>
                     </div>
                     {!isAuthor ? (

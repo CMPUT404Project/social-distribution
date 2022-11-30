@@ -31,18 +31,32 @@ class RemoteAuthService {
 
     }
 
-    async getRemoteAuthors(remoteNode) {
+    async getRemoteAuthor(remoteNode, authorID) {
         await this.getRemoteJWT(remoteNode);
-        if (remoteNode === "Team 13") {
-            return await team13Instance.get("/authors?page=1&size=1000").then((response) => {
-                return response.data.authorsPage;
+        if (remoteNode === "Team 12") {
+            return await team12Instance.get(`/authors/${authorID}/`).then((response) => {
+                return response.data;
             }).catch((error) => {
                 if (error.response) {
                     console.log(error.response)
                 }
-                return [];
+                return error
             });
-        } else if (remoteNode === "Team 12") {
+        } else if (remoteNode === "Team 13") {
+            return await team13Instance.get(`/authors/${authorID}`).then((response) => {
+                return response.data;
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+                return error
+            });
+        }
+    }
+
+    async getRemoteAuthors(remoteNode) {
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
             return await team12Instance.get("/authors/").then((response) => {
                 return response.data;
             }).catch((error) => {
@@ -51,6 +65,64 @@ class RemoteAuthService {
                 }
                 return [];
             });
+        } else if (remoteNode === "Team 13") {
+            return await team13Instance.get("/authors?page=1&size=1000").then((response) => {
+                return response.data.authorsPage;
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+                return [];
+            });
+        }
+    }
+
+    async sendRemoteFollowRequest(remoteNode, foreignID) {
+        let authorID = getCurrentAuthorID();
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
+            return await team12Instance.post("/friendrequest/from_external/19/" + authorID + "/recipient/" + foreignID + "/")
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
+        } else if (remoteNode === "Team 13"){
+            return await team13Instance.delete("/authors/" + authorID + "/followers/" + foreignID)
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
+        }
+    }
+
+    async unfollowRemoteAuthor(remoteNode, foreignID) {
+        let authorID = getCurrentAuthorID();
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
+            return await team12Instance.post(`/${authorID}/unfollow/${foreignID}`)
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
+        } else if (remoteNode === "Team 13"){
+            // /authors/{author_id}/followers/{foreign_author_id}
+            return await team13Instance.delete(`/authors/${authorID}/followers/${foreignID}`)
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
         }
     }
 

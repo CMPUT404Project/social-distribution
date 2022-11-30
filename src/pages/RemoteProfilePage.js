@@ -10,6 +10,7 @@ import {
     capitalizeFirstLetter
 } from "../utils";
 import AuthService from "../services/AuthService";
+import RemoteAuthService from "../services/RemoteAuthService";
 import NavBar from "../components/NavBar/NavBar";
 
 // Import Material UI Components
@@ -19,6 +20,7 @@ import {
     Avatar,
     Button,
     TextField,
+    Typography,
     Slide,
     Snackbar
 } from '@mui/material';
@@ -30,102 +32,59 @@ function SlideTransition(props: SlideProps) {
 
 function ProfilePage() {
     const {team, authorID} = useParams();
-    const [isAuthor, setIsAuthor] = useState(true);
-    const [defaultAuthor, setDefaultAuthor] = useState(retrieveCurrentAuthor());
     const [authorValues, setAuthorValues] = useState({
-        displayName: defaultAuthor.displayName || "",
-        github: defaultAuthor.github.split(".com/")[1] || "",
-        profileImage: defaultAuthor.profileImage || "",
+        displayName: "",
+        github: "",
+        profileImage: "",
     })
+    const [remoteNode, setRemoteNode] = useState(`${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`)
 
-    const [isExistingRequest, setIsExistingRequest] = useState(false);
     const [isFollowing, setIsFollowing] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
 
-    const [editState, setEditState] = useState(false)
     const [isLoading, setLoading] = useState(true);
     const [open, setOpen] = useState(false);
 
     const [alertDetails, setAlertDetails] = useState({
         alertSeverity: 'error',
-        errorMessage: 'Failed to update. Please try again'
+        errorMessage: 'Something went wrong. Try again later.'
     })
 
     useEffect(() => {
         const checkFollowStatus = async (currentAuthorID) => {
-            await AuthService.getFollowStatus(currentAuthorID, authorID).then(async (data) => {
+            const response = await AuthService.getFollowStatus(currentAuthorID, authorID).then((data) => {
                 setIsFollowing(data)
-                if (data) {
-                    await AuthService.getFollowStatus(authorID, currentAuthorID).then((data2) => {
-                        setIsFriend(data2)
-                    })
-                }
-                setLoading(false);
-            })
-        }
-        const checkExistingRequest = async (currentAuthorID) => {
-            await AuthService.getInboxItems("follows", authorID).then((data) => {
-                data.items.forEach(followRequest => {
-                    let followRequestID = followRequest.actor.id.split("authors/")[1]
-                    if (followRequestID === currentAuthorID) {
-                        setIsExistingRequest(true);
-                    }
-                });
-            })
+            }, error => {
+                return error.response
+            });
+            if (response) {
+                setIsFollowing(false)
+            }
         }
         const getAuthorDetails = async () => {
-            await AuthService.getAuthorDetails(authorID).then((data) => {
-                setAuthorValues({
-                    displayName: data.displayName,
-                    github: data.github,
-                    profileImage: data.profileImage
-                })
-            })
-        }
-        setLoading(true);
-        let currentAuthorID = getCurrentAuthorID();
-        if (authorID === currentAuthorID) {
-            setIsAuthor(true);
+            const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
-                displayName: defaultAuthor.displayName || "",
-                github: defaultAuthor.github.split(".com/")[1] || "",
-                profileImage: defaultAuthor.profileImage || "",
+                displayName: response.displayName || response.username,
+                github: response.github.split(".com/")[1],
+                profileImage: response.profileImage,
             })
             setLoading(false);
-        } else {
-            console.log(team)
-            // checkFollowStatus(currentAuthorID);
-            // setEditState(false);
-            // setIsAuthor(false);
-            // checkExistingRequest(currentAuthorID);
-            // getAuthorDetails();
-        };
-    }, [authorID, defaultAuthor])
-
-    const handleInputChange = (prop) => (event) => {
-        setAuthorValues({ ...authorValues, [prop]: event.target.value });
-    };
-
-    const handleEditButton = (prop) => () => {
-        if (prop === "Cancel") {
-            setAuthorValues({
-                displayName: defaultAuthor.displayName || "",
-                github: defaultAuthor.github.split(".com/")[1] || "",
-                profileImage: defaultAuthor.profileImage || "",
-            })
         }
-        setEditState(!editState);
-    }
+        let currentAuthorID = getCurrentAuthorID();
+        setLoading(true);
+        checkFollowStatus(currentAuthorID);
+        getAuthorDetails();
+    }, [authorID])
+
 
     const handleFollow = async (event) => {
         console.log(isFollowing);
         try {
             setLoading(true)
             if (event.target.textContent === "Send Follow Request") {
-                const response = await AuthService.sendInboxItem("follow", authorID).then(() => {
+                const response = await RemoteAuthService.sendRemoteFollowRequest(remoteNode, authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
                             errorMessage: "Sent a follow request to " + authorValues.displayName})
-                    setIsExistingRequest(true)
                     handleOpen();
                 }, error => {
                     return error;
@@ -133,25 +92,13 @@ function ProfilePage() {
                 if (response) {
                     throw response;
                 };
-            } else if (event.target.textContent === "Cancel pending follow request") {
-                const response = await AuthService.cancelFollowRequest(authorID).then(() => {
-                    setAlertDetails({alertSeverity: "success", 
-                            errorMessage: "Cancelled follow request to " + authorValues.displayName})
-                    setIsFollowing(false);
-                    setIsExistingRequest(false);
-                    handleOpen();
-                }, error => {
-                    return error;
-                });
-                if (response) {
-                    throw response;
-                };
+                
+
             } else if (event.target.textContent === "Unfollow") {
-                const response = await AuthService.unfollowAuthor(authorID).then(() => {
+                const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
                             errorMessage: "Unfollowed " + authorValues.displayName})
                     setIsFollowing(false);
-                    setIsExistingRequest(false);
                     handleOpen();
                 }, error => {
                     return error;
@@ -162,14 +109,8 @@ function ProfilePage() {
             }
         } catch (error) {
             console.log(error.response);
-            if (error.response.status === 404) {
+            if (error.response) {
                 setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "Author could not found"})
-            } else if (error.response.status === 409) {
-                setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "You've already sent a follow request to this author"})
-            } else {
-                setAlertDetails({alertSeverity: "warning", 
                     errorMessage: "Something went wrong. Try again later."})
             }
             handleOpen();
@@ -214,7 +155,7 @@ function ProfilePage() {
             <div className="container" style={{alignItems: "flex-start"}}>
                 <div className="profile-details-card">
                     <span className="profile-title">
-                        {isAuthor ? ("Edit Profile") : authorValues.displayName ? (authorValues.displayName + "'s Profile") : ("UNKNOWN Profile")}
+                        {authorValues.displayName + "'s Profile"}
                     </span>
                     <Avatar 
                         src={authorValues.profileImage}
@@ -226,93 +167,44 @@ function ProfilePage() {
                         }}
                     />
                     <div className="edit-container">
-                            <div className="edit-field-label">
-                                Image
-                            </div>
-                            <div className="edit-container">
-                                <div className="edit-field">
-                                    <TextField
-                                        style={{width: "100%", backgroundColor: "#e6e6e6"}}
-                                        sx={{
-                                            '& legend': {display: 'none'},
-                                            '& fieldset': {top: 0},
-                                            '& .MuiOutlinedInput-root.Mui-focused': {
-                                                '& > fieldset': {
-                                                    border : "3px solid #e0127c"
-                                                }
-                                            }
-                                        }}
-                                        InputLabelProps={{ sx: {display: 'none'}}}
-                                        InputProps={{sx: {fontSize: '20px'}}}
-                                        inputProps={{maxLength: 200}}
-                                        required
-                                        disabled={!editState}
-                                        variant="outlined"
-                                        name="profileImage"
-                                        placeholder="Leave blank to remove image"
-                                        value={authorValues.profileImage}
-                                        onChange={handleInputChange("profileImage")}
-                                        type="text" 
-                                    />
-                                </div>
-                            </div>
-                    </div>
-                    <div className="edit-container">
                         <div className="edit-field-label">
                             Display Name
                         </div>
                         <div className="edit-field">
-                            <TextField
-                                style={{width: "100%", backgroundColor: "#e6e6e6"}}
-                                sx={{
-                                    '& legend': {display: 'none'},
-                                    '& fieldset': {top: 0},
-                                    '& .MuiOutlinedInput-root.Mui-focused': {
-                                        '& > fieldset': {
-                                            border : "3px solid #e0127c"
-                                        }
-                                    }
+                            <Typography
+                                style={{
+                                    width: "100%",
+                                    color: "rgb(0, 0, 0, 0.6)",
+                                    backgroundColor: "#e6e6e6",
+                                    padding: "16.5px 14px",
+                                    border: "1px solid black",
+                                    fontSize: '20px'
                                 }}
-                                InputLabelProps={{ sx: {display: 'none'}}}
-                                InputProps={{ sx: {fontSize: '20px'}}}
-                                required
-                                disabled={!editState}
-                                variant="outlined"
-                                name="displayName"
-                                placeholder="Required"
-                                value={authorValues.displayName}
-                                onChange={handleInputChange("displayName")}
-                                type="text" 
-                            />
+                                noWrap
+                                
+                            >
+                                {authorValues.displayName ? authorValues.displayName : "None"}
+                            </Typography>
                         </div>
                     </div>
                     <div className="edit-container">
                         <div className="edit-field-label">
-                            Github Username
+                            Github
                         </div>
                         <div className="edit-field">
-                            <TextField
-                                style={{width: "100%", backgroundColor: "#e6e6e6"}}
-                                sx={{
-                                    '& legend': {display: 'none'},
-                                    '& fieldset': {top: 0},
-                                    '& .MuiOutlinedInput-root.Mui-focused': {
-                                        '& > fieldset': {
-                                            border : "3px solid #e0127c"
-                                        }
-                                    }
+                        <Typography
+                                style={{
+                                    width: "100%",
+                                    color: "rgb(0, 0, 0, 0.6)",
+                                    backgroundColor: "#e6e6e6",
+                                    padding: "16.5px 14px",
+                                    border: "1px solid black",
+                                    fontSize: '20px'
                                 }}
-                                InputLabelProps={{ sx: {display: 'none'}}}
-                                InputProps={{ sx: {fontSize: '20px'}}}
-                                required
-                                disabled={!editState}
-                                variant="outlined"
-                                name="github"
-                                placeholder="Leave blank to remove Github"
-                                value={authorValues.github}
-                                onChange={handleInputChange("github")}
-                                type="text" 
-                            />
+                                noWrap
+                            >
+                                {authorValues.github ? (<a href={authorValues.github} target="_blank" rel="noreferrer">{authorValues.github}</a>) : "None"}
+                            </Typography>
                         </div>
                     </div>
                     <div className="follow-btn-container">
@@ -321,9 +213,7 @@ function ProfilePage() {
                             sx={{fontWeight: "600"}}
                             onClick={handleFollow}
                         >
-                            {isFollowing ? ("Unfollow") 
-                            : isExistingRequest ? ("Cancel pending follow request") 
-                            : ("Send Follow Request")}
+                            {isFollowing ? ("Unfollow") : ("Send Follow Request")}
                         </Button>
                     </div>
                 </div>
