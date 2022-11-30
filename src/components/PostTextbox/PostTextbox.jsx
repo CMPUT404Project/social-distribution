@@ -164,12 +164,13 @@ export const PostTextbox = () => {
                                         password: process.env.REACT_APP_T13PASS,
                                     })
                                     .then((res) => {
-                                        const jwt = res.data.jwt;
+                                        // const jwt = res.data.jwt;
+                                        const jwt = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6ImYxMTYzMzg3LWUxNzEtNDFiMy05YjU1LWQzYjQxMzU0ZjVjOSIsImV4cCI6MTcwMTMyNTg4OSwiaWF0IjoxNjY5Nzg5ODg5fQ.HikuZ10v8G__T80O0UpNFMzQxHO88ZDVZsjg5ELj4eQ"
+                                        console.log(res)
                                         let team13data = createdPost.data;
                                         // clean up data of post
                                         delete team13data["categories"];
                                         delete team13data["count"];
-                                        team13data.author = { id: aID, displayName: userJSON.displayName };
                                         team13data.id = createdPost.data.id.split("/posts/")[1];
                                         if (createdPost.data.origin === createdPost.data.id) {
                                             team13data.originalAuthor = {
@@ -194,7 +195,8 @@ export const PostTextbox = () => {
                                                     };
                                                 });
                                         }
-
+                                        // do this after comparing the postURI to originURI
+                                        team13data.author = { id: aID, displayName: userJSON.displayName };
                                         //create post on their server
                                         axios
                                             .put(
