@@ -10,7 +10,7 @@ import AuthService from "../services/AuthService";
 import RemoteAuthService from "../services/RemoteAuthService";
 import {retrieveCurrentAuthor} from "../utils/index";
 
-import IconButton from '@mui/material/IconButton';
+import Icon from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 
 import './FollowersPage.css'
@@ -115,9 +115,7 @@ function FollowersPage() {
                                     type="text"
                                 />
                                 <span className="search-icon">
-                                    <IconButton onClick={() => {console.log("Yo")}}>
-                                        <SearchIcon fontSize="large"/>
-                                    </IconButton>
+                                    <SearchIcon fontSize="large"/>
                                 </span>
                             </div>
                             <h1>Followers</h1> <br/>
@@ -162,9 +160,7 @@ function FollowersPage() {
                                 type="text"
                             />
                             <span className="search-icon">
-                                <IconButton onClick={() => {console.log("Yo")}}>
-                                    <SearchIcon fontSize="large"/>
-                                </IconButton>
+                                <SearchIcon fontSize="large"/>
                             </span>
                         </div>
                         <h1>Search Results</h1>
@@ -174,7 +170,7 @@ function FollowersPage() {
                             input={searchField}
                             authors={allLocalAuthors}
                         />
-                        {teams.map(team => {
+                        {teams.map((team, index) => {
                             return <>
                                 <h3>{team}</h3>
                                 <SearchResults 

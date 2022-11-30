@@ -1,10 +1,9 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import { Avatar, Box, Button, Card, Grid, Menu, MenuItem, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, Grid, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
-import AuthService from "../../services/AuthService";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
 
@@ -22,8 +21,7 @@ export const Post = (props) => {
 
     // isSubmitted is used to let the webpage know to reload the comments
     useEffect(() => {
-        axios
-            .get("/authors/" + aID + "/posts/" + pID + "/comments", {
+        axios.get("/authors/" + aID + "/posts/" + pID + "/comments", {
                 headers: {
                     Authorization: "Bearer " + getAccessToken(),
                 },
@@ -58,7 +56,6 @@ export const Post = (props) => {
     const currentUser = retrieveCurrentAuthor();
 
     const handleLikeOnClick = (e) => {
-        
         var data = {
             type: "Like",
             context: "http://TODO.com",
@@ -68,7 +65,6 @@ export const Post = (props) => {
         };
         // send inbox to author of post
         const posterID = props.data.author.id.split("/authors/")[1];
-        console.log(posterID)
         axios
             .post("/authors/" + posterID + "/inbox", data, {
                 headers: {
@@ -207,6 +203,12 @@ function Stream() {
                 console.log(err);
             });
     }, []);
+
+    // Show new post when posting
+    // useEffect(() => {
+        
+    // },[posts])
+
 
     return (
         <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">

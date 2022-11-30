@@ -30,18 +30,11 @@ class RemoteAuthService {
         }
 
     }
-    // async getAuthorDetails(remoteNode, authorID) {
-    //     if (remoteNode === "Team 12") {
-
-    //     } else if (remoteNode === "Team 13") {
-
-    //     }
-    // }
 
     async getRemoteAuthors(remoteNode) {
+        await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 13") {
-            let remoteAuthorsUrl = "https://cmput404-team13.herokuapp.com/authors?page=1&size=1000"
-            return await axios.get(remoteAuthorsUrl).then((response) => {
+            return await team13Instance.get("/authors?page=1&size=1000").then((response) => {
                 return response.data.authorsPage;
             }).catch((error) => {
                 if (error.response) {
@@ -50,13 +43,7 @@ class RemoteAuthService {
                 return [];
             });
         } else if (remoteNode === "Team 12") {
-            let remoteAuthorsUrl = "https://true-friends-404.herokuapp.com/authors/"
-            return await axios.get(remoteAuthorsUrl, {
-                headers: {
-                    'Content-type': "application/json",
-                    'Authorization': "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNjc4MzE3OTQ2LCJpYXQiOjE2Njk2Nzc5NDYsImp0aSI6ImRiMjIwMmZjNGVjOTQ2MzQ4ZWFhNzY5OGMyN2U3NmI4IiwidXNlcl9lbWFpbCI6InRlYW0xOUBtYWlsLmNvbSJ9.57aZOwQJMaOOoYHpzzoOTPWw3hz7c1jxvg1EVYoeMfg"
-                }
-            }).then((response) => {
+            return await team12Instance.get("/authors/").then((response) => {
                 return response.data;
             }).catch((error) => {
                 if (error.response) {

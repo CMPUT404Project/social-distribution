@@ -219,7 +219,6 @@ export const InboxLikeItem = (props) => {
 
 export const InboxRequestItem = (props) => {
     const navigate = useNavigate();
-    console.log(props.data)
     const displayName = props.data.actor.displayName || props.data.username;
     const profileImage = props.data.actor.profileImage;
     const summary = props.data.summary;
