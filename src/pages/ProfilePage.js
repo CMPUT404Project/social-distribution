@@ -263,31 +263,28 @@ function ProfilePage() {
 
     return (
         <>
-        {isLoading ? (
-            <div className="container" style={{alignItems: "flex-start"}}>
-                <ClipLoader color={'#fff'} loading={isLoading} size={150} />
-            </div>
-        ) : (
-            <>
-            <NavBar />
-            <Snackbar
-                open={open}
-                sx={{top: "100px!important"}}
-                onClose={handleClose}
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                autoHideDuration={5000}
-                disableWindowBlurListener={true}
-                TransitionComponent={SlideTransition}
-                transitionDuration={{enter: 600, exit: 300}}
-            >
-                <Alert severity={alertDetails.alertSeverity} sx={{fontSize: "16px"}}>
-                    <AlertTitle sx={{fontSize: "18px"}}>
-                        {capitalizeFirstLetter(alertDetails.alertSeverity)}
-                    </AlertTitle>
-                    {alertDetails.errorMessage}
-                </Alert>
-            </Snackbar>
-            <div className="container" style={{alignItems: "flex-start"}}>
+        <NavBar />
+        <Snackbar
+            open={open}
+            sx={{top: "100px!important"}}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            autoHideDuration={5000}
+            disableWindowBlurListener={true}
+            TransitionComponent={SlideTransition}
+            transitionDuration={{enter: 600, exit: 300}}
+        >
+            <Alert severity={alertDetails.alertSeverity} sx={{fontSize: "16px"}}>
+                <AlertTitle sx={{fontSize: "18px"}}>
+                    {capitalizeFirstLetter(alertDetails.alertSeverity)}
+                </AlertTitle>
+                {alertDetails.errorMessage}
+            </Alert>
+        </Snackbar>
+            <div className="container" style={isLoading ? {alignItems: "center"} : {alignItems: "flex-start"}}>
+                {isLoading ? (
+                    <ClipLoader color={'#fff'} loading={isLoading} size={150} />
+                ) : (
                 <div className="profile-details-card">
                     <span className="profile-title">
                         {isAuthor ? ("Edit Profile") : authorValues.displayName ? (authorValues.displayName + "'s Profile") : ("UNKNOWN Profile")}
@@ -454,9 +451,8 @@ function ProfilePage() {
                         <div className="cancel-edit-profile-container">
                             <button className="cancel-edit-profile" onClick={handleEditButton("Cancel")}>Cancel</button>
                         </div>) : (<></>)}
-                </div>
+                </div>)};
             </div>
-            </>)};
         </>
     )
 }
