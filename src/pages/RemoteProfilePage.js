@@ -65,7 +65,7 @@ function ProfilePage() {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
                 displayName: response.displayName || response.username,
-                github: response.github.split(".com/")[1],
+                github: response.github.split(".com/")[1] || "",
                 profileImage: response.profileImage,
             })
             setLoading(false);
