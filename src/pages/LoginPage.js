@@ -89,14 +89,11 @@ function LoginPage() {
     };
 
     return (
-        <>
-        {isLoading ? (
-            <div className="container" style={{alignItems: "flex-start"}}>
-                <ClipLoader color={'#fff'} loading={isLoading} size={150} />
-            </div>
-        ) : (
         <div className="container">
-            <div className="login-card">
+            {isLoading ? (
+                <ClipLoader color={'#fff'} loading={isLoading} size={150} />
+            ) : (
+            <div className="login-card" >
                 <span className="login-title">
                     LOGIN
                 </span>
@@ -163,9 +160,8 @@ function LoginPage() {
                         Register
                     </Link>
                 </div>
-            </div>
-        </div>)};
-        </>
+            </div>)};
+        </div>
     )
 }
 

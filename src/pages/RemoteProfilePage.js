@@ -52,27 +52,46 @@ function ProfilePage() {
 
     useEffect(() => {
         const checkFollowStatus = async (currentAuthorID) => {
-            const response = await AuthService.getFollowStatus(currentAuthorID, authorID).then((data) => {
-                setIsFollowing(data)
-            }, error => {
-                return error.response
-            });
+            const allAuthors = await AuthService.getAllAuthors().then((data) => {
+                return data.items
+            })
+            var response;
+            await allAuthors.some((author) => {
+                console.log(author)
+                if (author.id.split("authors/")[1] === authorID) {
+                    response = AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
+                        setIsFollowing(data)
+                    }, error => {
+                        return error.response
+                    });
+                    return true;
+                }
+            })
             if (response) {
                 setIsFollowing(false)
             }
+            if (isFollowing) {
+                console.log("Following")
+                await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID).then((data) => {
+                    console.log(data)
+                })
+            }
+
+
+
         }
         const getAuthorDetails = async () => {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
                 displayName: response.displayName || response.username,
-                github: response.github.split(".com/")[1],
+                github: response.github.split(".com/")[1] || response.github,
                 profileImage: response.profileImage,
             })
             setLoading(false);
         }
         let currentAuthorID = getCurrentAuthorID();
         setLoading(true);
-        checkFollowStatus(currentAuthorID);
+        // checkFollowStatus(currentAuthorID);
         getAuthorDetails();
     }, [authorID])
 
@@ -128,14 +147,8 @@ function ProfilePage() {
 
     return (
         <>
-        {isLoading ? (
-            <div className="container" style={{alignItems: "flex-start"}}>
-                <ClipLoader color={'#fff'} loading={isLoading} size={150} />
-            </div>
-        ) : (
-            <>
-            <NavBar />
-            <Snackbar
+        <NavBar />
+        <Snackbar
                 open={open}
                 sx={{top: "100px!important"}}
                 onClose={handleClose}
@@ -151,8 +164,11 @@ function ProfilePage() {
                     </AlertTitle>
                     {alertDetails.errorMessage}
                 </Alert>
-            </Snackbar>
-            <div className="container" style={{alignItems: "flex-start"}}>
+        </Snackbar>
+            <div className="container" style={isLoading ? {alignItems: "center"} : {alignItems: "flex-start"}}>
+                {isLoading ? (
+                    <ClipLoader color={'#fff'} loading={isLoading} size={150} />
+                ) : (
                 <div className="profile-details-card">
                     <span className="profile-title">
                         {authorValues.displayName + "'s Profile"}
@@ -203,7 +219,7 @@ function ProfilePage() {
                                 }}
                                 noWrap
                             >
-                                {authorValues.github ? (<a href={authorValues.github} target="_blank" rel="noreferrer">{authorValues.github}</a>) : "None"}
+                                {authorValues.github ? (<a href={`https://github.com/${authorValues.github}`} target="_blank" rel="noreferrer">{authorValues.github}</a>) : "None"}
                             </Typography>
                         </div>
                     </div>
@@ -216,9 +232,8 @@ function ProfilePage() {
                             {isFollowing ? ("Unfollow") : ("Send Follow Request")}
                         </Button>
                     </div>
-                </div>
+                </div>)};
             </div>
-            </>)};
         </>
     )
 }

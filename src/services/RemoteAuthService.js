@@ -77,11 +77,12 @@ class RemoteAuthService {
         }
     }
 
-    async sendRemoteFollowRequest(remoteNode, foreignID) {
+    async getRemoteFollowStatus(remoteNode, foreignID) {
         let authorID = getCurrentAuthorID();
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 12") {
-            return await team12Instance.post("/friendrequest/from_external/19/" + authorID + "/recipient/" + foreignID + "/")
+            let autherUsername = sessionStorage.getItem("username")
+            return await team12Instance.post(`/friendrequest/from_external/19/${authorID}/${autherUsername}/send/${foreignID}/`)
             .then((response) => {
                 return response.data
             }).catch((error) => {
@@ -90,7 +91,36 @@ class RemoteAuthService {
                 }
             })
         } else if (remoteNode === "Team 13"){
-            return await team13Instance.delete("/authors/" + authorID + "/followers/" + foreignID)
+            return await team13Instance.get("/authors/" + foreignID + "/followers/" + authorID)
+            .then((response) => {
+                if (response.data.id) {
+                    return true
+                }
+                return false
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+                return false
+            })
+        }
+    }
+
+    async sendRemoteFollowRequest(remoteNode, foreignID) {
+        let authorID = getCurrentAuthorID();
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
+            let autherUsername = sessionStorage.getItem("username")
+            return await team12Instance.post(`/friendrequest/from_external/19/${authorID}/${autherUsername}/send/${foreignID}/`)
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
+        } else if (remoteNode === "Team 13"){
+            return await team13Instance.post("/authors/" + authorID + "/followers/" + foreignID)
             .then((response) => {
                 return response.data
             }).catch((error) => {
