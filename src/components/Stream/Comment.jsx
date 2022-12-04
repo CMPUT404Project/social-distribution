@@ -5,19 +5,20 @@ import React, { useEffect, useState } from "react";
 
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import AuthService from "../../services/AuthService";
+import RemoteAuthService from "../../services/RemoteAuthService";
 
 export const Comment = (props) => {
     const [likeableComment, setLikeableComment] = useState(true);
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
     const [likesFlag, setLikesFlag] = useState(false)
+    const commentURITokens = props.data.id.split("/");
+    const aid = commentURITokens[4];
+    const pid = commentURITokens[6];
+    const cid = commentURITokens[8];
 
     const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
-        const commentURITokens = props.data.id.split("/");
-        const aid = commentURITokens[4];
-        const pid = commentURITokens[6];
-        const cid = commentURITokens[8];
         axios
             .get("/authors/" + aid + "/posts/" + pid + "/comments/" + cid + "/likes", {
                 headers: {
@@ -76,6 +77,9 @@ export const Comment = (props) => {
                         }
                     });
             });
+        }
+        else if (props.data.id.includes("https://true-friends-404.herokuapp.com")){
+            RemoteAuthService.sendLikeRemoteComment("Team 12", cid)
         }
     };
 

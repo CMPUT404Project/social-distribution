@@ -211,13 +211,24 @@ class RemoteAuthService {
         if (remoteNode === "Team 12"){
             return await team12Instance.post("/authors/" + authorID + "/" + authorUsername + "/posts/" + postID + "/likes/")
             .then((response) => {
-                console.log(response)
+                // console.log(response)
                 return response.data
             })
         }
         // else if (remoteNode === "Team 13"){
         //     await this.getRemoteJWT(remoteNode)
         // }
+    }
+
+    async sendLikeRemoteComment(remoteNode, commentID){
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12"){
+            return await team12Instance.post("/comments/" + commentID + "/likes/")
+            .then((response) => {
+                console.log(response)
+                // return response.data
+            })
+        }
     }
 }
 

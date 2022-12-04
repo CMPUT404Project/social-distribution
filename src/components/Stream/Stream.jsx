@@ -179,7 +179,7 @@ export const Post = (props) => {
                 .slice()
                 .reverse()
                 .map((com) => {
-                    return <Comment key={com.id} data={com} />;
+                    return <Comment key={com.id} data={com} host={props.data.id}/>;
                 })}
             <TextField
                 id="commentData"
