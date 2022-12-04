@@ -57,7 +57,7 @@ function ProfilePage() {
             })
             var response;
             await allAuthors.some((author) => {
-                console.log(author)
+                // console.log(author)
                 if (author.id.split("authors/")[1] === authorID) {
                     response = AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
                         setIsFollowing(data)
@@ -84,7 +84,7 @@ function ProfilePage() {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
                 displayName: response.displayName || response.username,
-                github: response.github.split(".com/")[1] || response.github,
+                github: response.github.split(".com/")[1] || response.github || "",
                 profileImage: response.profileImage,
             })
             setLoading(false);

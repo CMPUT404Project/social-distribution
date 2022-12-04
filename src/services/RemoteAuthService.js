@@ -91,6 +91,7 @@ class RemoteAuthService {
                 }
             })
         } else if (remoteNode === "Team 13"){
+<<<<<<< HEAD
             return await team13Instance.get("/authors/" + foreignID + "/followers/" + authorID)
             .then((response) => {
                 if (response.data.id) {
@@ -120,7 +121,7 @@ class RemoteAuthService {
                 }
             })
         } else if (remoteNode === "Team 13"){
-            return await team13Instance.post("/authors/" + authorID + "/followers/" + foreignID)
+            return await team13Instance.post(`/authors/${authorID}/followers/${foreignID}`)
             .then((response) => {
                 return response.data
             }).catch((error) => {
@@ -169,7 +170,7 @@ class RemoteAuthService {
                 }
             })
         } else if (remoteNode === "Team 13"){
-            return await team13Instance.delete("/authors/" + foreignID + "/followRequest/" + authorID)
+            return await team13Instance.delete(`/authors/${authorID}/followers/${foreignID}`)
             .then((response) => {
                 return response.data
             }).catch((error) => {
@@ -193,7 +194,7 @@ class RemoteAuthService {
                 }
             })
         } else if (remoteNode === "Team 13"){
-            return await team13Instance.put("/authors/" + foreignID + "/followers/" + authorID)
+            return await team13Instance.put(`/authors/${authorID}/followers/${foreignID}`)
             .then((response) => {
                 return response.data
             }).catch((error) => {
