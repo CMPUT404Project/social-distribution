@@ -12,10 +12,6 @@ export const Comment = (props) => {
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
     const [likesFlag, setLikesFlag] = useState(false);
-    const commentURITokens = props.data.id.split("/");
-    const aid = commentURITokens[4];
-    const pid = commentURITokens[6];
-    const cid = commentURITokens[8];
 
     const commentURITokens = props.data.id.split("/");
     const aID = commentURITokens[4];
@@ -67,7 +63,7 @@ export const Comment = (props) => {
             });
         } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
         }
-    }, [likes, likeableComment, likesFlag]);
+    }, [likes, likeableComment]);
 
     const handleLikeOnClick = () => {
         const data = {
@@ -111,7 +107,7 @@ export const Comment = (props) => {
                         });
                 });
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
-            RemoteAuthService.sendLikeRemoteComment("Team 12", cid);
+            RemoteAuthService.sendLikeRemoteComment("Team 12", cID);
         }
     };
 

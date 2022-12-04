@@ -7,7 +7,6 @@ import RemoteAuthService from "../../services/RemoteAuthService";
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
-import RemoteAuthService from "../../services/RemoteAuthService";
 
 export const Post = (props) => {
     // const [show, setShow] = useState(false);
