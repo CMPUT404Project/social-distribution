@@ -16,6 +16,7 @@ export const Comment = (props) => {
     const aID = commentURITokens[4];
     const pID = commentURITokens[6];
     const cID = commentURITokens[8];
+    const host = props.host
 
     const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
@@ -61,6 +62,19 @@ export const Comment = (props) => {
                 });
             });
         } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
+            RemoteAuthService.getRemoteLikesOnComment("Team 13", aID, pID, props.data.id).then((response) =>
+            {
+                setLikes(response.length)
+                // returning true/false is needed for array.every(), if return false -> break
+                likesList.every((element) => {
+                    if (element.author.id === userJSON.id) {
+                        setLikeableComment(false);
+                        return false;
+                    }
+                    return true;
+                });
+            })
+
         }
     }, [likes, likeableComment]);
 

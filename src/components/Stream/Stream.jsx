@@ -46,10 +46,14 @@ export const Post = (props) => {
                 })
                 .catch((err) => console.log(err));
             // console.log(response)
+        } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
+            RemoteAuthService.getRemoteComments("Team 13", aID, pID)
+                .then((response) => {
+                    setComments(response);
+                    // console.log(response)
+                })
+                .catch((err) => console.log(err));
         }
-        //  else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
-        //     RemoteAuthService.getRemoteComments("Team 13", aID, pID);
-        // }
     }, [isCommentsSubmitted]);
 
     // get likes of a post
@@ -81,13 +85,15 @@ export const Post = (props) => {
                     console.log(e);
                 });
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
-            RemoteAuthService.getRemoteLikesOnPost("Team 12", aID, pID)
-                .then((response) => {
-                    setLikes(response.length);
-                })
+            RemoteAuthService.getRemoteLikesOnPost("Team 12", aID, pID).then((response) => {
+                setLikes(response.length);
+            });
         }
-        //TODO
-        else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")){}
+        else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
+            RemoteAuthService.getRemoteLikesOnPost("Team 13", aID, pID).then((response) => {
+                setLikes(response.length);
+            });
+        }
     }, [likes, likeablePost]);
 
     const currentUser = retrieveCurrentAuthor();
@@ -119,7 +125,7 @@ export const Post = (props) => {
                     console.log(err);
                 });
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
-            RemoteAuthService.sendLikeRemotePost("Team 12", pID)
+            RemoteAuthService.sendLikeRemotePost("Team 12", pID);
         } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
             // TODO: team 13 cannot send a post to us yet.
         }
@@ -214,7 +220,7 @@ export const Post = (props) => {
                 .slice()
                 .reverse()
                 .map((com) => {
-                    return <Comment key={com.id} data={com} host={props.data.id}/>;
+                    return <Comment key={com.id} data={com} host={props.data.id} />;
                 })}
             <TextField
                 id="commentData"
@@ -264,7 +270,7 @@ function Stream() {
             ) : (
                 posts.map((post) => {
                     if (post.type === "post") {
-                        return <Post key={post.id} data={post}/>;
+                        return <Post key={post.id} data={post} />;
                     }
                     return;
                 })

@@ -215,11 +215,14 @@ class RemoteAuthService {
             })
 
         }
-        // TODO: team 13 getting comments
-        // else if (remoteNode === "Team 13"){
-        //     RemoteAuthService.getRemoteJWT("Team 13")
-        //     axios.get("/authors/" + authorID + "/posts/" + postID)
-        // }
+        else if (remoteNode === "Team 13"){
+            return await team13Instance.get("/authors/" + authorID + "/posts/" + postID + "/comments")
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
         
     } 
 
@@ -233,11 +236,14 @@ class RemoteAuthService {
                 console.log(error)
             })
         }
-        // TODO: team 13 getting likes on a post
-        // else if (remoteNode === "Team 13"){
-        //     RemoteAuthService.getRemoteJWT("Team 13")
-        //     axios.get("/authors/" + authorID + "/posts/" + postID)
-        // }
+        else if (remoteNode === "Team 13"){
+            return await team13Instance.get("/authors/" + authorID + "/posts/" + postID + "/likes")
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
         
     }
 
@@ -251,10 +257,14 @@ class RemoteAuthService {
                 console.log(error)
             })
         }
-        // TODO: team 13 getting likes on a comment
-        // else if (remoteNode === "Team 13"){
-        //     RemoteAuthService.getRemoteJWT("Team 13")
-        // }
+        else if (remoteNode === "Team 13"){
+            return await team13Instance.get("/authors/" + authorID + "/posts/" + postID + "/comments/" + commentID + "/likes")
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
     }
 
     async sendLikeRemotePost(remoteNode, postID){
@@ -269,6 +279,10 @@ class RemoteAuthService {
             })
         }
         // else if (remoteNode === "Team 13"){
+            // const currentUserID = getCurrentAuthorID()
+            // const currentUserDisplayName = retrieveCurrentAuthor().displayName
+            // return await team13Instance.get("/authors/" + authorID + "/posts/" + postID + "/likes" + currentUserID)
+            // .then()
         // }
     }
 
