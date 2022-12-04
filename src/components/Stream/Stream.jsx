@@ -7,6 +7,7 @@ import RemoteAuthService from "../../services/RemoteAuthService";
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
+import RemoteAuthService from "../../services/RemoteAuthService";
 
 export const Post = (props) => {
     // const [show, setShow] = useState(false);
@@ -17,42 +18,77 @@ export const Post = (props) => {
     const [likeList, setLikeList] = useState([]);
     const [isCommentsSubmitted, setIsCommentSubmitted] = useState(false);
 
-    const aID = retrieveCurrentAuthor().id.split("/authors/")[1];
+    // cannot get from AuthService since author can be remote
+    const aID = props.data.id.split("/authors/")[1].split("/posts/")[0];
     const pID = props.data.id.split("/posts/")[1];
 
-    // isSubmitted is used to let the webpage know to reload the comments
+    // get comments of a post
     useEffect(() => {
-        axios
-            .get("/authors/" + aID + "/posts/" + pID + "/comments", {
-                headers: {
-                    Authorization: "Bearer " + getAccessToken(),
-                },
-            })
-            .then((res) => {
-                setComments(res.data.comments);
-            })
-            .catch((err) => console.log(err));
+        if (
+            props.data.id.includes("localhost") ||
+            props.data.id.includes("127.0.0.1") ||
+            props.data.id.includes("https://social-distribution-404.herokuapp.com")
+        ) {
+            axios
+                .get("/authors/" + aID + "/posts/" + pID + "/comments", {
+                    headers: {
+                        Authorization: "Bearer " + getAccessToken(),
+                    },
+                })
+                .then((res) => {
+                    setComments(res.data.comments);
+                })
+                .catch((err) => console.log(err));
+        } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
+            RemoteAuthService.getRemoteComments("Team 12", aID, pID)
+                .then((response) => {
+                    setComments(response);
+                    // console.log(comments);
+                })
+                .catch((err) => console.log(err));
+            // console.log(response)
+        }
+        //  else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
+        //     RemoteAuthService.getRemoteComments("Team 13", aID, pID);
+        // }
     }, [isCommentsSubmitted]);
 
+    // get likes of a post
     useEffect(() => {
-        axios
-            .get("/authors/" + aID + "/posts/" + pID + "/likes", {
-                headers: {
-                    Authorization: "Bearer " + getAccessToken(),
-                },
-            })
-            .then((res) => {
-                setLikeList(res.data.items);
-                setLikes(res.data.items.length);
-                likeList.forEach((element) => {
-                    if (element.author.id === currentUser.id) {
-                        setLikeablePost(false);
-                    }
+        //ex ID: "http://127.0.0.1:5454/authors/9n58e/posts/764e"
+
+        const pID = props.data.id.split("/posts/")[1];
+        if (
+            props.data.id.includes("localhost") ||
+            props.data.id.includes("127.0.0.1") ||
+            props.data.id.includes("https://social-distribution-404.herokuapp.com")
+        ) {
+            axios
+                .get("/authors/" + aID + "/posts/" + pID + "/likes", {
+                    headers: {
+                        Authorization: "Bearer " + getAccessToken(),
+                    },
+                })
+                .then((res) => {
+                    setLikeList(res.data.items);
+                    setLikes(res.data.items.length);
+                    likeList.forEach((element) => {
+                        if (element.author.id === currentUser.id) {
+                            setLikeablePost(false);
+                        }
+                    });
+                })
+                .catch((e) => {
+                    console.log(e);
                 });
-            })
-            .catch((e) => {
-                console.log(e);
-            });
+        } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
+            RemoteAuthService.getRemoteLikesOnPost("Team 12", aID, pID)
+                .then((response) => {
+                    setLikes(response.length);
+                })
+        }
+        //TODO
+        else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")){}
     }, [likes, likeablePost]);
 
     const currentUser = retrieveCurrentAuthor();
