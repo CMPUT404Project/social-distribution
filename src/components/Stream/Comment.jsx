@@ -4,35 +4,65 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
-import AuthService from "../../services/AuthService";
+import RemoteAuthService from "../../services/RemoteAuthService";
 
 export const Comment = (props) => {
     const [likeableComment, setLikeableComment] = useState(true);
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
 
+    const commentURITokens = props.data.id.split("/");
+    const aID = commentURITokens[4];
+    const pID = commentURITokens[6];
+    const cID = commentURITokens[8];
+
     const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
-        const commentURITokens = props.data.id.split("/");
-        const aid = commentURITokens[4];
-        const pid = commentURITokens[6];
-        const cid = commentURITokens[8];
-        axios
-            .get("/authors/" + aid + "/posts/" + pid + "/comments/" + cid + "/likes", {
-                headers: {
-                    Authorization: "Bearer " + getAccessToken(),
-                },
-            })
-            .then((res) => {
-                setLikes(res.data.items.length);
-                setLikesList(res.data.items);
-                likesList.forEach((element) => {
+        if (
+            props.data.id.includes("localhost") ||
+            props.data.id.includes("127.0.0.1") ||
+            props.data.id.includes("https://social-distribution-404.herokuapp.com")
+        ) {
+            axios
+                .get("/authors/" + aID + "/posts/" + pID + "/comments/" + cID + "/likes", {
+                    headers: {
+                        Authorization: "Bearer " + getAccessToken(),
+                    },
+                })
+                .then((res) => {
+                    setLikes(res.data.items.length);
+                    setLikesList(res.data.items);
+                    // returning true/false is needed for array.every(), if return false -> break
+                    likesList.every((element) => {
+                        if (element.author.id === userJSON.id) {
+                            setLikeableComment(false);
+                            return false;
+                        }
+                        return true;
+                    });
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        }
+        // host is passed as prop from the post component
+        else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
+            const team12cID = props.data.id;
+            RemoteAuthService.getRemoteLikesOnComment("Team 12", aID, pID, team12cID).then((response) => {
+                setLikes(response.length);
+                // returning true/false is needed for array.every(), if return false -> break
+                likesList.every((element) => {
                     if (element.author.id === userJSON.id) {
                         setLikeableComment(false);
+                        return false;
                     }
+                    return true;
                 });
             });
-    }, [likes, likeableComment]);
+        } 
+        // else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
+        // }
+    }, [likes, likesList]);
 
     const handleLikeOnClick = () => {
         const data = {
@@ -85,7 +115,8 @@ export const Comment = (props) => {
             <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
             <div>
                 <Typography variant="body1" padding="1em" fontWeight="bold">
-                    {props.data.author.displayName}
+                    {/* team 12 props.data.author === team 19 props.data.author.displayName */}
+                    {props.data.author.displayName ? props.data.author.displayName : props.data.author}
                 </Typography>
                 <Typography variant="body1" padding="1em">
                     {props.data.comment}

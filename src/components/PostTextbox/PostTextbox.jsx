@@ -179,6 +179,7 @@ export const PostTextbox = () => {
                                         // I am assuming that the source I recieve follows this format
                                         // {host}/authors/{aid}/posts/{pid}
                                         // team13 requires originalAuthor displayName which we have to call the origin's authors server which we might not have access to.
+                                        // TODO: this call is irrelevant because originalAuthor will always be us for this component/scenario.
                                         axios
                                             .get(createdPost.data.origin, {
                                                 headers: {

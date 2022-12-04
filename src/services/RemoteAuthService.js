@@ -174,6 +174,60 @@ class RemoteAuthService {
             })
         }
     }
+
+    async getRemoteComments(remoteNode, authorID, postID) {
+        await this.getRemoteJWT(remoteNode)
+        if (remoteNode === "Team 12"){
+            return await team12Instance.get("/posts/" + postID + "/comments/")
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                console.log(error)
+            })
+
+        }
+        // TODO: team 13 getting comments
+        // else if (remoteNode === "Team 13"){
+        //     RemoteAuthService.getRemoteJWT("Team 13")
+        //     axios.get("/authors/" + authorID + "/posts/" + postID)
+        // }
+        
+    } 
+
+    async getRemoteLikesOnPost(remoteNode, authorID, postID) {
+        await this.getRemoteJWT(remoteNode)
+        if (remoteNode === "Team 12"){
+            return await team12Instance.get("/posts/" + postID + "/likes/")
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+        // TODO: team 13 getting likes on a post
+        // else if (remoteNode === "Team 13"){
+        //     RemoteAuthService.getRemoteJWT("Team 13")
+        //     axios.get("/authors/" + authorID + "/posts/" + postID)
+        // }
+        
+    }
+
+    async getRemoteLikesOnComment(remoteNode, authorID, postID, commentID) {
+        await this.getRemoteJWT(remoteNode)
+        if (remoteNode === "Team 12"){
+            return await team12Instance.get("/comments/" + commentID + "/likes/")
+            .then((response) => {
+                console.log(response)
+                return response.data
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+        // TODO: team 13 getting likes on a comment
+        // else if (remoteNode === "Team 13"){
+        //     RemoteAuthService.getRemoteJWT("Team 13")
+        // }
+    }
 }
 
 export default new RemoteAuthService();
