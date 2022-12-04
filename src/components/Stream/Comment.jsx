@@ -19,9 +19,9 @@ export const Comment = (props) => {
     const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
         if (
-            props.data.id.includes("localhost") ||
-            props.data.id.includes("127.0.0.1") ||
-            props.data.id.includes("https://social-distribution-404.herokuapp.com")
+            props.host.includes("localhost") ||
+            props.host.includes("127.0.0.1") ||
+            props.host.includes("https://social-distribution-404.herokuapp.com")
         ) {
             axios
                 .get("/authors/" + aID + "/posts/" + pID + "/comments/" + cID + "/likes", {
@@ -60,8 +60,8 @@ export const Comment = (props) => {
                 });
             });
         } 
-        // else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
-        // }
+        //TODO
+        else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {}
     }, [likes, likesList]);
 
     const handleLikeOnClick = () => {

@@ -85,8 +85,9 @@ export const Post = (props) => {
                 .then((response) => {
                     setLikes(response.length);
                 })
-            // console.log(response)
         }
+        //TODO
+        else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")){}
     }, [likes, likeablePost]);
 
     const currentUser = retrieveCurrentAuthor();

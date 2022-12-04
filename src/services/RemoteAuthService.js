@@ -217,7 +217,6 @@ class RemoteAuthService {
         if (remoteNode === "Team 12"){
             return await team12Instance.get("/comments/" + commentID + "/likes/")
             .then((response) => {
-                console.log(response)
                 return response.data
             }).catch((error) => {
                 console.log(error)
