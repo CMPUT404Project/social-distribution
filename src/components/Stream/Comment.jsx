@@ -10,6 +10,7 @@ export const Comment = (props) => {
     const [likeableComment, setLikeableComment] = useState(true);
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
+    const [likesFlag, setLikesFlag] = useState(false)
 
     const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
@@ -32,7 +33,7 @@ export const Comment = (props) => {
                     }
                 });
             });
-    }, [likes, likeableComment]);
+    }, [likes, likeableComment, likesFlag]);
 
     const handleLikeOnClick = () => {
         const data = {
@@ -42,9 +43,14 @@ export const Comment = (props) => {
             author: userJSON,
             object: props.data.id,
         };
-        // console.log(data);
+        console.log(props.data);
         // this gets the aID of the author's comment
-        axios
+        if (
+            props.data.id.includes("https://social-distribution-404.herokuapp.com") ||
+            props.data.id.includes("http://127.0.0.1:8000") ||
+            props.data.id.includes("localhost")
+        ){
+            axios
             .get(props.data.id, {
                 headers: {
                     Authorization: "Bearer " + getAccessToken(),
@@ -70,6 +76,7 @@ export const Comment = (props) => {
                         }
                     });
             });
+        }
     };
 
     return (

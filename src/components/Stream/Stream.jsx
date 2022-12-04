@@ -2,6 +2,7 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import { Avatar, Box, Button, Card, Grid, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
+import RemoteAuthService from "../../services/RemoteAuthService";
 
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
@@ -21,7 +22,8 @@ export const Post = (props) => {
 
     // isSubmitted is used to let the webpage know to reload the comments
     useEffect(() => {
-        axios.get("/authors/" + aID + "/posts/" + pID + "/comments", {
+        axios
+            .get("/authors/" + aID + "/posts/" + pID + "/comments", {
                 headers: {
                     Authorization: "Bearer " + getAccessToken(),
                 },
@@ -58,24 +60,34 @@ export const Post = (props) => {
     const handleLikeOnClick = (e) => {
         var data = {
             type: "Like",
-            context: "http://TODO.com",
+            context: "http://TODO.com/",
             summary: currentUser.displayName + " Likes your post",
             author: currentUser,
             object: props.data.id,
         };
         // send inbox to author of post
-        const posterID = props.data.author.id.split("/authors/")[1];
-        axios
-            .post("/authors/" + posterID + "/inbox", data, {
-                headers: {
-                    Authorization: "Bearer " + getAccessToken(),
-                    ContentType: "application/json",
-                },
-            })
-            .then(() => setLikeablePost(false))
-            .catch((err) => {
-                console.log(err);
-            });
+        if (
+            props.data.id.includes("localhost") ||
+            props.data.id.includes("127.0.0.1") ||
+            props.data.id.includes("https://social-distribution-404.herokuapp.com")
+        ) {
+            const posterID = props.data.author.id.split("/authors/")[1];
+            axios
+                .post("/authors/" + posterID + "/inbox", data, {
+                    headers: {
+                        Authorization: "Bearer " + getAccessToken(),
+                        ContentType: "application/json",
+                    },
+                })
+                .then(() => setLikeablePost(false))
+                .catch((err) => {
+                    console.log(err);
+                });
+        } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
+            RemoteAuthService.sendLikeRemotePost("Team 12", pID)
+        } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
+            // TODO: team 13 cannot send a post to us yet.
+        }
     };
 
     /* 
@@ -206,9 +218,8 @@ function Stream() {
 
     // Show new post when posting
     // useEffect(() => {
-        
-    // },[posts])
 
+    // },[posts])
 
     return (
         <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
@@ -218,7 +229,7 @@ function Stream() {
             ) : (
                 posts.map((post) => {
                     if (post.type === "post") {
-                        return <Post key={post.id} data={post} />;
+                        return <Post key={post.id} data={post}/>;
                     }
                     return;
                 })
