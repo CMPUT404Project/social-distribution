@@ -269,7 +269,6 @@ class RemoteAuthService {
             })
         }
         // else if (remoteNode === "Team 13"){
-        //     await this.getRemoteJWT(remoteNode)
         // }
     }
 
@@ -278,10 +277,12 @@ class RemoteAuthService {
         if (remoteNode === "Team 12"){
             return await team12Instance.post("/comments/" + commentID + "/likes/")
             .then((response) => {
-                console.log(response)
-                // return response.data
+                // console.log(response)
+                return response.data
             })
         }
+        // else if (remoteNode === "Team 13"){
+        // }
     }
 }
 

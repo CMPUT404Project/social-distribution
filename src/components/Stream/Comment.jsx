@@ -3,9 +3,8 @@ import { Avatar, Button, Card, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
-import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
-import AuthService from "../../services/AuthService";
 import RemoteAuthService from "../../services/RemoteAuthService";
+import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 
 export const Comment = (props) => {
     const [likeableComment, setLikeableComment] = useState(true);
@@ -76,9 +75,9 @@ export const Comment = (props) => {
         console.log(props.data);
         // this gets the aID of the author's comment
         if (
-            props.data.id.includes("https://social-distribution-404.herokuapp.com") ||
-            props.data.id.includes("http://127.0.0.1:8000") ||
-            props.data.id.includes("localhost")
+            props.host.includes("https://social-distribution-404.herokuapp.com") ||
+            props.host.includes("http://127.0.0.1:8000") ||
+            props.host.includes("localhost")
         ) {
             axios
                 .get(props.data.id, {
@@ -106,8 +105,9 @@ export const Comment = (props) => {
                             }
                         });
                 });
-        } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
-            RemoteAuthService.sendLikeRemoteComment("Team 12", cID);
+        } else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
+            const team12cID = props.data.id;
+            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID)
         }
     };
 
