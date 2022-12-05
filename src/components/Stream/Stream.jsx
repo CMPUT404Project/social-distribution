@@ -7,7 +7,7 @@ import RemoteAuthService from "../../services/RemoteAuthService";
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from "uuid";
 
 export const Post = (props) => {
     // const [show, setShow] = useState(false);
@@ -43,15 +43,12 @@ export const Post = (props) => {
             RemoteAuthService.getRemoteComments("Team 12", aID, pID)
                 .then((response) => {
                     setComments(response);
-                    // console.log(comments);
                 })
                 .catch((err) => console.log(err));
-            // console.log(response)
         } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
             RemoteAuthService.getRemoteComments("Team 13", aID, pID)
                 .then((response) => {
                     setComments(response);
-                    // console.log(response)
                 })
                 .catch((err) => console.log(err));
         }
@@ -111,7 +108,6 @@ export const Post = (props) => {
     const currentUser = retrieveCurrentAuthor();
 
     const handleLikeOnClick = (e) => {
-      console.log("inside handleLikeOnClick");
         var data = {
             type: "Like",
             context: "http://TODO.com/",
@@ -133,19 +129,25 @@ export const Post = (props) => {
                         ContentType: "application/json",
                     },
                 })
-                .then(() => setLikeablePost(false))
+                .then(() => {
+                    setLikeablePost(false);
+                })
                 .catch((err) => {
                     console.log(err);
                 });
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
             RemoteAuthService.sendLikeRemotePost("Team 12", aID, pID)
-                .then(() => setLikeablePost(false))
+                .then(() => {
+                    setLikeablePost(false);
+                })
                 .catch((err) => {
                     console.log(err);
                 });
         } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
             RemoteAuthService.sendLikeRemotePost("Team 13", aID, pID)
-                .then(() => setLikeablePost(false))
+                .then(() => {
+                    setLikeablePost(false);
+                })
                 .catch((err) => {
                     console.log(err);
                 });
@@ -194,8 +196,7 @@ export const Post = (props) => {
                 });
 
             // Team 12 implementation
-            if ( props.data.origin.includes("https://true-friends-404.herokuapp.com")) {
-
+            if (props.data.origin.includes("https://true-friends-404.herokuapp.com")) {
                 // get jwt token
                 axios
                     .post(
@@ -211,50 +212,50 @@ export const Post = (props) => {
                             },
                         }
                     )
-              .then((res) => {
-                  console.log(props.data);
-                  let pID = props.data.id.split("/posts/")[1];
-                  let team12CommentData = {
-                    comment: postTextBox,
-                  };
-                  console.log(team12CommentData);
-                      axios.post(
-                          `https://true-friends-404.herokuapp.com/authors/${aID}/${props.data.author.displayName}/posts/${pID}/comments/`,
-
-                          team12CommentData,
-                          {
-                              headers: {
-                                  Authorization: "Bearer " + res.data.access,
-                                  "Content-Type": "application/json",
-                              },
-                          }
-                      )
-                      .then((res) => {
-                          console.log(res);
-                          console.log(props.data);
-                          let pID = props.data.id.split("/posts/")[1];
-                          let team12CommentData = {
+                    .then((res) => {
+                        let pID = props.data.id.split("/posts/")[1];
+                        let team12CommentData = {
                             comment: postTextBox,
-                          };
-                          console.log(team12CommentData);
-                              axios.post(
-                                  // UNCOMMENT WHEN FINSIHED TESTING
-                                  `https://true-friends-404.herokuapp.com/authors/${aID}/${props.data.author.displayName}/posts/${pID}/comments/`,
-                                  team12CommentData,
-                                  {
-                                      headers: {
-                                          Authorization: "Bearer " + res.data.access,
-                                          "Content-Type": "application/json",
-                                      },
-                                  }
-                              )
-                              .then((res) => {
-                                  console.log(res);
-                              });
+                        };
+                        axios
+                            .post(
+                                `https://true-friends-404.herokuapp.com/authors/${aID}/${sessionStorage.getItem(
+                                    "username"
+                                )}/posts/${pID}/comments/`,
+
+                                team12CommentData,
+                                {
+                                    headers: {
+                                        Authorization: "Bearer " + res.data.access,
+                                        "Content-Type": "application/json",
+                                    },
+                                }
+                            )
+                            .then((res) => {
+                                let pID = props.data.id.split("/posts/")[1];
+                                let team12CommentData = {
+                                    comment: postTextBox,
+                                };
+                                console.log(team12CommentData);
+                                axios
+                                    .post(
+                                        `https://true-friends-404.herokuapp.com/authors/${aID}/${sessionStorage.getItem(
+                                            "username"
+                                        )}/posts/${pID}/comments/`,
+                                        team12CommentData,
+                                        {
+                                            headers: {
+                                                Authorization: "Bearer " + res.data.access,
+                                                "Content-Type": "application/json",
+                                            },
+                                        }
+                                    )
+                                    .then((res) => {
+                                        console.log(res);
+                                    });
                             });
-                });
-              }
-            else if ( props.data.origin.includes("https://cmput404-team13.herokuapp.com")) {
+                    });
+            } else if (props.data.origin.includes("https://cmput404-team13.herokuapp.com")) {
                 axios
                     .put("https://cmput404-team13.herokuapp.com/users", {
                         username: process.env.REACT_APP_T13USER,
@@ -266,15 +267,14 @@ export const Post = (props) => {
                         let pID = props.data.id.split("/posts/")[1];
                         let originalAuthorID = props.data.author.id.split("/authors/")[1];
                         let team13CommentData = {
-                          comment: postTextBox,
-                          author: {
-                            id: currentAuthorInfo.id.split("/authors/")[1],
-                            displayName: currentAuthorInfo.displayName,
-                          },
-                          id: uuidv4(),
+                            comment: postTextBox,
+                            author: {
+                                id: currentAuthorInfo.id.split("/authors/")[1],
+                                displayName: currentAuthorInfo.displayName,
+                            },
+                            id: uuidv4(),
                         };
                         axios.post(
-
                             `https://cmput404-team13.herokuapp.com/authors/${originalAuthorID}/posts/${pID}/comments`,
                             team13CommentData,
                             {
@@ -283,7 +283,7 @@ export const Post = (props) => {
                                     "Content-Type": "application/json",
                                 },
                             }
-                        )
+                        );
                     });
             }
         }
@@ -350,9 +350,6 @@ export const Post = (props) => {
         </Box>
     );
 };
-
-async function sendCommentToTeam12(){
-}
 
 function Stream() {
     const [posts, setPosts] = useState([]);
