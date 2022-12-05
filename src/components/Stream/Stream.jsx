@@ -229,7 +229,6 @@ export const Post = (props) => {
                   console.log(team12CommentData);
                       axios.post(
                           `https://true-friends-404.herokuapp.com/authors/${currentAuthorID}/${currentAuthorUsername}/posts/${pID}/comments/`,
-
                           team12CommentData,
                           {
                               headers: {
@@ -264,7 +263,6 @@ export const Post = (props) => {
                           id: uuidv4(),
                         };
                         axios.post(
-
                             `https://cmput404-team13.herokuapp.com/authors/${currentAuthorID}/posts/${pID}/comments`,
                             team13CommentData,
                             {
