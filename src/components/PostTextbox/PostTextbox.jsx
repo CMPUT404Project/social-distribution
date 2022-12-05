@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 
-export const PostTextbox = () => {
+export const PostTextbox = (props) => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     // TODO: Get markdown/base64 example to try.
@@ -65,6 +65,7 @@ export const PostTextbox = () => {
             // the createdPost.data should be the whole post, which then is sent to the users.
             .then((createdPost) => {
                 // first send to current user's inbox
+                props.setPosts([createdPost.data, ...props.posts])
                 let postWithAuthor = createdPost.data;
                 postWithAuthor["author"] = userJSON;
                 axios
@@ -222,7 +223,7 @@ export const PostTextbox = () => {
                                                         } else if (data.visibility.includes("FRIEND")) {
                                                             axios
                                                                 .post(
-                                                                    `https://cmput404-team13.herokuapp.com/inbox/friends/${aID}/${
+                                                                    `https://cmput404-team13.herokuapp.com/inbox/friend/${aID}/${
                                                                         // createdPost.data.id.split("/posts/")[1]
                                                                         res.data.id
                                                                     }`,
@@ -389,7 +390,7 @@ export const PostTextbox = () => {
                     <MenuItem value={true}>Yes</MenuItem>
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
-                <Button variant="contained" sx={{ borderRadius: 0 }} onClick={onFormSubmit}>
+                <Button variant="contained" sx={{ borderRadius: 0, padding: 1.7}} onClick={onFormSubmit}>
                     Send
                 </Button>
             </FormControl>

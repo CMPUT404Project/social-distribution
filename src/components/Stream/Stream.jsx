@@ -1,5 +1,5 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import { Avatar, Box, Button, Card, Grid, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, Grid, responsiveFontSizes, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import RemoteAuthService from "../../services/RemoteAuthService";
@@ -8,6 +8,8 @@ import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
 import { v4 as uuidv4 } from 'uuid';
+import AuthService from "../../services/AuthService";
+import ClipLoader from 'react-spinners/ClipLoader';
 
 export const Post = (props) => {
     // const [show, setShow] = useState(false);
@@ -343,10 +345,33 @@ export const Post = (props) => {
     );
 };
 
+async function updateAndDeletePost(aID, pID, response, postData, currIndex) {
+    if (response.status !== 200) {
+        postData.splice(currIndex, 1)
+        await AuthService.deletePost(aID, pID)
+    }
+    else {
+        let updated_data = {
+            "title": response.data.title, 
+            "description": response.data.description, 
+            "contentType": response.data.contentType, 
+            "content": response.data.content,
+            "categories": "[]",
+        }
+        postData[currIndex].title = response.data.title
+        postData[currIndex].description = response.data.description
+        postData[currIndex].contentType = response.data.contentType
+        postData[currIndex].content = response.data.content
+        postData[currIndex].categories = "[]"
+        await AuthService.updatePost(aID, pID, updated_data)
+    }
+}
+
 async function sendCommentToTeam12(){
 }
 
 function Stream() {
+    const [isLoading, setLoading] = useState(true);
     const [posts, setPosts] = useState([]);
 
     const [accessToken, setAccessToken] = useState(
@@ -354,36 +379,62 @@ function Stream() {
     );
 
     useEffect(() => {
+        let promises1 = [];
+        let promises2 = [];
         const aID = retrieveCurrentAuthor().id.split("/authors/")[1];
-        axios
-            .get("/authors/" + aID + "/inbox?type=posts", {
+        axios.get("/authors/" + aID + "/inbox?type=posts", {
                 headers: { Authorization: "Bearer " + accessToken },
             })
             .then((res) => {
-                setPosts(res.data.items);
+                for (let i=res.data.items.length-1; i>=0; i--) {
+                    let raID = res.data.items[i].id.split("/authors/")[1].split("/posts/")[0]
+                    let pID = res.data.items[i].id.split("/posts/")[1]
+                    if (res.data.items[i].source.includes("https://true-friends-404.herokuapp.com")) {
+                        promises1.push(RemoteAuthService.getRemotePost("Team 12", raID, pID).then((response) => {
+                            promises2.push(updateAndDeletePost(raID, pID, response, res.data.items, i).then())
+                        }))
+                    }
+                    else if (res.data.items[i].source.includes("https://cmput404-team13.herokuapp.com")) {
+                        promises1.push(RemoteAuthService.getRemotePost("Team 13", raID, pID).then((response) => {
+                            promises2.push(updateAndDeletePost(raID, pID, response, res.data.items, i).then())
+                        }))
+                    }
+                }
+                Promise.all(promises1).then(() => {
+                    Promise.all(promises2).then(() => {
+                        setPosts(res.data.items)
+                        setLoading(false)
+                    })
+                })
             })
             .catch((err) => {
                 console.log(err);
-            });
+            })
     }, []);
 
     // Show new post when posting
     // useEffect(() => {
 
     // },[posts])
-
     return (
         <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
-            <PostTextbox />
-            {posts.length === 0 ? (
-                <h1>You currently have no posts!</h1>
+            {isLoading ? (
+                <ClipLoader color={'#fff'} loading={isLoading} size={150} />
+            ) : posts.length === 0 ? (
+                <>
+                    <PostTextbox />
+                    <h1>You currently have no posts!</h1>
+                </>   
             ) : (
-                posts.map((post) => {
-                    if (post.type === "post") {
-                        return <Post key={post.id} data={post} />;
-                    }
-                    return;
-                })
+                <>
+                    <PostTextbox posts={posts} setPosts={setPosts}/>
+                    {posts.map((post) => {
+                        if (post.type === "post") {
+                            return <Post key={post.id} data={post} />;
+                        }
+                        return;
+                    })}
+                </>
             )}
         </Grid>
     );
