@@ -7,6 +7,7 @@ import RemoteAuthService from "../../services/RemoteAuthService";
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
+import { v4 as uuidv4 } from 'uuid';
 
 export const Post = (props) => {
     // const [show, setShow] = useState(false);
@@ -110,6 +111,7 @@ export const Post = (props) => {
     const currentUser = retrieveCurrentAuthor();
 
     const handleLikeOnClick = (e) => {
+      console.log("inside handleLikeOnClick");
         var data = {
             type: "Like",
             context: "http://TODO.com/",
@@ -190,6 +192,100 @@ export const Post = (props) => {
                 .catch((err) => {
                     console.log(err);
                 });
+
+            // Team 12 implementation
+            if ( props.data.origin.includes("https://true-friends-404.herokuapp.com")) {
+
+                // get jwt token
+                axios
+                    .post(
+                        "https://true-friends-404.herokuapp.com/api/token/obtain/",
+                        {
+                            email: process.env.REACT_APP_T12USER,
+                            password: process.env.REACT_APP_T12PASS,
+                        },
+                        {
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Access-Control-Allow-Origin": "*",
+                            },
+                        }
+                    )
+              .then((res) => {
+                  console.log(props.data);
+                  let pID = props.data.id.split("/posts/")[1];
+                  let team12CommentData = {
+                    comment: postTextBox,
+                  };
+                  console.log(team12CommentData);
+                      axios.post(
+                          `https://true-friends-404.herokuapp.com/authors/${aID}/${props.data.author.displayName}/posts/${pID}/comments/`,
+
+                          team12CommentData,
+                          {
+                              headers: {
+                                  Authorization: "Bearer " + res.data.access,
+                                  "Content-Type": "application/json",
+                              },
+                          }
+                      )
+                      .then((res) => {
+                          console.log(res);
+                          console.log(props.data);
+                          let pID = props.data.id.split("/posts/")[1];
+                          let team12CommentData = {
+                            comment: postTextBox,
+                          };
+                          console.log(team12CommentData);
+                              axios.post(
+                                  // UNCOMMENT WHEN FINSIHED TESTING
+                                  `https://true-friends-404.herokuapp.com/authors/${aID}/${props.data.author.displayName}/posts/${pID}/comments/`,
+                                  team12CommentData,
+                                  {
+                                      headers: {
+                                          Authorization: "Bearer " + res.data.access,
+                                          "Content-Type": "application/json",
+                                      },
+                                  }
+                              )
+                              .then((res) => {
+                                  console.log(res);
+                              });
+                            });
+                });
+              }
+            else if ( props.data.origin.includes("https://cmput404-team13.herokuapp.com")) {
+                axios
+                    .put("https://cmput404-team13.herokuapp.com/users", {
+                        username: process.env.REACT_APP_T13USER,
+                        password: process.env.REACT_APP_T13PASS,
+                    })
+                    .then((res) => {
+                        // get jwt token
+                        let currentAuthorInfo = retrieveCurrentAuthor();
+                        let pID = props.data.id.split("/posts/")[1];
+                        let originalAuthorID = props.data.author.id.split("/authors/")[1];
+                        let team13CommentData = {
+                          comment: postTextBox,
+                          author: {
+                            id: currentAuthorInfo.id.split("/authors/")[1],
+                            displayName: currentAuthorInfo.displayName,
+                          },
+                          id: uuidv4(),
+                        };
+                        axios.post(
+
+                            `https://cmput404-team13.herokuapp.com/authors/${originalAuthorID}/posts/${pID}/comments`,
+                            team13CommentData,
+                            {
+                                headers: {
+                                    Authorization: "Bearer " + res.data.jwt,
+                                    "Content-Type": "application/json",
+                                },
+                            }
+                        )
+                    });
+            }
         }
     };
     return (
@@ -254,6 +350,9 @@ export const Post = (props) => {
         </Box>
     );
 };
+
+async function sendCommentToTeam12(){
+}
 
 function Stream() {
     const [posts, setPosts] = useState([]);

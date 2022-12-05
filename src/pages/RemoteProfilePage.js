@@ -91,7 +91,7 @@ function ProfilePage() {
         }
         let currentAuthorID = getCurrentAuthorID();
         setLoading(true);
-        checkFollowStatus(currentAuthorID);
+        // checkFollowStatus(currentAuthorID);
         getAuthorDetails();
     }, [authorID])
 
