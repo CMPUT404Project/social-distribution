@@ -164,6 +164,26 @@ class AuthService {
         }
         const response = await axios.post("/authors/" + authorID + "/inbox", body);
     }
+
+    async updatePost(authorID, postID, data) {
+        await axios.put("/authors/" + authorID + "/posts/" + postID, data, {
+            headers: {
+            Authorization: "Bearer " + getAccessToken(),
+            },
+        }).catch((err) =>
+            console.log(err)
+        )
+    }
+
+    async deletePost(authorID, postID) {
+        await axios.delete("/authors/" + authorID + "/posts/" + postID, {
+            headers: {
+            Authorization: "Bearer " + getAccessToken(),
+            },
+        }).catch((err) =>
+            console.log(err)
+        )
+    }
 }
 
 export default new AuthService();

@@ -214,6 +214,29 @@ class RemoteAuthService {
             })
         }
     }
+    async getRemotePost(remoteNode, authorID, postID) {
+        await this.getRemoteJWT(remoteNode)
+        if (remoteNode === "Team 12") {
+            return await team12Instance.get("/posts/" + postID + "/", {validateStatus: function (status) {
+                return status < 500;
+            }})
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+        else if (remoteNode === "Team 13") {
+            return await team13Instance.get("/authors/" + authorID + "/posts/" + postID, {validateStatus: function (status) {
+                return status < 500;
+            }})
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+    }
 
     async getRemoteComments(remoteNode, authorID, postID) {
         await this.getRemoteJWT(remoteNode)
