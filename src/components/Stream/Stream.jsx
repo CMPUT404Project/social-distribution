@@ -238,29 +238,9 @@ export const Post = (props) => {
                           }
                       )
                       .then((res) => {
-                          console.log(res);
-                          console.log(props.data);
-                          let pID = props.data.id.split("/posts/")[1];
-                          let team12CommentData = {
-                            comment: postTextBox,
-                          };
-                          console.log(team12CommentData);
-                              axios.post(
-                                  // UNCOMMENT WHEN FINSIHED TESTING
-                                  `https://true-friends-404.herokuapp.com/authors/${aID}/${props.data.author.displayName}/posts/${pID}/comments/`,
-                                  team12CommentData,
-                                  {
-                                      headers: {
-                                          Authorization: "Bearer " + res.data.access,
-                                          "Content-Type": "application/json",
-                                      },
-                                  }
-                              )
-                              .then((res) => {
-                                  setIsCommentSubmitted(!isCommentsSubmitted);
-                                  e.target.value = "";
-                              });
-                            });
+                          setIsCommentSubmitted(!isCommentsSubmitted);
+                          e.target.value = "";
+                      });
                 });
               }
             else if ( props.data.origin.includes("https://cmput404-team13.herokuapp.com")) {
@@ -273,18 +253,17 @@ export const Post = (props) => {
                         // get jwt token
                         let currentAuthorInfo = retrieveCurrentAuthor();
                         let pID = props.data.id.split("/posts/")[1];
-                        let currentAuthorUsername = currentAuthorInfo.displayName;
                         let team13CommentData = {
                           comment: postTextBox,
                           author: {
-                            id: currentAuthorInfo.id.split("/authors/")[1],
+                            id: aID,
                             displayName: currentAuthorInfo.displayName,
                           },
                           id: uuidv4(),
                         };
                         axios.post(
 
-                            `https://cmput404-team13.herokuapp.com/authors/${currentAuthorUsername}/posts/${pID}/comments`,
+                            `https://cmput404-team13.herokuapp.com/authors/${aID}/posts/${pID}/comments`,
                             team13CommentData,
                             {
                                 headers: {
