@@ -226,10 +226,10 @@ export const Post = (props) => {
                   };
                   let currentAuthorInfo = retrieveCurrentAuthor();
                   let currentAuthorUsername = currentAuthorInfo.displayName;
+                  let currentAuthorID = currentAuthorInfo.id.split("/authors/")[1];
                   console.log(team12CommentData);
                       axios.post(
-                          `https://true-friends-404.herokuapp.com/authors/${aID}/${currentAuthorUsername}/posts/${pID}/comments/`,
-
+                          `https://true-friends-404.herokuapp.com/authors/${currentAuthorID}/${currentAuthorUsername}/posts/${pID}/comments/`,
                           team12CommentData,
                           {
                               headers: {
@@ -253,17 +253,18 @@ export const Post = (props) => {
                     .then((res) => {
                         // get jwt token
                         let currentAuthorInfo = retrieveCurrentAuthor();
+                        let currentAuthorID = currentAuthorInfo.id.split("/authors/")[1];
                         let pID = props.data.id.split("/posts/")[1];
                         let team13CommentData = {
                           comment: postTextBox,
                           author: {
-                            id: aID,
+                            id: currentAuthorID,
                             displayName: currentAuthorInfo.displayName,
                           },
                           id: uuidv4(),
                         };
                         axios.post(
-                            `https://cmput404-team13.herokuapp.com/authors/${aID}/posts/${pID}/comments`,
+                            `https://cmput404-team13.herokuapp.com/authors/${currentAuthorID}/posts/${pID}/comments`,
                             team13CommentData,
                             {
                                 headers: {
