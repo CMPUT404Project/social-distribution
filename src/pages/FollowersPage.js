@@ -184,18 +184,6 @@ function FollowersPage() {
                             input={searchField.toLowerCase().includes("team 13") ? "" : searchField}
                             authors={allTeam13Authors}
                         />
-                        {/* {teams.map((team, index) => {
-                            return <>
-                                <h3>{team}</h3>
-                                <SearchResults 
-                                    key={team + index}
-                                    team={team}
-                                    input={searchField}
-                                    authors={eval("all"+team.replace(" ",'')+"Authors")}
-                                />
-                            </>
-                        })} */}
-
                     </Container>
                 </div> 
             )}

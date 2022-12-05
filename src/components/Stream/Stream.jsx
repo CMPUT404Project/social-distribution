@@ -9,7 +9,6 @@ import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
 import { v4 as uuidv4 } from 'uuid';
 
-
 import "./Comment.css"
 
 export const Post = (props) => {
