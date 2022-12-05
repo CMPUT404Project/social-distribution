@@ -71,9 +71,8 @@ function ProfilePage() {
                 setIsFollowing(false)
             }
             if (isFollowing) {
-                console.log("Following")
                 await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID).then((data) => {
-                    console.log(data)
+                    setIsFriend(data)
                 })
             }
 
@@ -84,14 +83,14 @@ function ProfilePage() {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
                 displayName: response.displayName || response.username,
-                github: response.github.split(".com/")[1] || response.github || "",
+                github: response.github?.split(".com/")[1] || response.github || "",
                 profileImage: response.profileImage,
             })
             setLoading(false);
         }
         let currentAuthorID = getCurrentAuthorID();
         setLoading(true);
-        checkFollowStatus(currentAuthorID);
+        // checkFollowStatus(currentAuthorID);
         getAuthorDetails();
     }, [authorID])
 
