@@ -3,35 +3,78 @@ import { Avatar, Button, Card, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
+import RemoteAuthService from "../../services/RemoteAuthService";
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
-import AuthService from "../../services/AuthService";
 
 export const Comment = (props) => {
     const [likeableComment, setLikeableComment] = useState(true);
     const [likesList, setLikesList] = useState([]);
     const [likes, setLikes] = useState(0);
+    const [likesFlag, setLikesFlag] = useState(false);
+
+    const commentURITokens = props.data.id.split("/");
+    const aID = commentURITokens[4];
+    const pID = commentURITokens[6];
+    const cID = commentURITokens[8];
+    const host = props.host;
 
     const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
-        const commentURITokens = props.data.id.split("/");
-        const aid = commentURITokens[4];
-        const pid = commentURITokens[6];
-        const cid = commentURITokens[8];
-        axios
-            .get("/authors/" + aid + "/posts/" + pid + "/comments/" + cid + "/likes", {
-                headers: {
-                    Authorization: "Bearer " + getAccessToken(),
-                },
-            })
-            .then((res) => {
-                setLikes(res.data.items.length);
-                setLikesList(res.data.items);
-                likesList.forEach((element) => {
+        if (
+            props.host.includes("localhost") ||
+            props.host.includes("127.0.0.1") ||
+            props.host.includes("https://social-distribution-404.herokuapp.com")
+        ) {
+            axios
+                .get("/authors/" + aID + "/posts/" + pID + "/comments/" + cID + "/likes", {
+                    headers: {
+                        Authorization: "Bearer " + getAccessToken(),
+                    },
+                })
+                .then((res) => {
+                    setLikes(res.data.items.length);
+                    setLikesList(res.data.items);
+                    // returning true/false is needed for array.every(), if return false -> break
+                    likesList.every((element) => {
+                        if (element.author.id === userJSON.id) {
+                            setLikeableComment(false);
+                            return false;
+                        }
+                        return true;
+                    });
+                })
+                .catch((e) => {
+                    console.log(e);
+                });
+        }
+        // host is passed as prop from the post component
+        else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
+            const team12cID = props.data.id;
+            RemoteAuthService.getRemoteLikesOnComment("Team 12", aID, pID, team12cID).then((response) => {
+                setLikes(response.length);
+                // returning true/false is needed for array.every(), if return false -> break
+                likesList.every((element) => {
+                    console.log(element.author.id, userJSON.id)
                     if (element.author.id === userJSON.id) {
                         setLikeableComment(false);
+                        return false;
                     }
+                    return true;
                 });
             });
+        } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
+            RemoteAuthService.getRemoteLikesOnComment("Team 13", aID, pID, props.data.id).then((response) => {
+                setLikes(response.length);
+                // returning true/false is needed for array.every(), if return false -> break
+                likesList.every((element) => {
+                    if (element.author.id === userJSON.id) {
+                        setLikeableComment(false);
+                        return false;
+                    }
+                    return true;
+                });
+            });
+        }
     }, [likes, likeableComment]);
 
     const handleLikeOnClick = () => {
@@ -42,34 +85,52 @@ export const Comment = (props) => {
             author: userJSON,
             object: props.data.id,
         };
-        // console.log(data);
         // this gets the aID of the author's comment
-        axios
-            .get(props.data.id, {
-                headers: {
-                    Authorization: "Bearer " + getAccessToken(),
-                },
-            })
-            .then((res) => {
-                let commenterUUID = res.data.author.id.split("/authors/")[1];
-                // send to inbox of the commenter on the post
-                axios
-                    .post("/authors/" + commenterUUID + "/inbox", data, {
-                        headers: {
-                            Authorization: "Bearer " + getAccessToken(),
-                        },
-                    })
-                    .then(() => {
-                        setLikeableComment(false);
-                    })
-                    .catch((err) => {
-                        if (err.response.status === 409) {
-                            console.log("You already like this comment!");
-                        } else {
-                            console.log(err);
-                        }
-                    });
+        if (
+            props.host.includes("https://social-distribution-404.herokuapp.com") ||
+            props.host.includes("http://127.0.0.1:8000") ||
+            props.host.includes("localhost")
+        ) {
+            axios
+                .get(props.data.id, {
+                    headers: {
+                        Authorization: "Bearer " + getAccessToken(),
+                    },
+                })
+                .then((res) => {
+                    let commenterUUID = res.data.author.id.split("/authors/")[1];
+                    // send to inbox of the commenter on the post
+                    axios
+                        .post("/authors/" + commenterUUID + "/inbox", data, {
+                            headers: {
+                                Authorization: "Bearer " + getAccessToken(),
+                            },
+                        })
+                        .then(() => {
+                            setLikeableComment(false);
+                        })
+                        .catch((err) => {
+                            if (err.response.status === 409) {
+                                console.log("You already like this comment!");
+                            } else {
+                                console.log(err);
+                            }
+                        });
+                });
+        } else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
+            const team12cID = props.data.id;
+            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID, undefined, undefined).then(() => {
+                setLikeableComment(false);
             });
+        } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
+            // console.log(props)
+            const team13cID = props.data.id;
+            const postAuthorID = props.data.author.id;
+            const postID = props.data.post.id;
+            RemoteAuthService.sendLikeRemoteComment("Team 13", team13cID, postAuthorID, postID).then(() => {
+                setLikeableComment(false);
+            });
+        }
     };
 
     return (
@@ -85,7 +146,8 @@ export const Comment = (props) => {
             <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
             <div>
                 <Typography variant="body1" padding="1em" fontWeight="bold">
-                    {props.data.author.displayName}
+                    {/* team 12 props.data.author === team 19 props.data.author.displayName */}
+                    {props.data.author.displayName ? props.data.author.displayName : props.data.author}
                 </Typography>
                 <Typography variant="body1" padding="1em">
                     {props.data.comment}
