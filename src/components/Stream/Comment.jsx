@@ -16,7 +16,7 @@ export const Comment = (props) => {
     const aID = commentURITokens[4];
     const pID = commentURITokens[6];
     const cID = commentURITokens[8];
-    const host = props.host
+    const host = props.host;
 
     const userJSON = retrieveCurrentAuthor();
     useEffect(() => {
@@ -54,6 +54,7 @@ export const Comment = (props) => {
                 setLikes(response.length);
                 // returning true/false is needed for array.every(), if return false -> break
                 likesList.every((element) => {
+                    console.log(element.author.id, userJSON.id)
                     if (element.author.id === userJSON.id) {
                         setLikeableComment(false);
                         return false;
@@ -62,9 +63,8 @@ export const Comment = (props) => {
                 });
             });
         } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
-            RemoteAuthService.getRemoteLikesOnComment("Team 13", aID, pID, props.data.id).then((response) =>
-            {
-                setLikes(response.length)
+            RemoteAuthService.getRemoteLikesOnComment("Team 13", aID, pID, props.data.id).then((response) => {
+                setLikes(response.length);
                 // returning true/false is needed for array.every(), if return false -> break
                 likesList.every((element) => {
                     if (element.author.id === userJSON.id) {
@@ -73,8 +73,7 @@ export const Comment = (props) => {
                     }
                     return true;
                 });
-            })
-
+            });
         }
     }, [likes, likeableComment]);
 
@@ -86,7 +85,6 @@ export const Comment = (props) => {
             author: userJSON,
             object: props.data.id,
         };
-        console.log(props.data);
         // this gets the aID of the author's comment
         if (
             props.host.includes("https://social-distribution-404.herokuapp.com") ||
@@ -121,7 +119,17 @@ export const Comment = (props) => {
                 });
         } else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
             const team12cID = props.data.id;
-            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID)
+            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID, undefined, undefined).then(() => {
+                setLikeableComment(false);
+            });
+        } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
+            // console.log(props)
+            const team13cID = props.data.id;
+            const postAuthorID = props.data.author.id;
+            const postID = props.data.post.id;
+            RemoteAuthService.sendLikeRemoteComment("Team 13", team13cID, postAuthorID, postID).then(() => {
+                setLikeableComment(false);
+            });
         }
     };
 

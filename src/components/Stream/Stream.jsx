@@ -73,8 +73,8 @@ export const Post = (props) => {
                     },
                 })
                 .then((res) => {
-                    setLikeList(res.data.items);
                     setLikes(res.data.items.length);
+                    setLikeList(res.data.items);
                     likeList.forEach((element) => {
                         if (element.author.id === currentUser.id) {
                             setLikeablePost(false);
@@ -87,11 +87,22 @@ export const Post = (props) => {
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
             RemoteAuthService.getRemoteLikesOnPost("Team 12", aID, pID).then((response) => {
                 setLikes(response.length);
+                setLikeList(response);
+                likeList.forEach((element) => {
+                    if (element.author === currentUser.id.split("/authors/")[1]) {
+                        setLikeablePost(false);
+                    }
+                });
             });
-        }
-        else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
+        } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
             RemoteAuthService.getRemoteLikesOnPost("Team 13", aID, pID).then((response) => {
                 setLikes(response.length);
+                setLikeList(response);
+                likeList.forEach((element) => {
+                    if (element.author === currentUser.id.split("/authors/")[1]) {
+                        setLikeablePost(false);
+                    }
+                });
             });
         }
     }, [likes, likeablePost]);
@@ -125,9 +136,17 @@ export const Post = (props) => {
                     console.log(err);
                 });
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
-            RemoteAuthService.sendLikeRemotePost("Team 12", pID);
+            RemoteAuthService.sendLikeRemotePost("Team 12", aID, pID)
+                .then(() => setLikeablePost(false))
+                .catch((err) => {
+                    console.log(err);
+                });
         } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
-            // TODO: team 13 cannot send a post to us yet.
+            RemoteAuthService.sendLikeRemotePost("Team 13", aID, pID)
+                .then(() => setLikeablePost(false))
+                .catch((err) => {
+                    console.log(err);
+                });
         }
     };
 

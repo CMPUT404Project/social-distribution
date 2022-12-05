@@ -231,6 +231,7 @@ class RemoteAuthService {
         if (remoteNode === "Team 12"){
             return await team12Instance.get("/posts/" + postID + "/likes/")
             .then((response) => {
+                // console.log(response)
                 return response.data
             }).catch((error) => {
                 console.log(error)
@@ -267,36 +268,50 @@ class RemoteAuthService {
         }
     }
 
-    async sendLikeRemotePost(remoteNode, postID){
-        const authorID = getCurrentAuthorID()
-        const authorUsername = sessionStorage.getItem('username') 
+    async sendLikeRemotePost(remoteNode, authorID, postID){
+        const currentAuthorID = getCurrentAuthorID()
+        const currentAuthorUsername = sessionStorage.getItem('username') 
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 12"){
-            return await team12Instance.post("/authors/" + authorID + "/" + authorUsername + "/posts/" + postID + "/likes/")
+            return await team12Instance.post("/authors/" + currentAuthorID + "/" + currentAuthorUsername + "/posts/" + postID + "/likes/")
             .then((response) => {
-                // console.log(response)
                 return response.data
+            }).catch((error) => {
+                console.log(error)
             })
         }
-        // else if (remoteNode === "Team 13"){
-            // const currentUserID = getCurrentAuthorID()
-            // const currentUserDisplayName = retrieveCurrentAuthor().displayName
-            // return await team13Instance.get("/authors/" + authorID + "/posts/" + postID + "/likes" + currentUserID)
-            // .then()
-        // }
+        // from swagger, body is not required
+        else if (remoteNode === "Team 13"){
+            return await team13Instance.post("/authors/" + authorID + "/posts/" + postID + "/likes/" + currentAuthorID)
+            .then((response) => {
+                // return response.data
+                console.log(response)
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
     }
 
-    async sendLikeRemoteComment(remoteNode, commentID){
+    async sendLikeRemoteComment(remoteNode, commentID, authorID=null, postID=null){
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 12"){
             return await team12Instance.post("/comments/" + commentID + "/likes/")
             .then((response) => {
-                // console.log(response)
                 return response.data
+            }).catch((error) => {
+                console.log(error)
             })
         }
-        // else if (remoteNode === "Team 13"){
-        // }
+        else if (remoteNode === "Team 13"){
+            const currentAuthorID = getCurrentAuthorID()
+            return await team13Instance.post("/authors/" + authorID + "/posts/" + postID + "/comments/" + commentID + "/likes/" + currentAuthorID)
+            .then((response) => {
+                // console.log(response)
+                return response.data
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
     }
 }
 
