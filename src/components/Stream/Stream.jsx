@@ -168,30 +168,36 @@ export const Post = (props) => {
             e.preventDefault();
             const postTextBox = e.target.value;
 
-            // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
-            let data = {
-                type: "comment",
-                author: retrieveCurrentAuthor(),
-                comment: postTextBox,
-                post: props.data.id.split("/posts/")[1],
-                contentType: "text/plain",
-            };
+            if ( 
+                props.data.id.includes("localhost") ||
+                props.data.id.includes("127.0.0.1") ||
+                props.data.id.includes("https://social-distribution-404.herokuapp.com")
+            ) {
+              // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
+              let data = {
+                  type: "comment",
+                  author: retrieveCurrentAuthor(),
+                  comment: postTextBox,
+                  post: props.data.id.split("/posts/")[1],
+                  contentType: "text/plain",
+              };
 
-            const postAuthorID = props.data.author.id.split("/authors/")[1];
-            axios
-                .post("/authors/" + postAuthorID + "/inbox", data, {
-                    headers: {
-                        Authorization: "Bearer " + getAccessToken(),
-                        ContentType: "application/json",
-                    },
-                })
-                .then(() => {
-                    setIsCommentSubmitted(!isCommentsSubmitted);
-                    e.target.value = "";
-                })
-                .catch((err) => {
-                    console.log(err);
-                });
+              const postAuthorID = props.data.author.id.split("/authors/")[1];
+              axios
+                  .post("/authors/" + postAuthorID + "/inbox", data, {
+                      headers: {
+                          Authorization: "Bearer " + getAccessToken(),
+                          ContentType: "application/json",
+                      },
+                  })
+                  .then(() => {
+                      setIsCommentSubmitted(!isCommentsSubmitted);
+                      e.target.value = "";
+                  })
+                  .catch((err) => {
+                      console.log(err);
+                  });
+            }
 
             // Team 12 implementation
             if ( props.data.origin.includes("https://true-friends-404.herokuapp.com")) {
@@ -217,9 +223,11 @@ export const Post = (props) => {
                   let team12CommentData = {
                     comment: postTextBox,
                   };
+                  let currentAuthorInfo = retrieveCurrentAuthor();
+                  let currentAuthorUsername = currentAuthorInfo.displayName;
                   console.log(team12CommentData);
                       axios.post(
-                          `https://true-friends-404.herokuapp.com/authors/${aID}/${props.data.author.displayName}/posts/${pID}/comments/`,
+                          `https://true-friends-404.herokuapp.com/authors/${aID}/${currentAuthorUsername}/posts/${pID}/comments/`,
 
                           team12CommentData,
                           {
@@ -249,7 +257,8 @@ export const Post = (props) => {
                                   }
                               )
                               .then((res) => {
-                                  console.log(res);
+                                  setIsCommentSubmitted(!isCommentsSubmitted);
+                                  e.target.value = "";
                               });
                             });
                 });
@@ -264,7 +273,7 @@ export const Post = (props) => {
                         // get jwt token
                         let currentAuthorInfo = retrieveCurrentAuthor();
                         let pID = props.data.id.split("/posts/")[1];
-                        let originalAuthorID = props.data.author.id.split("/authors/")[1];
+                        let currentAuthorUsername = currentAuthorInfo.displayName;
                         let team13CommentData = {
                           comment: postTextBox,
                           author: {
@@ -275,7 +284,7 @@ export const Post = (props) => {
                         };
                         axios.post(
 
-                            `https://cmput404-team13.herokuapp.com/authors/${originalAuthorID}/posts/${pID}/comments`,
+                            `https://cmput404-team13.herokuapp.com/authors/${currentAuthorUsername}/posts/${pID}/comments`,
                             team13CommentData,
                             {
                                 headers: {
@@ -284,6 +293,10 @@ export const Post = (props) => {
                                 },
                             }
                         )
+                        .then((res) => {
+                            setIsCommentSubmitted(!isCommentsSubmitted);
+                            e.target.value = "";
+                        });
                     });
             }
         }
