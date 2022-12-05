@@ -1,5 +1,5 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import { Avatar, Button, Card, Typography } from "@mui/material";
+import { Avatar, Button, Box, Card, Link, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -12,8 +12,12 @@ export const Comment = (props) => {
     const [likes, setLikes] = useState(0);
 
     const userJSON = retrieveCurrentAuthor();
+
+    const commentURITokens = props.data.id.split("/");
+
+    const [commenterURL, setCommenterURL] = useState(props.data.id.replace("authors", "profile").split("/posts")[0]);
+
     useEffect(() => {
-        const commentURITokens = props.data.id.split("/");
         const aid = commentURITokens[4];
         const pid = commentURITokens[6];
         const cid = commentURITokens[8];
@@ -33,6 +37,17 @@ export const Comment = (props) => {
                 });
             });
     }, [likes, likeableComment]);
+
+    useEffect(() => {
+        let newArray = [...commenterURL.split("/")];
+        if (commenterURL.split("profile/")[0] === "https://true-friends-404.herokuapp.com/") {
+            newArray.splice(4,0,"remote/team12")
+            setCommenterURL(newArray)
+        } else if (commenterURL.split("profile/")[0] === "https://cmput404-team13.herokuapp.com/") {
+            newArray.splice(4,0,"remote/team13")
+            setCommenterURL(newArray)
+        }
+    }, [])
 
     const handleLikeOnClick = () => {
         const data = {
@@ -82,11 +97,12 @@ export const Comment = (props) => {
                 display: "flex",
             }}
         >
+            
             <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
-            <div>
-                <Typography variant="body1" padding="1em" fontWeight="bold">
+            <div className="comment-header">
+                <Link href={commenterURL} variant="body1" padding="1em" fontWeight="bold" underline="hover">
                     {props.data.author.displayName}
-                </Typography>
+                </Link>
                 <Typography variant="body1" padding="1em">
                     {props.data.comment}
                 </Typography>

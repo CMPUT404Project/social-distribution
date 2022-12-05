@@ -61,7 +61,6 @@ function ProfilePage() {
                         setIsFriend(data2)
                     })
                 }
-                setLoading(false);
             })
         }
         const checkExistingRequest = async (currentAuthorID) => {
@@ -81,11 +80,13 @@ function ProfilePage() {
                     github: data.github,
                     profileImage: data.profileImage
                 })
+                setLoading(false);
             })
         }
         setLoading(true);
         let currentAuthorID = getCurrentAuthorID();
-        if (authorID === currentAuthorID) {
+
+        if (authorID === currentAuthorID || !authorID) {
             setIsAuthor(true);
             setAuthorValues({
                 displayName: defaultAuthor.displayName || "",

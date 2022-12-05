@@ -7,6 +7,9 @@ import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
 
+
+import "./Comment.css"
+
 export const Post = (props) => {
     // const [show, setShow] = useState(false);
     // const [anchor, setAnchor] = useState(null);
@@ -131,8 +134,8 @@ export const Post = (props) => {
             )} */}
             <Card
                 style={{
-                    textAlign: "center",
-                    padding: "2em",
+                    padding: "1em",
+                    paddingBottom: "0",
                     margin: "2em 0 0",
                     borderRadius: "10px 10px 0 0",
                 }}
@@ -149,26 +152,46 @@ export const Post = (props) => {
                     <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
                     <Typography variant="h5">{props.data.author.displayName}</Typography>
                 </Box>
-                <Typography variant="h4">{props.data.title}</Typography>
-                <Typography variant="h6" textAlign="left">
-                    {props.data.content}
-                </Typography>
-                <Button
-                    style={{ marginTop: "1ex" }}
-                    variant={likeablePost ? "contained" : "disabled"}
-                    onClick={handleLikeOnClick}
-                    endIcon={<ThumbUpIcon />}
+                <Typography variant="h4" style={{textAlign: "center", textDecoration: "underline"}}>{props.data.title}</Typography>
+                <Box 
+                    style={{
+                        border: "2px solid black",
+                        borderRadius: "10px",
+                        margin: "1em",
+                        marginBottom: "0",
+                        padding: "0.5em",
+                        minHeight: "10em"
+                    }}>
+                    <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
+                </Box>
+                <Box 
+                    style={{
+                        margin: "1em 1em",
+                        backgroundColor: "#ccc"
+                    }}
                 >
-                    {likes}
-                </Button>
+                    <Button
+                        style={{
+                            width: "100%",
+                            padding: "1em"
+                        }}
+                        variant={likeablePost ? "contained" : "disabled"}
+                        onClick={handleLikeOnClick}
+                        endIcon={<ThumbUpIcon />}
+                    >
+                        {likes}
+                    </Button>
+                </Box>
             </Card>
             {/* slice is to prevent mutation of the original array of comments */}
-            {comments
-                .slice()
-                .reverse()
-                .map((com) => {
-                    return <Comment key={com.id} data={com} />;
-                })}
+            <div className="comment">
+                {comments
+                    .slice()
+                    .reverse()
+                    .map((com) => {
+                        return <Comment key={com.id} data={com} />;
+                    })}
+            </div>
             <TextField
                 id="commentData"
                 onKeyDown={handleEnter}
