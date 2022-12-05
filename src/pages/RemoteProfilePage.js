@@ -57,7 +57,11 @@ function ProfilePage() {
             })
             var response;
             await allAuthors.some((author) => {
+<<<<<<< HEAD
                 console.log(author)
+=======
+                // console.log(author)
+>>>>>>> origin/main
                 if (author.id.split("authors/")[1] === authorID) {
                     response = AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
                         setIsFollowing(data)
