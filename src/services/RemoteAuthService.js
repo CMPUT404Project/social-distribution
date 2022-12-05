@@ -325,3 +325,5 @@ class RemoteAuthService {
         }
     }
 }
+
+export default new RemoteAuthService();
