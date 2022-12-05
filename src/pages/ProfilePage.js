@@ -195,7 +195,6 @@ function ProfilePage() {
     }
 
     const handleFollow = async (event) => {
-        console.log(isFollowing);
         try {
             setLoading(true)
             if (event.target.textContent === "Send Follow Request") {
@@ -264,7 +263,7 @@ function ProfilePage() {
 
     return (
         <>
-        <NavBar />
+        {isLoading ? (<></>) : <NavBar />}
         <Snackbar
             open={open}
             sx={{top: "100px!important"}}
@@ -452,7 +451,7 @@ function ProfilePage() {
                         <div className="cancel-edit-profile-container">
                             <button className="cancel-edit-profile" onClick={handleEditButton("Cancel")}>Cancel</button>
                         </div>) : (<></>)}
-                </div>)};
+                </div>)}
             </div>
         </>
     )

@@ -227,7 +227,7 @@ function ProfilePage() {
                             {isFollowing ? ("Unfollow") : ("Send Follow Request")}
                         </Button>
                     </div>
-                </div>)};
+                </div>)}
             </div>
         </>
     )

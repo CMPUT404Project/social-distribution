@@ -5,7 +5,3 @@
 .comment > div:last-child {
     border-bottom: 2px solid black;
 }
-
-.comment-header {
-    padding-top: 1em;
-}

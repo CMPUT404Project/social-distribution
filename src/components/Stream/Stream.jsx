@@ -1,5 +1,5 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import { Avatar, Box, Button, Card, Grid, TextField, Typography } from "@mui/material";
+import { Avatar, Box, Button, Card, Grid, Link, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import RemoteAuthService from "../../services/RemoteAuthService";
@@ -23,6 +23,9 @@ export const Post = (props) => {
     // cannot get from AuthService since author can be remote
     const aID = props.data.id.split("/authors/")[1].split("/posts/")[0];
     const pID = props.data.id.split("/posts/")[1];
+
+    const [commenterURL, setCommenterURL] = useState(props.data.id.replace("authors", "author").replace("posts", "post"));
+
 
     // get comments of a post
     useEffect(() => {
@@ -110,6 +113,20 @@ export const Post = (props) => {
         }
     }, [likes, likeablePost]);
 
+    useEffect(() => {
+        let newArray = [...commenterURL.split("/")];
+        if (commenterURL.split("author/")[0] === "http://127.0.0.1:8000/") {
+            newArray.splice(0,3,"http://localhost:3000")
+            setCommenterURL(newArray.join("/"))
+        } else if (commenterURL.split("profile/")[0] === "https://true-friends-404.herokuapp.com/") {
+            newArray.splice(4,0,"remote/team12")
+            setCommenterURL(newArray.join("/"))
+        } else if (commenterURL.split("profile/")[0] === "https://cmput404-team13.herokuapp.com/") {
+            newArray.splice(4,0,"remote/team13")
+            setCommenterURL(newArray.join("/"))
+        }
+    }, [])
+
     const currentUser = retrieveCurrentAuthor();
 
     const handleLikeOnClick = (e) => {
@@ -153,14 +170,6 @@ export const Post = (props) => {
                 });
         }
     };
-
-    /* 
-    Not implemented yet, but will check if you can follow/send friend request to user. Might be deleted.
-    */
-    // const onClickHandler = (e) => {
-    //     setAnchor(e.currentTarget);
-    //     setShow(!show);
-    // };
 
     /* 
     When making a comment, pressing the "Enter" key will be the trigger for posting a comment.
@@ -292,13 +301,6 @@ export const Post = (props) => {
     };
     return (
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
-            {/* will probably remove feature of following someone through stream */}
-            {/* {show && (
-                <Menu onClose={() => setShow(!show)} open={show} anchorEl={anchor}>
-                    <MenuItem>Follow</MenuItem>
-                    <MenuItem>Send Friend Request</MenuItem>
-                </Menu>
-            )} */}
             <Card
                 style={{
                     padding: "1em",
@@ -314,12 +316,13 @@ export const Post = (props) => {
                         flexDirection: "row",
                         alignItems: "center",
                     }}
-                    // onClick={onClickHandler}
                 >
-                    <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
+                    <Avatar alt="user image" src={props.data.author.profileImage} sx={{ width: 70, height: 70 }} style={{ margin: "0 1ex 0 1ex" }} />
                     <Typography variant="h5">{props.data.author.displayName}</Typography>
                 </Box>
-                <Typography variant="h4" style={{textAlign: "center", textDecoration: "underline"}}>{props.data.title}</Typography>
+                <Box style={{display: "flex",justifyContent: 'center',}}>
+                    <Link href={commenterURL} variant="h4" style={{color: "#000", textDecoration: "underline"}}>{props.data.title}</Link>
+                </Box>
                 <Box 
                     style={{
                         border: "2px solid black",
