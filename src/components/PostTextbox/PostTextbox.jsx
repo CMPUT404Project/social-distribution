@@ -62,19 +62,20 @@ export const PostTextbox = (props) => {
                 props.setPosts([createdPost.data, ...props.posts]);
                 let postWithAuthor = createdPost.data;
                 postWithAuthor["author"] = userJSON;
-                axios
-                    .post(`/authors/${aID}/inbox`, postWithAuthor, {
-                        headers: {
-                            Authorization: "Bearer " + getAccessToken(),
-                            "Content-Type": "application/json",
-                        },
-                    })
-                    .then(() => {
-                        if (createdPost.data.unlisted === true) {
-                            return;
-                        }
-                    })
-                    .catch((res) => console.log(res));
+                // send to self, then check if unlisted is true, if yes: RETURN
+                (async () => {
+                    await axios
+                        .post(`/authors/${aID}/inbox`, postWithAuthor, {
+                            headers: {
+                                Authorization: "Bearer " + getAccessToken(),
+                                "Content-Type": "application/json",
+                            },
+                        })
+                        .catch((res) => console.log(res));
+                })();
+                if (createdPost.data.unlisted === true) {
+                    return;
+                }
                 // then to everyone else
                 axios
                     .get(`/authors/${aID}/followers`, {
