@@ -121,7 +121,7 @@ export const PostTextbox = (props) => {
                                         }
                                     )
                                     .then((res) => {
-                                        let team12Data = createdPost.data;
+                                        let team12Data = JSON.parse(JSON.stringify(createdPost.data)) 
                                         // author is not required since it is sent with the URI
                                         delete team12Data["author"];
                                         // Do not include categories
@@ -165,11 +165,13 @@ export const PostTextbox = (props) => {
                                     })
                                     .then((res) => {
                                         const jwt = process.env.REACT_APP_T13JWT;
-                                        let team13data = createdPost.data;
+                                        let team13data = JSON.parse(JSON.stringify(createdPost.data))
                                         // clean up data of post
                                         delete team13data["categories"];
                                         delete team13data["count"];
                                         team13data.author = { id: aID, displayName: userJSON.displayName };
+                                        team13data.originalAuthor = { id: aID, displayName: userJSON.displayName };
+                                        team13data.id = createdPost.data.id.split("/posts/")[1];
                                         // team13data.originalAuthor = {
                                         //     id: aID,
                                         //     displayName: userJSON.displayName,
@@ -181,18 +183,18 @@ export const PostTextbox = (props) => {
                                         // {host}/authors/{aid}/posts/{pid}
                                         // team13 requires originalAuthor displayName which we have to call the origin's authors server which we might not have access to.
                                         // TODO: this call is irrelevant because originalAuthor will always be us for this component/scenario.
-                                        axios
-                                            .get(createdPost.data.origin, {
-                                                headers: {
-                                                    Authorization: "Bearer " + getAccessToken(),
-                                                },
-                                            })
-                                            .then((res) => {
-                                                team13data.originalAuthor = {
-                                                    id: res.data.author.id,
-                                                    displayName: res.data.author.displayName,
-                                                };
-                                                team13data.id = createdPost.data.id.split("/posts/")[1];
+                                        // axios
+                                        //     .get(createdPost.data.origin, {
+                                        //         headers: {
+                                        //             Authorization: "Bearer " + getAccessToken(),
+                                        //         },
+                                        //     })
+                                        //     .then((res) => {
+                                        //         team13data.originalAuthor = {
+                                        //             id: res.data.author.id,
+                                        //             displayName: res.data.author.displayName,
+                                        //         };
+                                                
                                                 //create post on their server
                                                 axios
                                                     .put(
@@ -239,10 +241,10 @@ export const PostTextbox = (props) => {
                                                         }
                                                     })
                                                     .catch((err) => console.log(err));
-                                            })
-                                            .catch((err) => {
-                                                console.log(err);
-                                            });
+                                            // })
+                                            // .catch((err) => {
+                                            //     console.log(err);
+                                            // });
                                         // }
                                     })
                                     .catch((err) => console.log(err));
