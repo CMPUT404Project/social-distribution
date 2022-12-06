@@ -393,7 +393,7 @@ export const PostTextbox = (props) => {
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
                 <Button variant="contained" sx={{ borderRadius: 0, padding: 1.7 }} onClick={onFormSubmit}>
-                    Send
+                    Distribute
                 </Button>
             </FormControl>
         </Card>
