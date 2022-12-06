@@ -121,7 +121,7 @@ export const PostTextbox = (props) => {
                                         }
                                     )
                                     .then((res) => {
-                                        let team12Data = createdPost.data;
+                                        let team12Data = JSON.parse(JSON.stringify(createdPost.data)) 
                                         // author is not required since it is sent with the URI
                                         delete team12Data["author"];
                                         // Do not include categories
@@ -165,7 +165,7 @@ export const PostTextbox = (props) => {
                                     })
                                     .then((res) => {
                                         const jwt = process.env.REACT_APP_T13JWT;
-                                        let team13data = createdPost.data;
+                                        let team13data = JSON.parse(JSON.stringify(createdPost.data))
                                         // clean up data of post
                                         delete team13data["categories"];
                                         delete team13data["count"];
