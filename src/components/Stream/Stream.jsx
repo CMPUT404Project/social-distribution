@@ -3,7 +3,7 @@ import { Avatar, Box, Button, Card, Grid, responsiveFontSizes, TextField, Typogr
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import RemoteAuthService from "../../services/RemoteAuthService";
-
+import ReactMarkdown from 'react-markdown'
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
@@ -44,6 +44,20 @@ export const Post = (props) => {
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
             RemoteAuthService.getRemoteComments("Team 12", aID, pID)
                 .then((response) => {
+                    response.forEach((comment) => {
+                        delete comment.author.password
+                        delete comment.author.last_login
+                        delete comment.author.is_superuser
+                        delete comment.author.email
+                        delete comment.author.first_name
+                        delete comment.author.last_name
+                        delete comment.author.is_staff
+                        delete comment.author.is_active
+                        delete comment.author.date_joined
+                        delete comment.author.groups
+                        delete comment.author.user_permissions
+                    })
+                    console.log(response)
                     setComments(response);
                     // console.log(comments);
                 })
@@ -312,9 +326,13 @@ export const Post = (props) => {
                     <Typography variant="h5">{props.data.author.displayName}</Typography>
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
-                <Typography variant="h6" textAlign="left">
-                    {props.data.content}
-                </Typography>
+                {(props.data.contentType === "text/markdown") ? 
+                  (<ReactMarkdown>{props.data.content}</ReactMarkdown>):
+                    (<Typography variant="h6" textAlign="left">
+                      {props.data.content}
+                    </Typography>)
+                }
+
                 <Button
                     style={{ marginTop: "1ex" }}
                     variant={likeablePost ? "contained" : "disabled"}
@@ -329,7 +347,11 @@ export const Post = (props) => {
                 .slice()
                 .reverse()
                 .map((com) => {
-                    return <Comment key={com.id} data={com} host={props.data.id} />;
+                    return <Comment 
+                                key={com.id}
+                                data={com}
+                                host={props.data.id} 
+                            />;
                 })}
             <TextField
                 id="commentData"
