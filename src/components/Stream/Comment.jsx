@@ -147,7 +147,7 @@ export const Comment = (props) => {
             <div>
                 <Typography variant="body1" padding="1em" fontWeight="bold">
                     {/* team 12 props.data.author === team 19 props.data.author.displayName */}
-                    {props.data.author.displayName ? props.data.author.displayName : props.data.author}
+                    props.data.author.displayName
                 </Typography>
                 <Typography variant="body1" padding="1em">
                     {props.data.comment}
