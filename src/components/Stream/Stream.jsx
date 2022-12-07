@@ -475,7 +475,10 @@ export const Post = (props) => {
                         minHeight: "10em"
                     }}>
                     {(props.data.contentType === "text/markdown") ? (
-                        <ReactMarkdown>{props.data.content}</ReactMarkdown>
+                        <ReactMarkdown 
+                            children={props.data.content}
+                            components={{img:({node,...props})=><img style={{maxWidth:'100%'}}{...props}/>}}
+                        />
                     ) : (
                         <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
                     )}

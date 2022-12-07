@@ -150,6 +150,12 @@ function PostPage() {
             handleOpen();
         }
     }
+
+    const handleCancelUpdate = () => {
+        setEditState(false);
+        navigate(`/author/${authorID}/post/${postID}`)
+    }
+
     const handleOpen = () => {
         setLoading(false);
         setOpen(true);
@@ -368,7 +374,7 @@ function PostPage() {
                             </button>
                         </div>
                         <div className="cancel-edit-profile-container">
-                            <button className="cancel-edit-profile" onClick={()=>{}}>Cancel</button>
+                            <button className="cancel-edit-profile" onClick={handleCancelUpdate}>Cancel</button>
                         </div>
                     </Card>
                 </Box>
