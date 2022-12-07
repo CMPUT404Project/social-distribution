@@ -104,27 +104,27 @@ function ProfilePage() {
                 };
                 
 
-        //     } else if (event.target.textContent === "Unfollow") {
-        //         const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
-        //             setAlertDetails({alertSeverity: "success", 
-        //                     errorMessage: "Unfollowed " + authorValues.displayName})
-        //             setIsFollowing(false);
-        //             handleOpen();
-        //         }, error => {
-        //             return error;
-        //         });
-        //         if (response) {
-        //             throw response;
-        //         };
-        //     }
-        // } catch (error) {
-        //     console.log(error.response);
-        //     if (error.response) {
-        //         setAlertDetails({alertSeverity: "error", 
-        //             errorMessage: "Something went wrong. Try again later."})
-        //     }
-        //     handleOpen();
-        // }
+            } else if (event.target.textContent === "Unfollow") {
+                const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
+                    setAlertDetails({alertSeverity: "success", 
+                            errorMessage: "Unfollowed " + authorValues.displayName})
+                    setIsFollowing(false);
+                    handleOpen();
+                }, error => {
+                    return error;
+                });
+                if (response) {
+                    throw response;
+                };
+            }
+        } catch (error) {
+            console.log(error.response);
+            if (error.response) {
+                setAlertDetails({alertSeverity: "error", 
+                    errorMessage: "Something went wrong. Try again later."})
+            }
+            handleOpen();
+        }
     }
 
     const handleOpen = () => {
