@@ -3,7 +3,7 @@ import { Avatar, Box, Button, Card, Grid, responsiveFontSizes, TextField, Typogr
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 import RemoteAuthService from "../../services/RemoteAuthService";
-
+import ReactMarkdown from 'react-markdown'
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
 import { Comment } from "./Comment";
@@ -312,9 +312,13 @@ export const Post = (props) => {
                     <Typography variant="h5">{props.data.author.displayName}</Typography>
                 </Box>
                 <Typography variant="h4">{props.data.title}</Typography>
-                <Typography variant="h6" textAlign="left">
-                    {props.data.content}
-                </Typography>
+                {(props.data.contentType === "text/markdown") ? 
+                  (<ReactMarkdown>{props.data.content}</ReactMarkdown>):
+                    (<Typography variant="h6" textAlign="left">
+                      {props.data.content}
+                    </Typography>)
+                }
+
                 <Button
                     style={{ marginTop: "1ex" }}
                     variant={likeablePost ? "contained" : "disabled"}
