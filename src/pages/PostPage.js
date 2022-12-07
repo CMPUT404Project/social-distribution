@@ -120,6 +120,8 @@ function PostPage() {
                         setAlertDetails({alertSeverity: "success", 
                             errorMessage: "Successfully updated post"})
                             let team12Body = {...body}
+                            team12Body.author = team12Body.author.id.split("/authors/")[1]
+                            team12Body.id = team12Body.id.split("/posts/")[1]
                             delete team12Body.categories
                             promises.push(RemoteAuthService.updateRemotePost("Team 12", authorID, postID, team12Body).then())
                             promises.push(RemoteAuthService.updateRemotePost("Team 13", authorID, postID).then())

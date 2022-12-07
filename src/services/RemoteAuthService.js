@@ -328,7 +328,7 @@ class RemoteAuthService {
         await this.getRemoteJWT(remoteNode)
         if (remoteNode === "Team 12"){
             // return await team12Instance.get("/authors/" + currentAuthorID + "/" + currentAuthorUsername + "/posts/" + commentID + "/likes/")
-            return await team12Instance.get("/comments/" + commentID + "/likes")
+            return await team12Instance.get("/comments/" + commentID + "/likes/")
             .then((response) => {
                 return response.data
             }).catch((error) => {
