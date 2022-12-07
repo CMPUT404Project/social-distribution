@@ -328,6 +328,7 @@ export const Post = (props) => {
                 }
             }
         }
+        setAnchor(null);
     };
 
     const handleOpenUserMenu = (event) => {

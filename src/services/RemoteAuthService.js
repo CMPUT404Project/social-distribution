@@ -323,9 +323,11 @@ class RemoteAuthService {
     }
 
     async getRemoteLikesOnComment(remoteNode, authorID, postID, commentID) {
+        const currentAuthorID = getCurrentAuthorID()
+        const currentAuthorUsername = sessionStorage.getItem('username') 
         await this.getRemoteJWT(remoteNode)
         if (remoteNode === "Team 12"){
-            return await team12Instance.get("/comments/" + commentID + "/likes/")
+            return await team12Instance.post("/authors/" + currentAuthorID + "/" + currentAuthorUsername + "/posts/" + commentID + "/likes/")
             .then((response) => {
                 return response.data
             }).catch((error) => {
@@ -366,10 +368,11 @@ class RemoteAuthService {
         }
     }
 
-    async sendLikeRemoteComment(remoteNode, commentID, authorID=null, postID=null){
+    async sendLikeRemoteComment(remoteNode, commentID, authorID, postID){
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 12"){
-            return await team12Instance.post("/comments/" + commentID + "/likes/")
+            const authorUsername = sessionStorage.getItem("username")
+            return await team12Instance.post("/authors/" + authorID + "/" + authorUsername  + "/comments/" + commentID + "/likes/")
             .then((response) => {
                 return response.data
             }).catch((error) => {
