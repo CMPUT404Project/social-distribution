@@ -168,6 +168,7 @@ export const PostTextbox = (props) => {
                                         // clean up data of post
                                         delete team13data["categories"];
                                         delete team13data["count"];
+                                        // is not need since unlisted will never be sent to users.
                                         team13data.visibility =
                                             team13data.unlisted === false ? team13data.visibility : "UNLISTED";
                                         team13data.author = { id: aID, displayName: userJSON.displayName };
