@@ -160,7 +160,6 @@ export const Comment = (props) => {
                 display: "flex",
             }}
         >
-            
             <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
             <CardContent
                 style={{padding: "20px 0 1em 0"}}

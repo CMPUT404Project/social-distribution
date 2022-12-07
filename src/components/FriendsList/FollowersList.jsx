@@ -22,8 +22,17 @@ export const User = (props) => {
     const foreignID = props.data.id.split("authors/")[1];
 
     const handleUserClick = (event) => {
-        // NEED TO NAVIGATE TO REMOTE 
-        navigate("/profile/" + foreignID)
+        let team = "local"
+        if (props.data.id.split("authors")[0] === "https://true-friends-404.herokuapp.com/") {
+            team = "team12"
+        } else if (props.data.id.split("authors")[0] === "https://cmput404-team13.herokuapp.com/") {
+            team = "team13"
+        }
+        if (team === "local") {
+            navigate("/profile/" + foreignID)
+        } else {
+            navigate("/profile/remote/" + team + "/" + foreignID)
+        }
     }
 
     return (
@@ -74,6 +83,7 @@ export default class FollowersList extends Component {
 
     renderEvents() {
         return this.props.followers.map(follower => {
+            console.log(follower)
             return <User key={follower.id} data={follower}></User>;
         })
     }

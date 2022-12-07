@@ -27,7 +27,8 @@ function App() {
                 <Route path="/profile/:authorID" element={<Priv><ProfilePage/></Priv>}/>
                 <Route path="/profile/remote/:team/:authorID" element={<Priv><RemoteProfilePage/></Priv>}/>
                 <Route path="/author/:authorID/post/:postID" element={<Priv><PostPage/></Priv>}/>
-                <Route path="/author/remote/:team/:authorID" element={<Priv><RemotePostPage/></Priv>}/>
+                <Route path="/author/:authorID/post/:postID/:edit" element={<Priv><PostPage/></Priv>}/>
+                <Route path="/author/remote/:team/:authorID/post/:postID" element={<Priv><RemotePostPage/></Priv>}/>
                 <Route path="/inbox" element={<Priv><InboxPage/></Priv>}/>
                 <Route path="/followers" element={<Priv><FollowersPage/></Priv>}/>
                 <Route path="/github" element={<Priv><GithubPage/></Priv>}/>
