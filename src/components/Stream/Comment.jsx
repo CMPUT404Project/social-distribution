@@ -4,7 +4,7 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 
 import RemoteAuthService from "../../services/RemoteAuthService";
-import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
+import { getAccessToken, retrieveCurrentAuthor, getCurrentAuthorID} from "../../utils";
 
 export const Comment = (props) => {
     const [likeableComment, setLikeableComment] = useState(true);
@@ -137,8 +137,8 @@ export const Comment = (props) => {
                         });
                 });
         } else if (props.data.author.id.includes("https://true-friends-404.herokuapp.com")) {
-            const team12cID = props.data.id;
-            const postAuthorID = props.data.author.id;
+            const team12cID = props.data.id.split("/comments/")[1];
+            const postAuthorID = getCurrentAuthorID()
             RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID, postAuthorID, undefined).then(() => {
                 setLikeableComment(false);
             });
