@@ -4,9 +4,6 @@ import ClipLoader from 'react-spinners/ClipLoader';
 
 import { 
     getCurrentAuthorID,
-    retrieveCurrentAuthor,
-    regexPatterns, 
-    doesImageExist, 
     capitalizeFirstLetter
 } from "../utils";
 import AuthService from "../services/AuthService";
@@ -19,7 +16,6 @@ import {
     AlertTitle,
     Avatar,
     Button,
-    TextField,
     Typography,
     Slide,
     Snackbar
@@ -37,7 +33,7 @@ function ProfilePage() {
         github: "",
         profileImage: "",
     })
-    const [remoteNode, setRemoteNode] = useState(`${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`)
+    const remoteNode = `${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`
 
     const [isFollowing, setIsFollowing] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
@@ -65,6 +61,7 @@ function ProfilePage() {
                     });
                     return true;
                 }
+                return false;
             })
             if (response) {
                 setIsFollowing(false)
@@ -86,26 +83,25 @@ function ProfilePage() {
         }
         let currentAuthorID = getCurrentAuthorID();
         setLoading(true);
-        // checkFollowStatus(currentAuthorID);
+        checkFollowStatus(currentAuthorID);
         getAuthorDetails();
     }, [authorID])
 
 
     const handleFollow = async (event) => {
-        console.log(authorValues)
-        // try {
-        //     setLoading(true)
-        //     if (event.target.textContent === "Send Follow Request") {
-        //         const response = await RemoteAuthService.sendRemoteFollowRequest(remoteNode, authorID).then(() => {
-        //             setAlertDetails({alertSeverity: "success", 
-        //                     errorMessage: "Sent a follow request to " + authorValues.displayName})
-        //             handleOpen();
-        //         }, error => {
-        //             return error;
-        //         });
-        //         if (response) {
-        //             throw response;
-        //         };
+        try {
+            setLoading(true)
+            if (event.target.textContent === "Send Follow Request") {
+                const response = await RemoteAuthService.sendRemoteFollowRequest(remoteNode, authorID).then(() => {
+                    setAlertDetails({alertSeverity: "success", 
+                            errorMessage: "Sent a follow request to " + authorValues.displayName})
+                    handleOpen();
+                }, error => {
+                    return error;
+                });
+                if (response) {
+                    throw response;
+                };
                 
 
         //     } else if (event.target.textContent === "Unfollow") {

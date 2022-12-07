@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 import { PublicRoute as Pub, PrivateRoute as Priv } from "./components/AuthRoutes";
 
@@ -8,7 +8,6 @@ import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import RemoteProfilePage from "./pages/RemoteProfilePage";
 import PostPage from "./pages/PostPage";
-import RemotePostPage from "./pages/RemotePostPage";
 import InboxPage from "./pages/InboxPage";
 import GithubPage from "./pages/GithubPage";
 import FollowersPage from "./pages/FollowersPage";
@@ -28,7 +27,6 @@ function App() {
                 <Route path="/profile/remote/:team/:authorID" element={<Priv><RemoteProfilePage/></Priv>}/>
                 <Route path="/author/:authorID/post/:postID" element={<Priv><PostPage/></Priv>}/>
                 <Route path="/author/:authorID/post/:postID/:edit" element={<Priv><PostPage/></Priv>}/>
-                <Route path="/author/remote/:team/:authorID/post/:postID" element={<Priv><RemotePostPage/></Priv>}/>
                 <Route path="/inbox" element={<Priv><InboxPage/></Priv>}/>
                 <Route path="/followers" element={<Priv><FollowersPage/></Priv>}/>
                 <Route path="/github" element={<Priv><GithubPage/></Priv>}/>

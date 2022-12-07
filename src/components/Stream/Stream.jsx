@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import axios from "axios";
 import ReactMarkdown from 'react-markdown'
@@ -10,7 +10,7 @@ import {
     CardHeader, Divider, Grid, IconButton, Link,
     Menu, MenuItem, TextField, Typography, Snackbar, Slide,
 } from "@mui/material";
-import { ThumbUp, MoreVert, Search } from "@mui/icons-material";
+import { ThumbUp, MoreVert } from "@mui/icons-material";
 
 import { getAccessToken, retrieveCurrentAuthor, getCurrentAuthorID, capitalizeFirstLetter } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
@@ -27,7 +27,6 @@ function SlideTransition(props: SlideProps) {
 export const Post = (props) => {
     // const [show, setShow] = useState(false);
     const navigate = useNavigate();
-    const location = useLocation()
     const [anchor, setAnchor] = useState(null);
     const [comments, setComments] = useState([]);
     const [likeablePost, setLikeablePost] = useState(true);
@@ -38,13 +37,6 @@ export const Post = (props) => {
     const currentUser = retrieveCurrentAuthor();
     const [isAuthor, setIsAuthor] = useState(false);
 
-    const [isLoading, setLoading] = useState(true);
-    const [open, setOpen] = useState(false);
-    const [alertDetails, setAlertDetails] = useState({
-        alertSeverity: 'error',
-        errorMessage: 'Failed to update. Please try again'
-    })
-
     const options = ["share", "edit", "delete"]
 
     // cannot get from AuthService since author can be remote
@@ -52,7 +44,7 @@ export const Post = (props) => {
     const pID = props.data.id.split("/posts/")[1];
 
     const [postTeam, setPostTeam] = useState("local")
-    const [postURL, setPostURL] = useState(props.data.id.replace("authors", "author").replace("posts", "post"));
+    const [postURL, setPostURL] = useState(`https://social-distribution-404.herokuapp.com/author/${aID}/post/${pID}`);
 
 
     // get comments of a post
@@ -76,6 +68,7 @@ export const Post = (props) => {
             RemoteAuthService.getRemoteComments("Team 12", aID, pID)
                 .then((response) => {
                     response.forEach((comment) => {
+                        comment.author.displayName = comment.author.username
                         delete comment.author.password
                         delete comment.author.last_login
                         delete comment.author.is_superuser
@@ -162,17 +155,13 @@ export const Post = (props) => {
         }
 
         let newArray = [...postURL.split("/")];
-        if (postURL.split("author/")[0] === "http://127.0.0.1:8000/") {
+        if (props.data.id.includes("http://127.0.0.1:8000/")) {
             newArray.splice(0,3,"http://localhost:3000")
             setPostURL(newArray.join("/"))
-        } else if (postURL.split("profile/")[0] === "https://true-friends-404.herokuapp.com/") {
-            newArray.splice(4,0,"remote/team12")
+        } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
             setPostTeam("Team 12")
-            setPostURL(newArray.join("/"))
-        } else if (postURL.split("profile/")[0] === "https://cmput404-team13.herokuapp.com/") {
-            newArray.splice(4,0,"remote/team13")
+        } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
             setPostTeam("Team 13")
-            setPostURL(newArray.join("/"))
         }
 
 
@@ -339,6 +328,7 @@ export const Post = (props) => {
                 }
             }
         }
+        setAnchor(null);
     };
 
     const handleOpenUserMenu = (event) => {
@@ -356,7 +346,7 @@ export const Post = (props) => {
                 const response = await AuthService.deletePost(aID, pID)
                     .then((response) => {
                         if (response.status === 204) {
-                            setAlertDetails({alertSeverity: "success", 
+                            props.setAlertDetails({alertSeverity: "success", 
                                 errorMessage: "Successfully deleted post"})
                             promises.push(RemoteAuthService.deleteRemotePost("Team 12", aID, pID).then())
                             promises.push(RemoteAuthService.deleteRemotePost("Team 13", aID, pID).then())
@@ -367,13 +357,14 @@ export const Post = (props) => {
                 if (response) {
                     throw response
                 }
-                Promise.all(promises).then(() => {
+                Promise.all(promises).then(async () => {
                     handleOpen();
+                    props.setPosts(props.posts.filter((post) => post !== props.data));
                     navigate("/homepage")
                 })
             } catch (error) {
                 if (error.message) {
-                    setAlertDetails({alertSeverity: "error", 
+                    props.setAlertDetails({alertSeverity: "error", 
                         errorMessage: "Could not delete post. Try again later."})
                 }
                 handleOpen();
@@ -383,33 +374,11 @@ export const Post = (props) => {
     };
 
     const handleOpen = () => {
-        setLoading(false);
-        setOpen(true);
-    };
-    
-    const handleClose = () => {
-        setOpen(false);
+        props.setOpen(true);
     };
 
     return (
         <>
-        <Snackbar
-            open={open}
-            sx={{top: "100px!important"}}
-            onClose={handleClose}
-            anchorOrigin={{ vertical: "top", horizontal: "right" }}
-            autoHideDuration={2500}
-            disableWindowBlurListener={true}
-            TransitionComponent={SlideTransition}
-            transitionDuration={{enter: 600, exit: 300}}
-        >
-            <Alert severity={alertDetails.alertSeverity} sx={{fontSize: "16px"}}>
-                <AlertTitle sx={{fontSize: "18px"}}>
-                    {capitalizeFirstLetter(alertDetails.alertSeverity)}
-                </AlertTitle>
-                {alertDetails.errorMessage}
-            </Alert>
-        </Snackbar>
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             <Card
                 style={{
@@ -491,7 +460,7 @@ export const Post = (props) => {
                     {(props.data.contentType === "text/markdown") ? (
                         <ReactMarkdown 
                             children={props.data.content}
-                            components={{img:({node,...props})=><img style={{maxWidth:'100%'}}{...props}/>}}
+                            components={{img:({node,...props})=><img alt="markdown_image" style={{maxWidth:'100%'}}{...props}/>}}
                         />
                     ) : (
                         <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
@@ -592,16 +561,18 @@ function Stream() {
     const [isLoading, setLoading] = useState(true);
     const [posts, setPosts] = useState([]);
 
-    const [accessToken, setAccessToken] = useState(
-        localStorage.getItem("access_token") || sessionStorage.getItem("access_token")
-    );
+    const [open, setOpen] = useState(false);
+    const [alertDetails, setAlertDetails] = useState({
+        alertSeverity: 'error',
+        errorMessage: 'Failed to update. Please try again'
+    })
 
     useEffect(() => {
         let promises1 = [];
         let promises2 = [];
         const aID = retrieveCurrentAuthor().id.split("/authors/")[1];
         axios.get("/authors/" + aID + "/inbox?type=posts", {
-                headers: { Authorization: "Bearer " + accessToken },
+                headers: { Authorization: "Bearer " + getAccessToken() },
             })
             .then((res) => {
                 for (let i=res.data.items.length-1; i>=0; i--) {
@@ -618,6 +589,7 @@ function Stream() {
                         }))
                     }
                 }
+                
                 Promise.all(promises1).then(() => {
                     Promise.all(promises2).then(() => {
                         setPosts(res.data.items)
@@ -630,17 +602,35 @@ function Stream() {
             })
     }, []);
 
-    // Show new post when posting
-    // useEffect(() => {
+    const handleClose = () => {
+        setOpen(false);
+    };
 
-    // },[posts])
     return (
+        <>
+        <Snackbar
+            open={open}
+            sx={{top: "100px!important"}}
+            onClose={handleClose}
+            anchorOrigin={{ vertical: "top", horizontal: "right" }}
+            autoHideDuration={2500}
+            disableWindowBlurListener={true}
+            TransitionComponent={SlideTransition}
+            transitionDuration={{enter: 600, exit: 300}}
+        >
+            <Alert severity={alertDetails.alertSeverity} sx={{fontSize: "16px"}}>
+                <AlertTitle sx={{fontSize: "18px"}}>
+                    {capitalizeFirstLetter(alertDetails.alertSeverity)}
+                </AlertTitle>
+                {alertDetails.errorMessage}
+            </Alert>
+        </Snackbar>
         <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
             {isLoading ? (
                 <ClipLoader color={'#fff'} loading={isLoading} size={150} />
             ) : posts.length === 0 ? (
                 <>
-                    <PostTextbox />
+                    <PostTextbox posts={posts} setPosts={setPosts}/>
                     <h1>You currently have no posts!</h1>
                 </>   
             ) : (
@@ -648,13 +638,23 @@ function Stream() {
                     <PostTextbox posts={posts} setPosts={setPosts}/>
                     {posts.map((post) => {
                         if (post.type === "post") {
-                            return <Post key={post.id} data={post} />;
+                            return <Post 
+                                        key={post.id}
+                                        data={post}
+                                        posts={posts}
+                                        setPosts={setPosts}
+                                        open={open}
+                                        setOpen={setOpen}
+                                        alertDetails={alertDetails}
+                                        setAlertDetails={setAlertDetails}
+                                    />;
                         }
-                        return;
+                        return <></>
                     })}
                 </>
             )}
         </Grid>
+        </>
     );
 }
 

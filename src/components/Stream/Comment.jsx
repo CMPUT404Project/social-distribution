@@ -1,5 +1,5 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import { Avatar, Button, Box, Card, Link, Typography, CardHeader, CardContent } from "@mui/material";
+import { Avatar, Button, Card, Link, Typography, CardHeader, CardContent } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 

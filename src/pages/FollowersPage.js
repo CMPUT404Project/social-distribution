@@ -10,7 +10,6 @@ import AuthService from "../services/AuthService";
 import RemoteAuthService from "../services/RemoteAuthService";
 import {retrieveCurrentAuthor} from "../utils/index";
 
-import Icon from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 
 import './FollowersPage.css'

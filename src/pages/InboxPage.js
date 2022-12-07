@@ -1,20 +1,12 @@
-import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
 
 import {
-    Box,
     Container,
     Tabs,
     Tab
 } from "@mui/material"
 
-import { 
-    getCurrentAuthorID,
-    retrieveCurrentAuthor,
-    regexPatterns, 
-    doesImageExist, 
-    capitalizeFirstLetter
-} from "../utils";
+import { getCurrentAuthorID } from "../utils";
 import NavBar from "../components/NavBar/NavBar";
 import InboxItemsList from "../components/InboxItems/InboxItemsList";
 import AuthService from "../services/AuthService";
@@ -22,7 +14,6 @@ import AuthService from "../services/AuthService";
 // import axios from 'axios';
 
 function InboxPage() {
-    const navigate = useNavigate();
 
     const [inboxItems, setInboxItems] = useState([])
 

@@ -4,14 +4,13 @@ import { useNavigate, useParams } from "react-router-dom";
 import ClipLoader from 'react-spinners/ClipLoader';
 
 import { 
-    Alert, Avatar, AlertTitle, Box, Button, Card, 
-    CardHeader, Divider, Grid, IconButton, Link, Menu,
-    FormControlLabel, MenuItem, Switch, Slide,
-    Snackbar, TextField, Typography
+    Alert, Avatar, AlertTitle, Box, Card, 
+    CardHeader, FormControlLabel, MenuItem, 
+    Switch, Slide, Snackbar, TextField, Typography
 } from "@mui/material";
 
 import AuthService from "../services/AuthService";
-import { capitalizeFirstLetter, retrieveCurrentAuthor } from "../utils";
+import { capitalizeFirstLetter } from "../utils";
 import { Post } from "../components/Stream/Stream";
 import NavBar from "../components/NavBar/NavBar";
 import RemoteAuthService from "../services/RemoteAuthService";

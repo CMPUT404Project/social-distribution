@@ -163,6 +163,7 @@ class AuthService {
             body.comment = comment;
         }
         const response = await axios.post("/authors/" + authorID + "/inbox", body);
+        return response.data
     }
 
     async getPostDetails(authorID, postID) {

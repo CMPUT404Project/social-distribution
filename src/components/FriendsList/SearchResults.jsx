@@ -1,19 +1,15 @@
-import axios from "axios";
-import React, { Component, PropTypes, useEffect, useState } from "react";
-import { useNavigate, redirect } from "react-router-dom";
+import React, { Component, PropTypes } from "react";
+import { useNavigate } from "react-router-dom";
 
 //Import MUI components
 import {
     Avatar,
-    Button,
     Card,
     CardActionArea,
     CardHeader,
     Grid,
     Typography
 } from "@mui/material";
-
-import AuthService from "../../services/AuthService";
 
 export const User = (props) => {
     const navigate = useNavigate();

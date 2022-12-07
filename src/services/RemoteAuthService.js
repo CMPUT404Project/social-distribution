@@ -1,7 +1,6 @@
 import axios from "axios";
-import jwtDecode from "jwt-decode";
 
-import { getCurrentAuthorID, getAccessToken, retrieveCurrentAuthor } from "../utils";
+import { getCurrentAuthorID, retrieveCurrentAuthor } from "../utils";
 
 const team12Instance = axios.create({
     baseURL: "https://true-friends-404.herokuapp.com"
@@ -81,13 +80,13 @@ class RemoteAuthService {
         let authorID = getCurrentAuthorID();
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 12") {
-            let autherUsername = sessionStorage.getItem("username")
             return await team12Instance.get(`/authors/${foreignID}/followers/`)
             .then((response) => {
                 return response.data.some((follower) => {
                     if (follower.sender_id === authorID) {
                         return true
                     }
+                    return false
                 })
             }).catch((error) => {
                 if (error.response) {
@@ -234,6 +233,48 @@ class RemoteAuthService {
                 return response
             }).catch((error) => {
                 console.log(error)
+            })
+        }
+    }
+    
+    async updateRemotePost(remoteNode, authorID, postID, body) {
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
+            return await team12Instance.put(`/posts/${postID}/`, body)
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                // console.log(error);
+                return error;
+            })
+        } else if (remoteNode === "Team 13") {
+            return await team13Instance.post(`/authors/${authorID}/posts/${postID}`)
+            .then((response) => {
+                return response;
+            }).catch((error) => {
+                // console.log(error);
+                return error;
+            })
+        }
+    }
+
+    async deleteRemotePost(remoteNode, authorID, postID) {
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
+            return await team12Instance.delete(`/posts/${postID}/`)
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                // console.log(error);
+                return error;
+            })
+        } else if (remoteNode === "Team 13") {
+            return await team13Instance.delete(`/authors/${authorID}/posts/${postID}`)
+            .then((response) => {
+                return response;
+            }).catch((error) => {
+                // console.log(error);
+                return error;
             })
         }
     }
