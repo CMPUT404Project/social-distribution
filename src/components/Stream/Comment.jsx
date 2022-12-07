@@ -55,6 +55,7 @@ export const Comment = (props) => {
             const team12cID = props.data.id;
             RemoteAuthService.getRemoteLikesOnComment("Team 12", aID, pID, team12cID).then((response) => {
                 setLikes(response.length);
+                setLikesList(response)
                 // returning true/false is needed for array.every(), if return false -> break
                 likesList.every((element) => {
                     console.log(element.author.id, userJSON.id)
@@ -68,6 +69,7 @@ export const Comment = (props) => {
         } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
             RemoteAuthService.getRemoteLikesOnComment("Team 13", aID, pID, props.data.id).then((response) => {
                 setLikes(response.length);
+                setLikesList(response)
                 // returning true/false is needed for array.every(), if return false -> break
                 likesList.every((element) => {
                     if (element.author.id === userJSON.id) {
@@ -104,9 +106,9 @@ export const Comment = (props) => {
         };
         // this gets the aID of the author's comment
         if (
-            props.host.includes("https://social-distribution-404.herokuapp.com") ||
-            props.host.includes("http://127.0.0.1:8000") ||
-            props.host.includes("localhost")
+            props.data.author.id.includes("https://social-distribution-404.herokuapp.com") ||
+            props.data.author.id.includes("http://127.0.0.1:8000") ||
+            props.data.author.id.includes("localhost")
         ) {
             axios
                 .get(props.data.id, {
@@ -134,12 +136,13 @@ export const Comment = (props) => {
                             }
                         });
                 });
-        } else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
+        } else if (props.data.author.id.includes("https://true-friends-404.herokuapp.com")) {
             const team12cID = props.data.id;
-            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID, undefined, undefined).then(() => {
+            const postAuthorID = props.data.author.id;
+            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID, postAuthorID, undefined).then(() => {
                 setLikeableComment(false);
             });
-        } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
+        } else if (props.data.author.id.includes("https://cmput404-team13.herokuapp.com")) {
             // console.log(props)
             const team13cID = props.data.id;
             const postAuthorID = props.data.author.id;

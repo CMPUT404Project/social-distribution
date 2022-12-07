@@ -378,7 +378,6 @@ export const Post = (props) => {
 
     return (
         <>
-
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             <Card
                 style={{

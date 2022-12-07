@@ -279,6 +279,72 @@ class RemoteAuthService {
         }
     }
 
+    async getRemotePost(remoteNode, authorID, postID) {
+        await this.getRemoteJWT(remoteNode)
+        if (remoteNode === "Team 12") {
+            return await team12Instance.get("/posts/" + postID + "/", {validateStatus: function (status) {
+                return status < 500;
+            }})
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+        else if (remoteNode === "Team 13") {
+            return await team13Instance.get("/authors/" + authorID + "/posts/" + postID, {validateStatus: function (status) {
+                return status < 500;
+            }})
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                console.log(error)
+            })
+        }
+    }
+    
+    async updateRemotePost(remoteNode, authorID, postID, body) {
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
+            return await team12Instance.put(`/posts/${postID}/`, body)
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                console.log(error);
+                return error;
+            })
+        } else if (remoteNode === "Team 13") {
+            return await team13Instance.post(`/authors/${authorID}/posts/${postID}`)
+            .then((response) => {
+                return response;
+            }).catch((error) => {
+                console.log(error);
+                return error;
+            })
+        }
+    }
+
+    async deleteRemotePost(remoteNode, authorID, postID) {
+        await this.getRemoteJWT(remoteNode);
+        if (remoteNode === "Team 12") {
+            return await team12Instance.delete(`/posts/${postID}/`)
+            .then((response) => {
+                return response
+            }).catch((error) => {
+                console.log(error);
+                return error;
+            })
+        } else if (remoteNode === "Team 13") {
+            return await team13Instance.delete(`/authors/${authorID}/posts/${postID}`)
+            .then((response) => {
+                return response;
+            }).catch((error) => {
+                console.log(error);
+                return error;
+            })
+        }
+    }
+
     async getRemoteComments(remoteNode, authorID, postID) {
         await this.getRemoteJWT(remoteNode)
         if (remoteNode === "Team 12"){
@@ -366,10 +432,11 @@ class RemoteAuthService {
         }
     }
 
-    async sendLikeRemoteComment(remoteNode, commentID, authorID=null, postID=null){
+    async sendLikeRemoteComment(remoteNode, commentID, authorID, postID){
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 12"){
-            return await team12Instance.post("/comments/" + commentID + "/likes/")
+            const authorUsername = sessionStorage.getItem("username")
+            return await team12Instance.post("/authors/" + authorID + "/" + authorUsername  + "/comments/" + commentID + "/likes/")
             .then((response) => {
                 return response.data
             }).catch((error) => {
