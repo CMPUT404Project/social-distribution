@@ -119,7 +119,8 @@ export const Comment = (props) => {
                 });
         } else if (props.host.includes("https://true-friends-404.herokuapp.com")) {
             const team12cID = props.data.id;
-            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID, undefined, undefined).then(() => {
+            const postAuthorID = props.data.author.id;
+            RemoteAuthService.sendLikeRemoteComment("Team 12", team12cID, postAuthorID, undefined).then(() => {
                 setLikeableComment(false);
             });
         } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
