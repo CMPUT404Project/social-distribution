@@ -169,7 +169,7 @@ function NavBar() {
                         variant="h4"
                         noWrap
                         component="a"
-                        href=""
+                        href="/homepage"
                         sx={{
                             mr: 2,
                             display: { xs: 'flex', md: 'none' },
