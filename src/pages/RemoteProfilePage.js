@@ -57,7 +57,6 @@ function ProfilePage() {
             })
             var response;
             await allAuthors.some((author) => {
-                // console.log(author)
                 if (author.id.split("authors/")[1] === authorID) {
                     response = AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
                         setIsFollowing(data)
@@ -75,9 +74,6 @@ function ProfilePage() {
                     setIsFriend(data)
                 })
             }
-
-
-
         }
         const getAuthorDetails = async () => {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
@@ -96,43 +92,43 @@ function ProfilePage() {
 
 
     const handleFollow = async (event) => {
-        console.log(isFollowing);
-        try {
-            setLoading(true)
-            if (event.target.textContent === "Send Follow Request") {
-                const response = await RemoteAuthService.sendRemoteFollowRequest(remoteNode, authorID).then(() => {
-                    setAlertDetails({alertSeverity: "success", 
-                            errorMessage: "Sent a follow request to " + authorValues.displayName})
-                    handleOpen();
-                }, error => {
-                    return error;
-                });
-                if (response) {
-                    throw response;
-                };
+        console.log(authorValues)
+        // try {
+        //     setLoading(true)
+        //     if (event.target.textContent === "Send Follow Request") {
+        //         const response = await RemoteAuthService.sendRemoteFollowRequest(remoteNode, authorID).then(() => {
+        //             setAlertDetails({alertSeverity: "success", 
+        //                     errorMessage: "Sent a follow request to " + authorValues.displayName})
+        //             handleOpen();
+        //         }, error => {
+        //             return error;
+        //         });
+        //         if (response) {
+        //             throw response;
+        //         };
                 
 
-            } else if (event.target.textContent === "Unfollow") {
-                const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
-                    setAlertDetails({alertSeverity: "success", 
-                            errorMessage: "Unfollowed " + authorValues.displayName})
-                    setIsFollowing(false);
-                    handleOpen();
-                }, error => {
-                    return error;
-                });
-                if (response) {
-                    throw response;
-                };
-            }
-        } catch (error) {
-            console.log(error.response);
-            if (error.response) {
-                setAlertDetails({alertSeverity: "error", 
-                    errorMessage: "Something went wrong. Try again later."})
-            }
-            handleOpen();
-        }
+        //     } else if (event.target.textContent === "Unfollow") {
+        //         const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
+        //             setAlertDetails({alertSeverity: "success", 
+        //                     errorMessage: "Unfollowed " + authorValues.displayName})
+        //             setIsFollowing(false);
+        //             handleOpen();
+        //         }, error => {
+        //             return error;
+        //         });
+        //         if (response) {
+        //             throw response;
+        //         };
+        //     }
+        // } catch (error) {
+        //     console.log(error.response);
+        //     if (error.response) {
+        //         setAlertDetails({alertSeverity: "error", 
+        //             errorMessage: "Something went wrong. Try again later."})
+        //     }
+        //     handleOpen();
+        // }
     }
 
     const handleOpen = () => {
@@ -231,7 +227,7 @@ function ProfilePage() {
                             {isFollowing ? ("Unfollow") : ("Send Follow Request")}
                         </Button>
                     </div>
-                </div>)};
+                </div>)}
             </div>
         </>
     )

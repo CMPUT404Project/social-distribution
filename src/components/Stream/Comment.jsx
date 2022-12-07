@@ -1,5 +1,5 @@
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
-import { Avatar, Button, Card, Typography } from "@mui/material";
+import { Avatar, Button, Box, Card, Link, Typography, CardHeader, CardContent } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -19,6 +19,9 @@ export const Comment = (props) => {
     const host = props.host;
 
     const userJSON = retrieveCurrentAuthor();
+
+    const [commenterURL, setCommenterURL] = useState(props.data.id.replace("authors", "profile").split("/posts")[0]);
+
     useEffect(() => {
         if (
             props.host.includes("localhost") ||
@@ -52,6 +55,7 @@ export const Comment = (props) => {
             const team12cID = props.data.id;
             RemoteAuthService.getRemoteLikesOnComment("Team 12", aID, pID, team12cID).then((response) => {
                 setLikes(response.length);
+                setLikesList(response)
                 // returning true/false is needed for array.every(), if return false -> break
                 likesList.every((element) => {
                     console.log(element.author.id, userJSON.id)
@@ -65,6 +69,7 @@ export const Comment = (props) => {
         } else if (props.host.includes("https://cmput404-team13.herokuapp.com")) {
             RemoteAuthService.getRemoteLikesOnComment("Team 13", aID, pID, props.data.id).then((response) => {
                 setLikes(response.length);
+                setLikesList(response)
                 // returning true/false is needed for array.every(), if return false -> break
                 likesList.every((element) => {
                     if (element.author.id === userJSON.id) {
@@ -76,6 +81,20 @@ export const Comment = (props) => {
             });
         }
     }, [likes, likeableComment]);
+
+    useEffect(() => {
+        let newArray = [...commenterURL.split("/")];
+        if (commenterURL.split("profile/")[0] === "http://127.0.0.1:8000/") {
+            newArray.splice(0,3,"http://localhost:3000")
+            setCommenterURL(newArray.join("/"))
+        } else if (commenterURL.split("profile/")[0] === "https://true-friends-404.herokuapp.com/") {
+            newArray.splice(4,0,"remote/team12")
+            setCommenterURL(newArray.join("/"))
+        } else if (commenterURL.split("profile/")[0] === "https://cmput404-team13.herokuapp.com/") {
+            newArray.splice(4,0,"remote/team13")
+            setCommenterURL(newArray.join("/"))
+        }
+    }, [])
 
     const handleLikeOnClick = () => {
         const data = {
@@ -145,23 +164,31 @@ export const Comment = (props) => {
             }}
         >
             <Avatar alt="user image" src={props.data.author.profileImage} style={{ margin: "1ex 1ex" }} />
-            <div>
-                <Typography variant="body1" padding="1em" fontWeight="bold">
-                    {/* team 12 props.data.author === team 19 props.data.author.displayName */}
-                    props.data.author.displayName
-                </Typography>
-                <Typography variant="body1" padding="1em">
-                    {props.data.comment}
-                </Typography>
-            </div>
-            <Button
-                style={{ margin: "2em 0 2em auto", left: "-50px" }}
-                variant={likeableComment ? "contained" : "disabled"}
-                onClick={handleLikeOnClick}
-                endIcon={<ThumbUpIcon />}
+            <CardContent
+                style={{padding: "20px 0 1em 0"}}
             >
-                {likes}
-            </Button>
+                <div className="comment-header">
+                    <Link href={commenterURL} variant="body1" fontWeight="bold" underline="hover">
+                        {props.data.author.displayName}
+                    </Link>
+                    <Typography variant="body1">
+                        {props.data.comment}
+                    </Typography>
+                </div>
+            </CardContent>
+            <CardHeader
+                style={{marginLeft: "auto", paddingLeft: "0"}}
+                action={
+                    <Button
+                        aria-label="settings"
+                        variant={likeableComment ? "text" : "disabled"}
+                        onClick={handleLikeOnClick}
+                        endIcon={<ThumbUpIcon />}
+                    >
+                        {likes}
+                    </Button>
+                }
+            />
         </Card>
     );
 };
