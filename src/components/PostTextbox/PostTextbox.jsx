@@ -362,7 +362,7 @@ export const PostTextbox = (props) => {
                     onChange={handleVisibilityChange}
                 >
                     <MenuItem value="PUBLIC">Public</MenuItem>
-                    <MenuItem value="FRIEND">Friends</MenuItem>
+                    <MenuItem value="FRIENDS">Friends</MenuItem>
                     {/* <MenuItem value="UNLISTED">Unlisted</MenuItem> */}
                 </TextField>
 
