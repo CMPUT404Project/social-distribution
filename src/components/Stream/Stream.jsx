@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
 import axios from "axios";
+import ReactMarkdown from 'react-markdown'
 import ClipLoader from 'react-spinners/ClipLoader';
 import { v4 as uuidv4 } from 'uuid';
 import { 
@@ -473,7 +474,11 @@ export const Post = (props) => {
                         padding: "0.5em",
                         minHeight: "10em"
                     }}>
-                    <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
+                    {(props.data.contentType === "text/markdown") ? (
+                        <ReactMarkdown>{props.data.content}</ReactMarkdown>
+                    ) : (
+                        <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
+                    )}
                 </Box>
                 <Box 
                     style={{
@@ -575,7 +580,8 @@ function Stream() {
     );
 
     useEffect(() => {
-        let promises = [];
+        let promises1 = [];
+        let promises2 = [];
         const aID = retrieveCurrentAuthor().id.split("/authors/")[1];
         axios.get("/authors/" + aID + "/inbox?type=posts", {
                 headers: { Authorization: "Bearer " + accessToken },
@@ -585,20 +591,22 @@ function Stream() {
                     let raID = res.data.items[i].id.split("/authors/")[1].split("/posts/")[0]
                     let pID = res.data.items[i].id.split("/posts/")[1]
                     if (res.data.items[i].source.includes("https://true-friends-404.herokuapp.com")) {
-                        promises.push(RemoteAuthService.getRemotePost("Team 12", raID, pID).then((response) => {
-                            promises.push(updateAndDeletePost(raID, pID, response, res.data.items, i).then())
+                        promises1.push(RemoteAuthService.getRemotePost("Team 12", raID, pID).then((response) => {
+                            promises2.push(updateAndDeletePost(raID, pID, response, res.data.items, i).then())
                         }))
                     }
                     else if (res.data.items[i].source.includes("https://cmput404-team13.herokuapp.com")) {
-                        promises.push(RemoteAuthService.getRemotePost("Team 13", raID, pID).then((response) => {
-                            promises.push(updateAndDeletePost(raID, pID, response, res.data.items, i).then())
+                        promises1.push(RemoteAuthService.getRemotePost("Team 13", raID, pID).then((response) => {
+                            promises2.push(updateAndDeletePost(raID, pID, response, res.data.items, i).then())
                         }))
                     }
                 }
-                Promise.all(promises).then(() => {
-                    setPosts(res.data.items)
+                Promise.all(promises1).then(() => {
+                    Promise.all(promises2).then(() => {
+                        setPosts(res.data.items)
+                        setLoading(false)
+                    })
                 })
-                setLoading(false)
             })
             .catch((err) => {
                 console.log(err);
@@ -611,16 +619,23 @@ function Stream() {
     // },[posts])
     return (
         <Grid container alignContent="center" minHeight={"100%"} flexDirection="column">
-            <PostTextbox />
-            {posts.length === 0 ? (
-                <h1>You currently have no posts!</h1>
+            {isLoading ? (
+                <ClipLoader color={'#fff'} loading={isLoading} size={150} />
+            ) : posts.length === 0 ? (
+                <>
+                    <PostTextbox />
+                    <h1>You currently have no posts!</h1>
+                </>   
             ) : (
-                posts.map((post) => {
-                    if (post.type === "post") {
-                        return <Post key={post.id} data={post} />;
-                    }
-                    return;
-                })
+                <>
+                    <PostTextbox posts={posts} setPosts={setPosts}/>
+                    {posts.map((post) => {
+                        if (post.type === "post") {
+                            return <Post key={post.id} data={post} />;
+                        }
+                        return;
+                    })}
+                </>
             )}
         </Grid>
     );

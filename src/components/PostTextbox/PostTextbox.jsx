@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 
-export const PostTextbox = () => {
+export const PostTextbox = (props) => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     // TODO: Get markdown/base64 example to try.
@@ -15,7 +15,6 @@ export const PostTextbox = () => {
     const [description, setDescription] = useState("");
     const [open, setOpen] = useState(false);
     const [alert, setAlert] = useState("");
-    const [visibilityLogic, setVisibilityLogic] = useState(false);
 
     const handleVisibilityChange = (e) => {
         setVisibility(e.target.value);
@@ -28,11 +27,6 @@ export const PostTextbox = () => {
     }, [unlisted]);
 
     const handleUnlistedChange = (e) => {
-        if (unlisted === true) {
-            setVisibilityLogic(false);
-        } else {
-            setVisibilityLogic(true);
-        }
         setUnlisted(e.target.value);
     };
 
@@ -63,11 +57,12 @@ export const PostTextbox = () => {
                 },
             })
             // the createdPost.data should be the whole post, which then is sent to the users.
-            .then((createdPost) => {
+            .then(async(createdPost) => {
                 // first send to current user's inbox
+                props.setPosts([createdPost.data, ...props.posts]);
                 let postWithAuthor = createdPost.data;
                 postWithAuthor["author"] = userJSON;
-                axios
+                await axios
                     .post(`/authors/${aID}/inbox`, postWithAuthor, {
                         headers: {
                             Authorization: "Bearer " + getAccessToken(),
@@ -75,7 +70,9 @@ export const PostTextbox = () => {
                         },
                     })
                     .catch((res) => console.log(res));
-
+                if (createdPost.data.unlisted === true) {
+                    return;
+                }
                 // then to everyone else
                 axios
                     .get(`/authors/${aID}/followers`, {
@@ -120,7 +117,7 @@ export const PostTextbox = () => {
                                         }
                                     )
                                     .then((res) => {
-                                        let team12Data = createdPost.data;
+                                        let team12Data = JSON.parse(JSON.stringify(createdPost.data));
                                         // author is not required since it is sent with the URI
                                         delete team12Data["author"];
                                         // Do not include categories
@@ -164,11 +161,16 @@ export const PostTextbox = () => {
                                     })
                                     .then((res) => {
                                         const jwt = process.env.REACT_APP_T13JWT;
-                                        let team13data = createdPost.data;
+                                        let team13data = JSON.parse(JSON.stringify(createdPost.data));
                                         // clean up data of post
                                         delete team13data["categories"];
                                         delete team13data["count"];
+                                        // is not need since unlisted will never be sent to users.
+                                        team13data.visibility =
+                                            team13data.unlisted === false ? team13data.visibility : "UNLISTED";
                                         team13data.author = { id: aID, displayName: userJSON.displayName };
+                                        team13data.originalAuthor = { id: aID, displayName: userJSON.displayName };
+                                        team13data.id = createdPost.data.id.split("/posts/")[1];
                                         // team13data.originalAuthor = {
                                         //     id: aID,
                                         //     displayName: userJSON.displayName,
@@ -180,68 +182,68 @@ export const PostTextbox = () => {
                                         // {host}/authors/{aid}/posts/{pid}
                                         // team13 requires originalAuthor displayName which we have to call the origin's authors server which we might not have access to.
                                         // TODO: this call is irrelevant because originalAuthor will always be us for this component/scenario.
+                                        // axios
+                                        //     .get(createdPost.data.origin, {
+                                        //         headers: {
+                                        //             Authorization: "Bearer " + getAccessToken(),
+                                        //         },
+                                        //     })
+                                        //     .then((res) => {
+                                        //         team13data.originalAuthor = {
+                                        //             id: res.data.author.id,
+                                        //             displayName: res.data.author.displayName,
+                                        //         };
+
+                                        //create post on their server
                                         axios
-                                            .get(createdPost.data.origin, {
-                                                headers: {
-                                                    Authorization: "Bearer " + getAccessToken(),
-                                                },
-                                            })
+                                            .put(
+                                                `https://cmput404-team13.herokuapp.com/authors/${aID}/posts`,
+                                                team13data,
+                                                {
+                                                    headers: {
+                                                        Authorization: "Bearer " + jwt,
+                                                        "Content-Type": "application/json",
+                                                    },
+                                                }
+                                            )
                                             .then((res) => {
-                                                team13data.originalAuthor = {
-                                                    id: res.data.author.id,
-                                                    displayName: res.data.author.displayName,
-                                                };
-                                                team13data.id = createdPost.data.id.split("/posts/")[1];
-                                                //create post on their server
-                                                axios
-                                                    .put(
-                                                        `https://cmput404-team13.herokuapp.com/authors/${aID}/posts`,
-                                                        team13data,
-                                                        {
-                                                            headers: {
-                                                                Authorization: "Bearer " + jwt,
-                                                                "Content-Type": "application/json",
-                                                            },
-                                                        }
-                                                    )
-                                                    .then((res) => {
-                                                        //call endpoint depending on visibility for distribution
-                                                        if (data.visibility.includes("PUBLIC")) {
-                                                            axios
-                                                                .post(
-                                                                    `https://cmput404-team13.herokuapp.com/inbox/public/${aID}/${res.data.id}`,
-                                                                    {},
-                                                                    {
-                                                                        headers: {
-                                                                            Authorization: "Bearer " + jwt,
-                                                                            "Content-Type": "application/json",
-                                                                        },
-                                                                    }
-                                                                )
-                                                                .then(() => console.log("PUBLIC POST SUCCESSFUL"));
-                                                        } else if (data.visibility.includes("FRIEND")) {
-                                                            axios
-                                                                .post(
-                                                                    `https://cmput404-team13.herokuapp.com/inbox/friends/${aID}/${
-                                                                        // createdPost.data.id.split("/posts/")[1]
-                                                                        res.data.id
-                                                                    }`,
-                                                                    {},
-                                                                    {
-                                                                        headers: {
-                                                                            Authorization: "Bearer " + jwt,
-                                                                            "Content-Type": "application/json",
-                                                                        },
-                                                                    }
-                                                                )
-                                                                .then(() => console.log("FRIEND POST SUCCESSFUL"));
-                                                        }
-                                                    })
-                                                    .catch((err) => console.log(err));
+                                                //call endpoint depending on visibility for distribution
+                                                if (data.visibility.includes("PUBLIC")) {
+                                                    axios
+                                                        .post(
+                                                            `https://cmput404-team13.herokuapp.com/inbox/public/${aID}/${res.data.id}`,
+                                                            {},
+                                                            {
+                                                                headers: {
+                                                                    Authorization: "Bearer " + jwt,
+                                                                    "Content-Type": "application/json",
+                                                                },
+                                                            }
+                                                        )
+                                                        .then(() => console.log("PUBLIC POST SUCCESSFUL"));
+                                                } else if (data.visibility.includes("FRIEND")) {
+                                                    axios
+                                                        .post(
+                                                            `https://cmput404-team13.herokuapp.com/inbox/friend/${aID}/${
+                                                                // createdPost.data.id.split("/posts/")[1]
+                                                                res.data.id
+                                                            }`,
+                                                            {},
+                                                            {
+                                                                headers: {
+                                                                    Authorization: "Bearer " + jwt,
+                                                                    "Content-Type": "application/json",
+                                                                },
+                                                            }
+                                                        )
+                                                        .then(() => console.log("FRIEND POST SUCCESSFUL"));
+                                                }
                                             })
-                                            .catch((err) => {
-                                                console.log(err);
-                                            });
+                                            .catch((err) => console.log(err));
+                                        // })
+                                        // .catch((err) => {
+                                        //     console.log(err);
+                                        // });
                                         // }
                                     })
                                     .catch((err) => console.log(err));
@@ -357,12 +359,11 @@ export const PostTextbox = () => {
                     select
                     variant="filled"
                     value={visibility}
-                    disabled={visibilityLogic}
                     onChange={handleVisibilityChange}
                 >
                     <MenuItem value="PUBLIC">Public</MenuItem>
-                    <MenuItem value="FRIENDS">Friends</MenuItem>
-                    <MenuItem value="UNLISTED">Unlisted</MenuItem>
+                    <MenuItem value="FRIEND">Friends</MenuItem>
+                    {/* <MenuItem value="UNLISTED">Unlisted</MenuItem> */}
                 </TextField>
 
                 <TextField
@@ -389,8 +390,8 @@ export const PostTextbox = () => {
                     <MenuItem value={true}>Yes</MenuItem>
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
-                <Button variant="contained" sx={{ borderRadius: 0 }} onClick={onFormSubmit}>
-                    Send
+                <Button variant="contained" sx={{ borderRadius: 0, padding: 1.7 }} onClick={onFormSubmit}>
+                    Distribute
                 </Button>
             </FormControl>
         </Card>
