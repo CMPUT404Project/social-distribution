@@ -36,6 +36,7 @@ function ProfilePage() {
     const remoteNode = `${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`
 
     const [isFollowing, setIsFollowing] = useState(false);
+    const [isFollowed, setIsFollowed] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
 
     const [isLoading, setLoading] = useState(true);
@@ -52,25 +53,22 @@ function ProfilePage() {
                 return data.items
             })
             var response;
-            await allAuthors.some((author) => {
-                if (author.id.split("authors/")[1] === authorID) {
-                    response = AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
-                        setIsFollowing(data)
-                    }, error => {
-                        return error.response
-                    });
-                    return true;
-                }
-                return false;
+            let following = false;
+            let followed = false;
+            await AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
+                console.log("Local Data")
+                console.log(data)
+                setIsFollowed(data);
+                followed = data;
             })
-            if (response) {
-                setIsFollowing(false)
-            }
-            if (isFollowing) {
-                await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID).then((data) => {
-                    setIsFriend(data)
-                })
-            }
+            await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID).then((data) => {
+                console.log("Remote Data")
+                console.log(data)
+                following = data;
+                setIsFollowing(data)
+            })
+            console.log(followed, following)
+            setIsFriend(followed && following)
         }
         const getAuthorDetails = async () => {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
@@ -102,8 +100,6 @@ function ProfilePage() {
                 if (response) {
                     throw response;
                 };
-                
-
             } else if (event.target.textContent === "Unfollow") {
                 const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 

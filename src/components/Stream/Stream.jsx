@@ -303,12 +303,12 @@ export const Post = (props) => {
                         let currentAuthorID = currentAuthorInfo.id.split("/authors/")[1];
                         let pID = props.data.id.split("/posts/")[1];
                         let team13CommentData = {
-                        comment: postTextBox,
-                        author: {
-                            id: currentAuthorID,
-                            displayName: currentAuthorInfo.displayName,
-                        },
-                        id: uuidv4(),
+                            comment: postTextBox,
+                            author: {
+                                id: currentAuthorID,
+                                displayName: currentAuthorInfo.displayName,
+                            },
+                            id: uuidv4(),
                         };
                         axios.post(
                             `https://cmput404-team13.herokuapp.com/authors/${currentAuthorID}/posts/${pID}/comments`,
@@ -328,6 +328,7 @@ export const Post = (props) => {
                 }
             }
         }
+        setAnchor(null);
     };
 
     const handleOpenUserMenu = (event) => {
@@ -358,8 +359,10 @@ export const Post = (props) => {
                 }
                 Promise.all(promises).then(async () => {
                     handleOpen();
-                    props.setPosts(props.posts.filter((post) => post !== props.data));
-                    navigate("/homepage")
+                    if (props.posts) {
+                        props.setPosts(props.posts.filter((post) => post !== props.data));
+                    }
+                    navigate("/homepage", { replace: true })
                 })
             } catch (error) {
                 if (error.message) {

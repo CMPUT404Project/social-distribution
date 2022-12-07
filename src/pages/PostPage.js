@@ -380,7 +380,13 @@ function PostPage() {
                     </Card>
                 </Box>
             ) : (
-                <Post data={originalPostValues}/>
+                <Post
+                    data={originalPostValues}
+                    open={open}
+                    setOpen={setOpen}
+                    alertDetails={alertDetails}
+                    setAlertDetails={setAlertDetails}
+                />
             )}
         </div>
         </>
