@@ -166,7 +166,7 @@ export const Comment = (props) => {
             >
                 <div className="comment-header">
                     <Link href={commenterURL} variant="body1" fontWeight="bold" underline="hover">
-                        {props.data.author.displayName ? props.data.author.displayName : props.data.author}
+                        {props.data.author.displayName}
                     </Link>
                     <Typography variant="body1">
                         {props.data.comment}
