@@ -57,22 +57,19 @@ export const PostTextbox = (props) => {
                 },
             })
             // the createdPost.data should be the whole post, which then is sent to the users.
-            .then((createdPost) => {
+            .then(async(createdPost) => {
                 // first send to current user's inbox
                 props.setPosts([createdPost.data, ...props.posts]);
                 let postWithAuthor = createdPost.data;
                 postWithAuthor["author"] = userJSON;
-                // send to self, then check if unlisted is true, if yes: RETURN
-                (async () => {
-                    await axios
-                        .post(`/authors/${aID}/inbox`, postWithAuthor, {
-                            headers: {
-                                Authorization: "Bearer " + getAccessToken(),
-                                "Content-Type": "application/json",
-                            },
-                        })
-                        .catch((res) => console.log(res));
-                })();
+                await axios
+                    .post(`/authors/${aID}/inbox`, postWithAuthor, {
+                        headers: {
+                            Authorization: "Bearer " + getAccessToken(),
+                            "Content-Type": "application/json",
+                        },
+                    })
+                    .catch((res) => console.log(res));
                 if (createdPost.data.unlisted === true) {
                     return;
                 }
