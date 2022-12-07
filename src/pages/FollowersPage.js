@@ -10,7 +10,6 @@ import AuthService from "../services/AuthService";
 import RemoteAuthService from "../services/RemoteAuthService";
 import {retrieveCurrentAuthor} from "../utils/index";
 
-import Icon from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 
 import './FollowersPage.css'
@@ -117,6 +116,7 @@ function FollowersPage() {
                                 <span className="search-icon">
                                     <SearchIcon fontSize="large"/>
                                 </span>
+                                Include a team in the search to look for all users in that team. (E.g. "local", "Team 12")
                             </div>
                             <h1>Followers</h1> <br/>
                             {!followers.length ? (
@@ -162,26 +162,27 @@ function FollowersPage() {
                             <span className="search-icon">
                                 <SearchIcon fontSize="large"/>
                             </span>
+                            Include a team in the search to look for all users in that team. (E.g. "local", "Team 12")
                         </div>
                         <h1>Search Results</h1>
                         <h3>Locals</h3>
                         <SearchResults
                             team={"Local"}
-                            input={searchField}
+                            input={searchField.toLowerCase().includes("local") ? "" : searchField}
                             authors={allLocalAuthors}
                         />
-                        {teams.map((team, index) => {
-                            return <>
-                                <h3>{team}</h3>
-                                <SearchResults 
-                                    key={team.id}
-                                    team={team}
-                                    input={searchField}
-                                    authors={eval("all"+team.replace(" ",'')+"Authors")}
-                                />
-                            </>
-                        })}
-
+                        <h3>Team 12</h3>
+                        <SearchResults 
+                            team={"Team 12"}
+                            input={searchField.toLowerCase().includes("team 12") ? "" : searchField}
+                            authors={allTeam12Authors}
+                        />
+                        <h3>Team 13</h3>
+                        <SearchResults 
+                            team={"Team 13"}
+                            input={searchField.toLowerCase().includes("team 13") ? "" : searchField}
+                            authors={allTeam13Authors}
+                        />
                     </Container>
                 </div> 
             )}

@@ -61,7 +61,6 @@ function ProfilePage() {
                         setIsFriend(data2)
                     })
                 }
-                setLoading(false);
             })
         }
         const checkExistingRequest = async (currentAuthorID) => {
@@ -81,11 +80,13 @@ function ProfilePage() {
                     github: data.github,
                     profileImage: data.profileImage
                 })
+                setLoading(false);
             })
         }
         setLoading(true);
         let currentAuthorID = getCurrentAuthorID();
-        if (authorID === currentAuthorID) {
+
+        if (authorID === currentAuthorID || !authorID) {
             setIsAuthor(true);
             setAuthorValues({
                 displayName: defaultAuthor.displayName || "",
@@ -194,7 +195,6 @@ function ProfilePage() {
     }
 
     const handleFollow = async (event) => {
-        console.log(isFollowing);
         try {
             setLoading(true)
             if (event.target.textContent === "Send Follow Request") {
@@ -263,7 +263,7 @@ function ProfilePage() {
 
     return (
         <>
-        <NavBar />
+        {isLoading ? (<></>) : <NavBar />}
         <Snackbar
             open={open}
             sx={{top: "100px!important"}}
@@ -451,7 +451,7 @@ function ProfilePage() {
                         <div className="cancel-edit-profile-container">
                             <button className="cancel-edit-profile" onClick={handleEditButton("Cancel")}>Cancel</button>
                         </div>) : (<></>)}
-                </div>)};
+                </div>)}
             </div>
         </>
     )

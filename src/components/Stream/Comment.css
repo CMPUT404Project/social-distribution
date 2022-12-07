@@ -1,0 +1,39 @@
+.comment > div {
+    border-top: 2px solid black;
+}
+
+.comment > div:last-child {
+    border-bottom: 2px solid black;
+}
+
+/* CSS for post comment button (not implemented */
+/* .post-comment {
+    margin-bottom: 16px;
+    position: relative;
+    width: 100%;
+    z-index: 1;
+    color: #fff;
+}
+
+.post-comment-button-container {
+    height: 100%;
+    width: 62px;
+    color: rgb(66, 66, 66);
+    background-color: rgba(170, 170, 170, 0.274);
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-bottom-right-radius: 5px;
+    box-shadow: -5px 0px 10px rgba(0, 0, 0, 0.285);
+    transition: all .4s;
+}
+
+.post-comment-button {
+    height: 100%;
+    width: 100%;
+    color: #fff;
+    font-size: 20px;
+    letter-spacing: 1px;
+    border-bottom-right-radius: 5px;
+    background-color: #e0127c;
+} */

@@ -163,26 +163,43 @@ class AuthService {
             body.comment = comment;
         }
         const response = await axios.post("/authors/" + authorID + "/inbox", body);
+        return response.data
     }
 
-    async updatePost(authorID, postID, data) {
-        await axios.put("/authors/" + authorID + "/posts/" + postID, data, {
-            headers: {
-            Authorization: "Bearer " + getAccessToken(),
-            },
-        }).catch((err) =>
+    async getPostDetails(authorID, postID) {
+        setAxiosDefaults();
+        const response = await axios.get(`/authors/${authorID}/posts/${postID}`);
+        return response.data
+    }
+
+    async updatePost(authorID, postID, body) {
+        setAxiosDefaults();
+        return await axios.put("/authors/" + authorID + "/posts/" + postID, body)
+        .then((response) => {
+            if (response.status === 200) {
+                return response
+            }
+            throw new Error(JSON.parse(response))
+        })
+        .catch((err) => {
             console.log(err)
-        )
+            return err
+        })
     }
 
     async deletePost(authorID, postID) {
-        await axios.delete("/authors/" + authorID + "/posts/" + postID, {
-            headers: {
-            Authorization: "Bearer " + getAccessToken(),
-            },
-        }).catch((err) =>
+        setAxiosDefaults();
+        return await axios.delete("/authors/" + authorID + "/posts/" + postID)
+        .then((response) => {
+            if (response.status === 204) {
+                return response
+            }
+            throw new Error(JSON.parse(response))
+        })
+        .catch((err) => {
             console.log(err)
-        )
+            return err
+        })
     }
 }
 

@@ -16,7 +16,6 @@ import AuthService from "../../services/AuthService";
 import RemoteAuthService from "../../services/RemoteAuthService";
 
 export const InboxCommentItem = (props) => {
-    const navigate = useNavigate();
     const displayName = props.data.author.displayName || props.data.username;
     const profileImage = props.data.author.profileImage;
     const [comment, setComment] = useState(() => {
@@ -95,7 +94,6 @@ export const InboxCommentItem = (props) => {
 };
 
 export const InboxPostItem = (props) => {
-    const navigate = useNavigate();
     const postTitle = props.data.title;
     const displayName = props.data.author.displayName || props.data.username;
     const profileImage = props.data.author.profileImage;
@@ -181,12 +179,8 @@ export const InboxPostItem = (props) => {
 };
 
 export const InboxLikeItem = (props) => {
-    const navigate = useNavigate();
-    const postTitle = props.data.title;
-    const displayName = props.data.author.displayName || props.data.username;
     const profileImage = props.data.author.profileImage;
-
-    const [summary, setSummary] = useState(props.data.summary)
+    const summary = props.data.summary
 
     return (
         <Grid>
@@ -218,8 +212,6 @@ export const InboxLikeItem = (props) => {
 };
 
 export const InboxRequestItem = (props) => {
-    const navigate = useNavigate();
-    const displayName = props.data.actor.displayName || props.data.username;
     const profileImage = props.data.actor.profileImage;
     const summary = props.data.summary;
     const follower = props.data.actor;
@@ -233,7 +225,7 @@ export const InboxRequestItem = (props) => {
                 await RemoteAuthService.acceptRemoteFollowRequest("Team 13",follower.id.split("authors/")[1]);
             }
         }
-        const response = await AuthService.acceptFollowRequest(follower.id.split("authors/")[1])
+        await AuthService.acceptFollowRequest(follower.id.split("authors/")[1])
         .then(() => {
             props.setInboxItems(props.inboxItems.filter(item => item !== props.data))
         }, error => {
@@ -249,7 +241,7 @@ export const InboxRequestItem = (props) => {
                 await RemoteAuthService.declineRemoteFollowRequest("Team 13",follower.id.split("authors/")[1]);
             }
         }
-        const response = await AuthService.declineFollowRequest(follower.id.split("authors/")[1])
+        await AuthService.declineFollowRequest(follower.id.split("authors/")[1])
         .then(() => {
             props.setInboxItems(props.inboxItems.filter(item => item !== props.data))
         }, error => {

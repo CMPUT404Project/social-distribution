@@ -3,7 +3,6 @@ import GitHubFeed from '../components/GithubActivity/GithubFeed'
 import ClipLoader from 'react-spinners/ClipLoader';
 
 import NavBar from "../components/NavBar/NavBar";
-import AuthService from "../services/AuthService";
 import { retrieveCurrentAuthor } from "../utils";
 
 import axios from 'axios';

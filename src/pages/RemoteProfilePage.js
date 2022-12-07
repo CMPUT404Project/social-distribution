@@ -4,9 +4,6 @@ import ClipLoader from 'react-spinners/ClipLoader';
 
 import { 
     getCurrentAuthorID,
-    retrieveCurrentAuthor,
-    regexPatterns, 
-    doesImageExist, 
     capitalizeFirstLetter
 } from "../utils";
 import AuthService from "../services/AuthService";
@@ -19,7 +16,6 @@ import {
     AlertTitle,
     Avatar,
     Button,
-    TextField,
     Typography,
     Slide,
     Snackbar
@@ -37,9 +33,10 @@ function ProfilePage() {
         github: "",
         profileImage: "",
     })
-    const [remoteNode, setRemoteNode] = useState(`${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`)
+    const remoteNode = `${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`
 
     const [isFollowing, setIsFollowing] = useState(false);
+    const [isFollowed, setIsFollowed] = useState(false);
     const [isFriend, setIsFriend] = useState(false);
 
     const [isLoading, setLoading] = useState(true);
@@ -56,28 +53,23 @@ function ProfilePage() {
                 return data.items
             })
             var response;
+            let following = false;
+            let followed = false;
             await allAuthors.some((author) => {
-                // console.log(author)
                 if (author.id.split("authors/")[1] === authorID) {
-                    response = AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
-                        setIsFollowing(data)
-                    }, error => {
-                        return error.response
+                    response = AuthService.getFollowStatus(authorID, currentAuthorID).then(async (data) => {
+                        setIsFollowing(data);
+                        following = data;
                     });
                     return true;
                 }
+                return false;
             })
-            if (response) {
-                setIsFollowing(false)
-            }
-            if (isFollowing) {
-                await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID).then((data) => {
-                    setIsFriend(data)
-                })
-            }
-
-
-
+            await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID).then((data) => {
+                followed = data;
+                setIsFollowed(data)
+            })
+            setIsFriend(followed && following)
         }
         const getAuthorDetails = async () => {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
@@ -90,13 +82,12 @@ function ProfilePage() {
         }
         let currentAuthorID = getCurrentAuthorID();
         setLoading(true);
-        // checkFollowStatus(currentAuthorID);
+        checkFollowStatus(currentAuthorID);
         getAuthorDetails();
     }, [authorID])
 
 
     const handleFollow = async (event) => {
-        console.log(isFollowing);
         try {
             setLoading(true)
             if (event.target.textContent === "Send Follow Request") {
@@ -110,8 +101,6 @@ function ProfilePage() {
                 if (response) {
                     throw response;
                 };
-                
-
             } else if (event.target.textContent === "Unfollow") {
                 const response = await RemoteAuthService.unfollowRemoteAuthor(remoteNode, authorID).then(() => {
                     setAlertDetails({alertSeverity: "success", 
@@ -231,7 +220,7 @@ function ProfilePage() {
                             {isFollowing ? ("Unfollow") : ("Send Follow Request")}
                         </Button>
                     </div>
-                </div>)};
+                </div>)}
             </div>
         </>
     )
