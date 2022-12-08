@@ -34,6 +34,8 @@ ALLOWED_HOSTS = [
     'https://true-friends-404.herokuapp.com',
     'https://cmput404-team13.herokuapp.com',
     'https://social-distribution-404.herokuapp.com',
+    'https://team-sixteen-social-scene.herokuapp.com',
+    'https://team-sixteen.herokuapp.com',
 ]
 
 CORS_ORIGIN_WHITELIST = [
@@ -42,6 +44,8 @@ CORS_ORIGIN_WHITELIST = [
     'https://true-friends-404.herokuapp.com',
     'https://cmput404-team13.herokuapp.com',
     'https://social-distribution-404.herokuapp.com',
+    'https://team-sixteen-social-scene.herokuapp.com',
+    'https://team-sixteen.herokuapp.com',
 ]
 
 CORS_ALLOW_METHODS = [

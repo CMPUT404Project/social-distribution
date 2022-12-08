@@ -6,6 +6,20 @@ from .serializers import PostSerializer, PostCreationSerializer, PostsSerializer
 from backend.pagination import CustomPagination
 from backend.permissions import CustomDjangoModelPermissions
 from drf_yasg.utils import swagger_auto_schema
+import os
+
+class PostsAllPublicView(GenericAPIView):
+    serializer_class = PostsViewSerializer
+    queryset = Post.objects.all()
+    permission_class = [CustomDjangoModelPermissions]
+    tag = "All Pubilc Posts"
+
+    @swagger_auto_schema(tags=[tag], responses={200: PostsSwaggerResponseSerializer})
+    def get(self, request):
+        authors = Author.objects.filter(host=os.environ.get("SOCIAL_HOST"))
+        posts = Post.objects.filter(visibility="PUBLIC", author__in=authors)
+        serializer = PostsSerializer(posts)
+        return Response(serializer.data, status=200)
 
 class PostView(GenericAPIView):
     serializer_class = PostsViewSerializer
