@@ -14,8 +14,8 @@ const team13Instance = axios.create({
 const team16Instance = axios.create({
     baseURL: "https://team-sixteen.herokuapp.com",
     auth: {
-        username: 'team16',
-        password: '12345'
+        username: process.env.REACT_APP_T16USER,
+        password: process.env.REACT_APP_T16PASS
     },
 })
 
@@ -35,10 +35,7 @@ class RemoteAuthService {
             }).then((response) => {
                 team13Instance.defaults.headers.common["Authorization"] = "Bearer " + response.data.jwt
             })
-        } else if (remoteNode === "Team 16") {
-            team16Instance.defaults.headers.common["Authorization"] = "Basic " + process.env.REACT_APP_T19BASICAUTH
         }
-
     }
 
     async getRemoteAuthor(remoteNode, authorID) {
@@ -93,7 +90,7 @@ class RemoteAuthService {
                 }
                 return [];
             });
-        } else if (remoteNode == "Team 16") {
+        } else if (remoteNode === "Team 16") {
             return await team16Instance.get("/authors/").then((response) => {
                 return response.data.items
             }).catch((error) => {
@@ -427,8 +424,6 @@ class RemoteAuthService {
     }
 
     async getRemoteLikesOnComment(remoteNode, authorID, postID, commentID) {
-        const currentAuthorID = getCurrentAuthorID()
-        const currentAuthorUsername = sessionStorage.getItem('username') 
         await this.getRemoteJWT(remoteNode)
         if (remoteNode === "Team 12"){
             // return await team12Instance.get("/authors/" + currentAuthorID + "/" + currentAuthorUsername + "/posts/" + commentID + "/likes/")
