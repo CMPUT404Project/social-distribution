@@ -77,6 +77,7 @@ INSTALLED_APPS = [
     'inbox',
     'followRequests',
     'nodes',
+    'image'
 ]
 
 MIDDLEWARE = [
