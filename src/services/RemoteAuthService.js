@@ -2,6 +2,8 @@ import axios from "axios";
 
 import { getCurrentAuthorID, retrieveCurrentAuthor } from "../utils";
 
+import AuthService from "./AuthService";
+
 const team12Instance = axios.create({
     baseURL: "https://true-friends-404.herokuapp.com"
 })
@@ -424,6 +426,7 @@ class RemoteAuthService {
         }
         else if (remoteNode === "Team 16"){
             return await team16Instance.post(`/authors/${authorID}/inbox/`,{
+                "@context": "https://social-distribution-404.herokuapp.com/",
                 summary: `${currentAuthorUsername} Likes your post`,
                 type: "Like",
                 author: AuthService.getAuthorDetails(),
