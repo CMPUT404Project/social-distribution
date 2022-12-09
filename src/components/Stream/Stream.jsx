@@ -6,11 +6,11 @@ import ReactMarkdown from 'react-markdown'
 import ClipLoader from 'react-spinners/ClipLoader';
 import { v4 as uuidv4 } from 'uuid';
 import { 
-    Alert, AlertTitle, Avatar, Box, Button, Card,
-    CardHeader, Divider, Grid, IconButton, Link,
-    Menu, MenuItem, TextField, Typography, Snackbar, Slide,
+    Alert, AlertTitle, Avatar, Box, Button, Card, Dialog, DialogContent,
+    DialogAction, DialogTitle, CardHeader, Divider, Grid, IconButton, Link,
+    Menu, MenuItem, TextField, Typography, Snackbar, Slide, 
 } from "@mui/material";
-import { ThumbUp, MoreVert } from "@mui/icons-material";
+import { ThumbUp, MoreVert, Share, Close } from "@mui/icons-material";
 
 import { getAccessToken, retrieveCurrentAuthor, getCurrentAuthorID, capitalizeFirstLetter } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
@@ -28,6 +28,7 @@ export const Post = (props) => {
     // const [show, setShow] = useState(false);
     const navigate = useNavigate();
     const [anchor, setAnchor] = useState(null);
+    const [openShare, setOpenShare] = useState(false);
     const [comments, setComments] = useState([]);
     const [likeablePost, setLikeablePost] = useState(true);
     const [likes, setLikes] = useState(0);
@@ -37,7 +38,7 @@ export const Post = (props) => {
     const currentUser = retrieveCurrentAuthor();
     const [isAuthor, setIsAuthor] = useState(false);
 
-    const options = ["share", "edit", "delete"]
+    const options = ["edit", "delete"]
 
     // cannot get from AuthService since author can be remote
     const aID = props.data.id.split("/authors/")[1].split("/posts/")[0];
@@ -67,6 +68,11 @@ export const Post = (props) => {
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
             RemoteAuthService.getRemoteComments("Team 12", aID, pID)
                 .then((response) => {
+                    // This forEach to delete the extra fields needs to be done
+                    // because Team 12 gives all this extra information in their response
+                    // and if these fields are not deleted, React throws a Error Decoder Link
+                    // saying that passing these fields to a child component is prohibited
+                    // Their endpoints were to far gone to change, so we had to adapt to them
                     response.forEach((comment) => {
                         comment.author.displayName = comment.author.username
                         delete comment.author.password
@@ -209,6 +215,47 @@ export const Post = (props) => {
         }
     };
 
+    const handleOpenShare = () => {
+        setOpenShare(true);
+    };
+    const handleCloseShare = () => {
+        setOpenShare(false);
+    };
+
+    const handleShare = async (event) => {
+        console.log("share")
+        console.log(props.data)
+        if (event.target.outerText === "PUBLIC") {
+            // Share to self
+            // AuthService.sendInboxItem("post", aID, {post:props.data});
+            const allFollowers = await AuthService.getAuthorFollowers();
+            let hostArray = [
+                "https://true-friends-404.herokuapp.com/",
+                "https://cmput404-team13.herokuapp.com/",
+            ];
+            allFollowers.forEach((follower) => {
+                let followerID = follower.id.split("/authors/")[1];
+                if (
+                    user.host.includes("https://true-friends-404.herokuapp.com") &&
+                    hostArray.find((item) => item.includes("https://true-friends-404.herokuapp.com")) !==
+                        undefined
+                ) {
+
+                }
+                // // Team 13 implementation
+                else if (
+                    user.host.includes("https://cmput404-team13.herokuapp.com") &&
+                    hostArray.find((item) => item.includes("https://cmput404-team13.herokuapp.com")) !==
+                        undefined
+                ) {
+                    
+                }
+            })
+        } else if (event.target.outerText === "FRIENDS") {
+            
+        }
+    }
+
     /* 
     When making a comment, pressing the "Enter" key will be the trigger for posting a comment.
     */
@@ -336,9 +383,7 @@ export const Post = (props) => {
     };
 
     const handleCloseUserMenu = async (event) => {
-        if (event.target.innerText === "share") {
-            console.log("share");
-        } else if (event.target.innerText === "edit") {
+        if (event.target.innerText === "edit") {
             navigate(`/author/${aID}/post/${pID}/edit`)
         } else if (event.target.innerText === "delete") {
             try {
@@ -357,7 +402,7 @@ export const Post = (props) => {
                 if (response) {
                     throw response
                 }
-                Promise.all(promises).then(async () => {
+                Promise.all(promises).then(() => {
                     handleOpen();
                     if (props.posts) {
                         props.setPosts(props.posts.filter((post) => post !== props.data));
@@ -381,6 +426,51 @@ export const Post = (props) => {
 
     return (
         <>
+        <Dialog onClose={handleCloseShare} open={openShare}>
+            <DialogTitle variant="h5">
+                Share to:
+            </DialogTitle>
+            <DialogContent sx={{paddingBottom: "0"}}>
+                <Typography variant="h6">Who would you like to share the post to?</Typography>
+            </DialogContent>
+            <Box 
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "10px",
+                    margin: "1em 1em",
+                }}
+            >
+                <Button
+                    style={{width: "100%", minWidth: "150px",padding: "10px",fontSize: "15px",}}
+                    sx={{':hover': {backgroundColor: "#dc4191"}}}
+                    variant="contained"
+                    onClick={handleShare}
+                >
+                    Public
+                </Button>
+                <Divider orientation="vertical" variant="middle"  sx={{backgroundColor: "rgba(25, 118, 210, 0.2)"}} flexItem/>
+                <Button
+                    style={{width: "100%", minWidth: "150px",padding: "10px",fontSize: "15px",}}
+                    sx={{':hover': {backgroundColor: "#dc4191"}}}
+                    variant="contained"
+                    onClick={handleShare}
+                >
+                    Friends
+                </Button>
+            </Box>
+            <IconButton
+                onClick={handleCloseShare}
+                sx={{
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    color: (theme) => theme.palette.grey[500],
+                }}
+            >
+                <Close />
+            </IconButton>
+        </Dialog>
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             <Card
                 style={{
@@ -391,19 +481,18 @@ export const Post = (props) => {
                 }}
                 elevation={10}
             >
-
-                <Box
-                    style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                    }}
+                <Box style={{ display: "flex", flexDirection: "row", alignItems: "center", }}
                 >
                 </Box>
                 <CardHeader
                     style={{marginLeft: "auto", padding: "0"}}
                     avatar={
-                        <Avatar alt="user image" src={props.data.author.profileImage} sx={{ width: 70, height: 70 }} style={{ margin: "0 0 0 1ex" }} />
+                        <Avatar 
+                            alt="user image"
+                            src={props.data.author.profileImage}
+                            sx={{ width: 70, height: 70 }}
+                            style={{ margin: "0 0 0 1ex" }}
+                        />
                     }
                     action={isAuthor ? (
                             <>
@@ -470,21 +559,45 @@ export const Post = (props) => {
                 </Box>
                 <Box 
                     style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: "10px",
                         margin: "1em 1em",
-                        backgroundColor: "#ccc"
                     }}
                 >
                     <Button
                         style={{
                             width: "100%",
-                            padding: "1em"
+                            padding: "10px 0"
                         }}
-                        variant={likeablePost ? "contained" : "disabled"}
+                        sx={{
+                            borderRadius: "0",
+                            ':hover': {
+                                backgroundColor: "rgba(25, 118, 210, 0.2)"
+                            }
+                        }}
+                        variant={likeablePost ? "text" : "disabled"}
                         onClick={handleLikeOnClick}
                         endIcon={<ThumbUp />}
                     >
                         {likes}
                     </Button>
+                    <Divider orientation="vertical" variant="middle"  sx={{backgroundColor: "rgba(25, 118, 210, 0.2)"}} flexItem/>
+                    <Button
+                        style={{
+                            width: "100%",
+                            padding: "10px 0"
+                        }}
+                        sx={{
+                            borderRadius: "0",
+                            ':hover': {
+                                backgroundColor: "rgba(25, 118, 210, 0.2)"
+                            }
+                        }}
+                        variant="text"
+                        onClick={handleOpenShare}
+                        endIcon={<Share />}
+                    />
                 </Box>
             </Card>
             {/* slice is to prevent mutation of the original array of comments */}

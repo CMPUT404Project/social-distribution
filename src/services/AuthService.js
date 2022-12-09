@@ -98,8 +98,11 @@ class AuthService {
     // Checks if authorID follows foreignID
     async getFollowStatus(authorID, foreignID) {
         setAxiosDefaults();
-        const response = await axios.get("/authors/" + foreignID + "/followers/" + authorID);
-        return response.data
+        return await axios.get("/authors/" + foreignID + "/followers/" + authorID).then((response) => {
+            return response.data
+        }).catch((error) => {
+            return false
+        });
     }
 
     async acceptFollowRequest(foreignID) {
@@ -140,7 +143,7 @@ class AuthService {
         return response.data
     }
 
-    async sendInboxItem(type, authorID, postID="", comment="", ) {
+    async sendInboxItem(type, authorID, {post, postID, comment}={}) {
         setAxiosDefaults();
         const currentAuthor = retrieveCurrentAuthor();
         const author = await this.getAuthorDetails(authorID)
@@ -149,9 +152,10 @@ class AuthService {
             actor: currentAuthor,
             author: author
         };
+        let headers = {}
         if (type === "post") {
-            body.content = "";
-            body.categories = "";
+            body = {...body, ...post}
+            headers["Content-Type"] = "application/json"
         } else if (type === "follow") {
             body.summary = currentAuthor.displayName + " wants to follow you"
         } else if (type === "like") {
@@ -162,7 +166,9 @@ class AuthService {
             body.post = postID;
             body.comment = comment;
         }
-        const response = await axios.post("/authors/" + authorID + "/inbox", body);
+        const response = await axios.post("/authors/" + authorID + "/inbox", body, headers);
+        console.log("response")
+        console.log(response)
         return response.data
     }
 
@@ -170,6 +176,16 @@ class AuthService {
         setAxiosDefaults();
         const response = await axios.get(`/authors/${authorID}/posts/${postID}`);
         return response.data
+    }
+
+    async createPost(body) {
+        setAxiosDefaults();
+        const authorID = getCurrentAuthorID();
+        return await axios.post(`/authors/${authorID}/posts`, body).then((response) => {
+            return response.data
+        }).catch((error) => {
+            return response
+        });
     }
 
     async updatePost(authorID, postID, body) {

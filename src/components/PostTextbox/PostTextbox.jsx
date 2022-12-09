@@ -62,6 +62,8 @@ export const PostTextbox = (props) => {
                 props.setPosts([createdPost.data, ...props.posts]);
                 let postWithAuthor = createdPost.data;
                 postWithAuthor["author"] = userJSON;
+                console.log("postWithAuthor")
+                console.log(postWithAuthor)
                 await axios
                     .post(`/authors/${aID}/inbox`, postWithAuthor, {
                         headers: {
