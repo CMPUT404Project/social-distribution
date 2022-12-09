@@ -2,6 +2,8 @@ import axios from "axios";
 
 import { getCurrentAuthorID, retrieveCurrentAuthor } from "../utils";
 
+import AuthService from "./AuthService";
+
 const team12Instance = axios.create({
     baseURL: "https://true-friends-404.herokuapp.com"
 })
@@ -11,7 +13,11 @@ const team13Instance = axios.create({
 })
 
 const team16Instance = axios.create({
-    baseURL: "https://team-sixteen.herokuapp.com"
+    baseURL: "https://team-sixteen.herokuapp.com",
+    auth: {
+        username: process.env.REACT_APP_T16USER,
+        password: process.env.REACT_APP_T16PASS
+    },
 })
 
 class RemoteAuthService {
@@ -30,10 +36,7 @@ class RemoteAuthService {
             }).then((response) => {
                 team13Instance.defaults.headers.common["Authorization"] = "Bearer " + response.data.jwt
             })
-        } else if (remoteNode === "Team 16") {
-            team16Instance.defaults.headers.common["Authorization"] = "Basic " + process.env.REACT_APP_T19BASICAUTH
         }
-
     }
 
     async getRemoteAuthor(remoteNode, authorID) {
@@ -88,7 +91,7 @@ class RemoteAuthService {
                 }
                 return [];
             });
-        } else if (remoteNode == "Team 16") {
+        } else if (remoteNode === "Team 16") {
             return await team16Instance.get("/authors/").then((response) => {
                 return response.data.items
             }).catch((error) => {
@@ -420,6 +423,15 @@ class RemoteAuthService {
                 console.log(response)
             }).catch((error) => {
                 console.log(error)
+            })
+        }
+        else if (remoteNode === "Team 16"){
+            return await team16Instance.post(`/authors/${authorID}/inbox/`,{
+                "@context": "https://social-distribution-404.herokuapp.com/",
+                summary: `${currentAuthorUsername} Likes your post`,
+                type: "Like",
+                author: AuthService.getAuthorDetails(),
+                object: `https://team-sixteen-social-scene.herokuapp.com/${authorID}/posts/${postID}`
             })
         }
     }
