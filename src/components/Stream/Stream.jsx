@@ -225,14 +225,13 @@ export const Post = (props) => {
     const handleShare = async (event) => {
         handleCloseShare();
         let visibility = event.target.outerText;
-        // Share to self
-        AuthService.sendInboxItem("post", aID, {post:props.data});
         const allFollowers = await AuthService.getAuthorFollowers();
         let hostArray = [
             "https://true-friends-404.herokuapp.com/",
             "https://cmput404-team13.herokuapp.com/",
-            "https://team-sixteen-social-scene.herokuapp.com/"
+            "https://team-sixteen.herokuapp.com/"
         ];
+        
         for (const follower of allFollowers) {
             let followerID = follower.id.split("/authors/")[1];
             if (
@@ -240,16 +239,16 @@ export const Post = (props) => {
                 follower.host.includes("http://127.0.0.1:8000") ||
                 follower.host.includes("localhost")
             ) {
-                let response;
+                let response = {status: 500};
                 if (visibility === "PUBLIC") {
-                    response = await AuthService.sendInboxItem("post", followerID, {post:props.data});
+                    response = response.data ? response : await AuthService.sendInboxItem("post", followerID, {post:props.data});
                 } else if (visibility === "FRIENDS") {
                     const isFollowing = await AuthService.getFollowStatus(aID, followerID);
                     if (isFollowing) {
-                        response = await AuthService.sendInboxItem("post", followerID, {post:props.data});
+                        response = response.data ? response : await AuthService.sendInboxItem("post", followerID, {post:props.data});
                     }
                 }
-                if (response.status === 201) {
+                if (response.status === 201 || response.status === 409) {
                     props.setAlertDetails({alertSeverity: "success", 
                         errorMessage: "Successfully shared post"})
                 } else {
@@ -276,13 +275,13 @@ export const Post = (props) => {
                 );
                 await RemoteAuthService.createRemotePost("Team 13", props.data, visibility)
             } else if (
-                follower.host.includes("https://team-sixteen-social-scene.herokuapp.com/") &&
-                hostArray.find((item) => item.includes("https://team-sixteen-social-scene.herokuapp.com/")) !==
+                follower.host.includes("https://team-sixteen.herokuapp.com/") &&
+                hostArray.find((item) => item.includes("https://team-sixteen.herokuapp.com/")) !==
                     undefined
             ) {
                 // clear team13 from hostArray
                 hostArray = hostArray.filter(
-                    (item) => !item.includes("https://team-sixteen-social-scene.herokuapp.com/")
+                    (item) => !item.includes("https://team-sixteen.herokuapp.com/")
                 );
                 await RemoteAuthService.createRemotePost("Team 16", props.data, visibility)
             }
@@ -457,6 +456,22 @@ export const Post = (props) => {
         props.setOpen(true);
     };
 
+    const handleUsernameClick = (event) => {
+        let team = "local"
+        if (props.data.id.includes("https://true-friends-404.herokuapp.com/")) {
+            team = "team12"
+        } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com/")) {
+            team = "team13"
+        } else if (props.data.id.includes("https://team-sixteen.herokuapp.com/")) {
+            team = "team16"
+        }
+        if (team === "local") {
+            navigate("/profile/" + aID)
+        } else {
+            navigate("/profile/remote/" + team + "/" + aID)
+        }
+    }
+
     function isImagePost(){
         return (props.data.contentType === contentTypes[2]) || (props.data.contentType === contentTypes[3]) || (props.data.contentType === contentTypes[4])
     }
@@ -529,8 +544,9 @@ export const Post = (props) => {
                         <Avatar 
                             alt="user image"
                             src={props.data.author.profileImage}
-                            sx={{ width: 70, height: 70 }}
+                            sx={{ width: 70, height: 70, cursor: "pointer" }}
                             style={{ margin: "0 0 0 1ex" }}
+                            onClick={handleUsernameClick}
                         />
                     }
                     action={isAuthor ? (
@@ -572,7 +588,7 @@ export const Post = (props) => {
                         )
                     }
                     title={
-                        <Typography variant="h5">{props.data.author.displayName}</Typography>
+                        <Typography onClick={handleUsernameClick} variant="h5" sx={{cursor: "pointer"}}>{props.data.author.displayName}</Typography>
                     }
                 />
                 <Box style={{display: "flex",justifyContent: 'center',}}>

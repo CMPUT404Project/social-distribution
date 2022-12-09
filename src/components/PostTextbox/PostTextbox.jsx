@@ -88,6 +88,9 @@ export const PostTextbox = (props) => {
                 setUnlisted(false);
                 setOpen(true);
             });
+        if (!createdPost) {
+            return;
+        }
         props.setPosts([createdPost, ...props.posts]);
         let postWithAuthor = createdPost;
         postWithAuthor["author"] = userJSON;
@@ -101,7 +104,7 @@ export const PostTextbox = (props) => {
         let hostArray = [
             "https://true-friends-404.herokuapp.com/",
             "https://cmput404-team13.herokuapp.com/",
-            "https://team-sixteen-social-scene.herokuapp.com/",
+            "https://team-sixteen.herokuapp.com/",
         ];
         allFollowers.forEach((user) => {
             let faID = user.id.split("/authors/")[1];
@@ -133,13 +136,13 @@ export const PostTextbox = (props) => {
             }
             // Team 16 - keep condition for consistency for now.
             else if (
-                user.host.includes("https://team-sixteen-social-scene.herokuapp.com/") &&
-                hostArray.find((item) => item.includes("https://team-sixteen-social-scene.herokuapp.com/")) !==
+                user.host.includes("https://team-sixteen.herokuapp.com/") &&
+                hostArray.find((item) => item.includes("https://team-sixteen.herokuapp.com/")) !==
                     undefined
             ) {
                 // clear team13 from hostArray
                 hostArray = hostArray.filter(
-                    (item) => !item.includes("https://team-sixteen-social-scene.herokuapp.com/")
+                    (item) => !item.includes("https://team-sixteen.herokuapp.com/")
                 );
                 RemoteAuthService.createRemotePost("Team 16", createdPost)
             }
