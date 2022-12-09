@@ -10,6 +10,10 @@ const team13Instance = axios.create({
     baseURL: "https://cmput404-team13.herokuapp.com"
 })
 
+const team16Instance = axios.create({
+    baseURL: "https://team-sixteen.herokuapp.com"
+})
+
 class RemoteAuthService {
     async getRemoteJWT(remoteNode) {
         if (remoteNode === "Team 12") {
@@ -26,6 +30,8 @@ class RemoteAuthService {
             }).then((response) => {
                 team13Instance.defaults.headers.common["Authorization"] = "Bearer " + response.data.jwt
             })
+        } else if (remoteNode === "Team 16") {
+            team16Instance.defaults.headers.common["Authorization"] = "Basic " + process.env.REACT_APP_T19BASICAUTH
         }
 
     }
@@ -67,6 +73,15 @@ class RemoteAuthService {
         } else if (remoteNode === "Team 13") {
             return await team13Instance.get("/authors?page=1&size=1000").then((response) => {
                 return response.data.authorsPage;
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+                return [];
+            });
+        } else if (remoteNode == "Team 16") {
+            return await team16Instance.get("/authors/").then((response) => {
+                return response.data.items
             }).catch((error) => {
                 if (error.response) {
                     console.log(error.response)
@@ -143,7 +158,10 @@ class RemoteAuthService {
                     console.log(error.response)
                 }
             })
-        }
+        } 
+        // else if (remoteNode === "Team 16"){
+        //     return await team16Instance.post()
+        // }
     }
 
     async unfollowRemoteAuthor(remoteNode, foreignID) {
