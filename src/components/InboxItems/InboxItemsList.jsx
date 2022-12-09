@@ -9,6 +9,7 @@ import {
     Card,
     CardHeader,
     Grid,
+    Link,
     Typography
 } from "@mui/material";
 
@@ -62,7 +63,7 @@ export const InboxCommentItem = (props) => {
                     }
                     title={
                         <Typography variant="h5" sx={{fontWeight: "600"}}>
-                            {displayName} commented on your post:
+                            <Link onClick={()=>{console.log(props.data)}}>{displayName}</Link> commented on your post:
                         </Typography>
                     }
                     subheader={

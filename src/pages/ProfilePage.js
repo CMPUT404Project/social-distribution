@@ -77,7 +77,7 @@ function ProfilePage() {
             await AuthService.getAuthorDetails(authorID).then((data) => {
                 setAuthorValues({
                     displayName: data.displayName,
-                    github: data.github,
+                    github: data.github.split(".com/")[1],
                     profileImage: data.profileImage
                 })
                 setLoading(false);
@@ -394,7 +394,7 @@ function ProfilePage() {
                                 noWrap
                                 
                             >
-                                {authorValues.github ? (<a href={authorValues.github} target="_blank" rel="noreferrer">{authorValues.github}</a>) : "None"}
+                                {authorValues.github ? (<a href={`https://www.github.com/${authorValues.github}`} target="_blank" rel="noreferrer">{authorValues.github}</a>) : "None"}
                             </Typography> 
                                 :
                             (<TextField
