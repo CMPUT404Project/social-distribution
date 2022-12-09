@@ -379,6 +379,12 @@ export const Post = (props) => {
         props.setOpen(true);
     };
 
+    function isImagePost(){
+        return (props.data.contentType === contentTypes[2]) || (props.data.contentType === contentTypes[3]) || (props.data.contentType === contentTypes[4])
+    }
+
+    const contentTypes = ["text/plain", "text/markdown", "application/base64", "image/png;base64", "image/jpeg;base64"];
+
     return (
         <>
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
@@ -459,14 +465,21 @@ export const Post = (props) => {
                         padding: "0.5em",
                         minHeight: "10em"
                     }}>
-                    {(props.data.contentType === "text/markdown") ? (
-                        <ReactMarkdown 
-                            children={props.data.content}
-                            components={{img:({node,...props})=><img alt="markdown_image" style={{maxWidth:'100%'}}{...props}/>}}
-                        />
-                    ) : (
-                        <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
-                    )}
+                    {(() => {
+                        switch (props.data.contentType) {
+                            case ("text/markdown"):
+                                return <ReactMarkdown
+                                    children={props.data.content} 
+                                    components={{img: ({node, ...props}) => <img alt="markdown_image" style={{maxWidth: '100%'}}{...props} />}}
+                                />
+                            case ("image/jpeg;base64"):
+                            case ("image/png;base64"):
+                                return <img src={props.data.content} alt="post_image" style={{maxWidth:'100%'}}/>
+                            default:
+                                return <Typography variant="h6" textAlign="left">{props.data.content}</Typography>
+
+                        }
+                    })()}
                 </Box>
                 <Box 
                     style={{

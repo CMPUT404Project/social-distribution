@@ -1,4 +1,4 @@
-import { Button, Card, FormControl, MenuItem, Snackbar, TextField } from "@mui/material";
+import { Button, Card, CardMedia, FormControl, MenuItem, Snackbar, TextField } from "@mui/material";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -15,6 +15,8 @@ export const PostTextbox = (props) => {
     const [description, setDescription] = useState("");
     const [open, setOpen] = useState(false);
     const [alert, setAlert] = useState("");
+    const [base64file, setbase64file] = useState(null);
+    const [imageURL, setimageURL] = useState(null);
 
     const handleVisibilityChange = (e) => {
         setVisibility(e.target.value);
@@ -30,6 +32,24 @@ export const PostTextbox = (props) => {
         setUnlisted(e.target.value);
     };
 
+    const handleFileChange = (e) => {
+        getBase64(e.target.files[0]);
+        setimageURL(URL.createObjectURL(e.target.files[0]));
+    };
+
+    function getBase64(file) {
+        console.log(file);
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function () {
+            setbase64file(reader.result);
+            console.log(base64file);
+        }
+        reader.onerror = function (error) {
+            console.log('Error: ', error);
+        };
+    }
+
     const onFormSubmit = (e) => {
         let tokens = [];
         if (tags !== "") {
@@ -38,7 +58,7 @@ export const PostTextbox = (props) => {
         const data = {
             type: "post",
             title: title,
-            content: content,
+            content: base64file ? base64file : content,
             visibility: visibility,
             categories: JSON.stringify(tokens),
             description: description,
@@ -46,6 +66,7 @@ export const PostTextbox = (props) => {
             unlisted: unlisted,
             author: retrieveCurrentAuthor(),
         };
+        console.log(data);
         const userJSON = retrieveCurrentAuthor();
         const aID = userJSON.id.split("/authors/")[1];
         // create post
@@ -304,12 +325,17 @@ export const PostTextbox = (props) => {
 
     const handleContentTypeChange = (e) => {
         setContentType(e.target.value);
+        console.log(contentType);
     };
+
+    function isFileUploadPost(){
+        return (contentType === contentTypes[2]) || (contentType === contentTypes[3]) || (contentType === contentTypes[4])
+    }
 
     const contentTypes = ["text/plain", "text/markdown", "application/base64", "image/png;base64", "image/jpeg;base64"];
 
     return (
-        <Card>
+        <Card style={{height:"auto"}}>
             <Snackbar
                 open={open}
                 anchorOrigin={{ vertical: "top", horizontal: "center" }}
@@ -327,14 +353,22 @@ export const PostTextbox = (props) => {
                     onInput={(e) => setTitle(e.target.value)}
                     required
                 />
-                <TextField
-                    label="Enter your main text here! (required)"
-                    variant="filled"
-                    value={content}
-                    multiline
-                    onInput={(e) => setContent(e.target.value)}
-                    required
-                />
+                {isFileUploadPost() ?
+                    <CardMedia 
+                        component="img" 
+                        image={imageURL} 
+                        alt={"File Preview"} 
+                        height="150"
+                        sx={{maxWidth: "150px", display: "flex", alignContent: "center" }}/> :
+                        <TextField
+                            label="Enter your main text here! (required)"
+                            variant="filled"
+                            value={content}
+                            multiline
+                            onInput={(e) => setContent(e.target.value)}
+                            required
+                        />
+                }
                 <TextField
                     label="Enter your description here!"
                     variant="filled"
@@ -390,6 +424,19 @@ export const PostTextbox = (props) => {
                     <MenuItem value={true}>Yes</MenuItem>
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
+                {isFileUploadPost()
+                    ? (<Button
+                        variant="contained"
+                        component="label"
+                    >
+                        Upload File
+                        <input
+                            type="file" onChange={handleFileChange}
+                            hidden
+                        />
+                    </Button>)
+                    : null
+                }
                 <Button variant="contained" sx={{ borderRadius: 0, padding: 1.7 }} onClick={onFormSubmit}>
                     Distribute
                 </Button>
