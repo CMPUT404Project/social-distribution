@@ -14,7 +14,7 @@ import SearchIcon from '@mui/icons-material/Search';
 
 import './FollowersPage.css'
 
-const teams = ["Team 12", "Team 13"]
+const teams = ["Team 12", "Team 13", "Team 16"]
 
 function FollowersPage() {
     const author = retrieveCurrentAuthor();
@@ -23,6 +23,7 @@ function FollowersPage() {
     const [allLocalAuthors, setAllLocalAuthors] = useState([]);
     const [allTeam12Authors, setAllTeam12Authors] = useState([]);
     const [allTeam13Authors, setAllTeam13Authors] = useState([]);
+    const [allTeam16Authors, setAllTeam16Authors] = useState([]);
 
     const [searchField, setSearchField] = useState("");
 
@@ -66,7 +67,11 @@ function FollowersPage() {
                     if (team === "Team 12") {
                         setAllTeam12Authors([...allTeam12Authors, ...data])
                     } else if (team === "Team 13") {
+                        console.log(data)
                         setAllTeam13Authors([...allTeam13Authors, ...data])
+                    } else if (team === "Team 16") {
+                        console.log(data)
+                        setAllTeam16Authors([...allTeam16Authors, ...data])
                     }
                 }
             })
@@ -182,6 +187,12 @@ function FollowersPage() {
                             team={"Team 13"}
                             input={searchField.toLowerCase().includes("team 13") ? "" : searchField}
                             authors={allTeam13Authors}
+                        />
+                        <h3>Team 16</h3>
+                        <SearchResults 
+                            team={"Team 16"}
+                            input={searchField.toLowerCase().includes("team 16") ? "" : searchField}
+                            authors={allTeam16Authors}
                         />
                     </Container>
                 </div> 
