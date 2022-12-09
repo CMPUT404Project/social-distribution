@@ -1,4 +1,5 @@
-import { Button, Card, CardMedia, FormControl, MenuItem, Snackbar, TextField } from "@mui/material";
+import { Button, Card, CardMedia, FormControl, MenuItem, Snackbar, TextField, IconButton } from "@mui/material";
+import { FileUpload } from "@mui/icons-material"
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
@@ -178,7 +179,7 @@ export const PostTextbox = (props) => {
         return (contentType === contentTypes[2]) || (contentType === contentTypes[3]) || (contentType === contentTypes[4])
     }
 
-    const contentTypes = ["text/plain", "text/markdown", "application/base64", "image/png;base64", "image/jpeg;base64"];
+    const contentTypes = ["text/plain", "text/markdown", "image/png;base64", "image/jpeg;base64"];
 
     return (
         <Card style={{height:"auto"}}>
@@ -200,12 +201,34 @@ export const PostTextbox = (props) => {
                     required
                 />
                 {isFileUploadPost() ?
-                    <CardMedia 
-                        component="img" 
-                        image={imageURL} 
-                        alt={"File Preview"} 
-                        height="150"
-                        sx={{maxWidth: "150px", display: "flex", alignContent: "center" }}/> :
+                    (
+                        <>
+                        <CardMedia 
+                            component="img" 
+                            image={imageURL} 
+                            alt={"File Preview"}
+                            sx={{
+                                display: "flex", 
+                                minHeight: "150px",
+                                maxHeight: "300px",
+                                alignItems: "center", 
+                                justifyContent: "center", 
+                                objectFit: "contain"
+                            }}
+                        />
+                        <Button variant="text" component="label" endIcon={<FileUpload />} 
+                            sx={{
+                                borderTop: "1px solid black", 
+                                borderRadius: "0",
+                                ':hover': {
+                                    backgroundColor: "rgba(25, 118, 210, 0.2)"
+                                }
+                            }}>
+                            Upload image
+                            <input hidden accept="image/*" type="file" onChange={handleFileChange}/>
+                        </Button>
+                        </>
+                    ) : (
                         <TextField
                             label="Enter your main text here! (required)"
                             variant="filled"
@@ -213,7 +236,7 @@ export const PostTextbox = (props) => {
                             multiline
                             onInput={(e) => setContent(e.target.value)}
                             required
-                        />
+                        />)
                 }
                 <TextField
                     label="Enter your description here!"
@@ -270,19 +293,6 @@ export const PostTextbox = (props) => {
                     <MenuItem value={true}>Yes</MenuItem>
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
-                {isFileUploadPost()
-                    ? (<Button
-                        variant="contained"
-                        component="label"
-                    >
-                        Upload File
-                        <input
-                            type="file" onChange={handleFileChange}
-                            hidden
-                        />
-                    </Button>)
-                    : null
-                }
                 <Button variant="contained" sx={{ borderRadius: 0, padding: 1.7 }} onClick={onFormSubmit}>
                     Distribute
                 </Button>

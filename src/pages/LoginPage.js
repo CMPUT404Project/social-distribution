@@ -161,7 +161,7 @@ function LoginPage() {
                         Register
                     </Link>
                 </div>
-            </div>)};
+            </div>)}
         </div>
     )
 }
