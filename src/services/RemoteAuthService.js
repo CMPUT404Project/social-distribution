@@ -422,6 +422,14 @@ class RemoteAuthService {
                 console.log(error)
             })
         }
+        else if (remoteNode === "Team 16"){
+            return await team16Instance.post(`/authors/${authorID}/inbox/`,{
+                summary: `${currentAuthorUsername} Likes your post`,
+                type: "Like",
+                author: AuthService.getAuthorDetails(),
+                object: `https://team-sixteen-social-scene.herokuapp.com/${authorID}/posts/${postID}`
+            })
+        }
     }
 
     async sendLikeRemoteComment(remoteNode, commentID, authorID, postID){
