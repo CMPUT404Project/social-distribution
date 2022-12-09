@@ -173,9 +173,24 @@ class RemoteAuthService {
                 }
             })
         } 
-        // else if (remoteNode === "Team 16"){
-        //     return await team16Instance.post()
-        // }
+        else if (remoteNode === "Team 16"){
+            return await this.getRemoteAuthor("Team 16", foreignID).then((res) => {
+                const team16Data = {
+                    type: "Follow",
+                    summary: currentAuthor.displayName + " wants to follow you",
+                    actor: currentAuthor,
+                    object: res.data
+                }
+                team16Instance.post("/authors/" + foreignID + "/inbox/", team16Data)
+                .then((response) => {
+                    return response.data
+                })
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
+        }
     }
 
     async unfollowRemoteAuthor(remoteNode, foreignID) {
@@ -241,6 +256,15 @@ class RemoteAuthService {
             })
         } else if (remoteNode === "Team 13"){
             return await team13Instance.put(`/authors/${authorID}/followers/${foreignID}`)
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
+        } else if (remoteNode === "Team 16") {
+            return await team16Instance.put("/authors/" + foreignID + "/followers/" + authorID)
             .then((response) => {
                 return response.data
             }).catch((error) => {
