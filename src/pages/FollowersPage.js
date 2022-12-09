@@ -42,8 +42,8 @@ function FollowersPage() {
 
     const getFollowerData = async () => {
         await AuthService.getAuthorFollowers().then((data) => {
-            setFollowers(data.items);
-            if (data.items.length > 0) {
+            setFollowers(data);
+            if (data.length > 0) {
                 setIsEmpty(false)
             }
             setLoading(false)

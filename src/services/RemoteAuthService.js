@@ -2,12 +2,21 @@ import axios from "axios";
 
 import { getCurrentAuthorID, retrieveCurrentAuthor } from "../utils";
 
+
 const team12Instance = axios.create({
     baseURL: "https://true-friends-404.herokuapp.com"
 })
 
 const team13Instance = axios.create({
     baseURL: "https://cmput404-team13.herokuapp.com"
+})
+
+const team16Instance = axios.create({
+    baseURL: "https://team-sixteen.herokuapp.com",
+    auth: {
+        username: 'team16',
+        password: '12345'
+    },
 })
 
 class RemoteAuthService {
@@ -239,6 +248,34 @@ class RemoteAuthService {
             }).catch((error) => {
                 console.log(error)
             })
+        }
+    }
+
+    async createRemotePost(remoteNode, post, visibility="") {
+        await this.getRemoteJWT(remoteNode);
+        let authorID = getCurrentAuthorID();
+        let authorUsername = sessionStorage.getItem("username");
+        let headers = {"Content-Type": "application/json"}
+        try {
+            if (remoteNode === "Team 12") {
+                await team12Instance.post(`/authors/${authorID}/${authorUsername}/posts/`, post, {headers})
+            } else if (remoteNode === "Team 13") {
+                //create post on their server
+                const createdPost = await team13Instance.put(`/authors/${authorID}/posts`, post, {headers})
+                //call endpoint depending on visibility for distribution
+                if (visibility.includes("PUBLIC")) {
+                    await team13Instance.post(`/inbox/public/${authorID}/${createdPost.data.id}`, {}, {headers})
+                } else if (visibility.includes("FRIEND")) {
+                    await team13Instance.post(`/inbox/friend/${authorID}/${createdPost.data.id}`, {}, {headers})
+                }
+            } else if (remoteNode === "Team 16") {
+
+            }
+        } catch (error) {
+            if (error.response) {
+                console.log(error.response.status);
+                console.log(error.response.data);
+            }
         }
     }
     

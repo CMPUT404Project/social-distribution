@@ -332,14 +332,14 @@ export default class InboxItemsList extends Component {
                 } else if (inboxItem.type.toLowerCase() === "like") {
                     return <InboxLikeItem key={index} data={inboxItem} inboxItems={this.props.inboxItems} setInboxItems={this.props.setInboxItems}/>
                 }
-                return <></>
+                return <React.Fragment key={index}/>
             })
         } else if (this.props.tab === "Requests") {
             return this.props.inboxItems.map((inboxItem, index) => {
                 if (inboxItem.type.toLowerCase() === "follow") {
                     return <InboxRequestItem key={index} data={inboxItem} inboxItems={this.props.inboxItems} setInboxItems={this.props.setInboxItems}/>
                 }
-                return <></>
+                return <React.Fragment key={index}/>
             })
         } 
     }

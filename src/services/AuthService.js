@@ -92,7 +92,7 @@ class AuthService {
         setAxiosDefaults();
         const authorID = getCurrentAuthorID();
         const response = await axios.get("/authors/" + authorID + "/followers");
-        return response.data
+        return response.data.items
     }
 
     // Checks if authorID follows foreignID
@@ -166,10 +166,17 @@ class AuthService {
             body.post = postID;
             body.comment = comment;
         }
-        const response = await axios.post("/authors/" + authorID + "/inbox", body, headers);
-        console.log("response")
-        console.log(response)
-        return response.data
+        return await axios.post("/authors/" + authorID + "/inbox", body, {headers})
+        .then((response) => {
+            return response
+        })
+        .catch((error) => {
+            if (error.response) {
+                // console.log(error.response.status);
+                // console.log(error.response.data);
+                return error.response
+            }
+        });
     }
 
     async getPostDetails(authorID, postID) {
@@ -184,7 +191,7 @@ class AuthService {
         return await axios.post(`/authors/${authorID}/posts`, body).then((response) => {
             return response.data
         }).catch((error) => {
-            return response
+            return error
         });
     }
 
