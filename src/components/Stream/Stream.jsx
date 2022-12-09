@@ -405,6 +405,31 @@ export const Post = (props) => {
                         });
                     });
                 }
+                else if (props.data.origin.includes("https://team-sixteen.herokuapp.com/")) {
+                    let data = {
+                        type: "comment",
+                        author: retrieveCurrentAuthor(),
+                        comment: postTextBox,
+                        post: props.data.id.split("/posts/")[1],
+                        contentType: "text/plain",
+                    };
+
+                    const postAuthorID = props.data.author.id.split("/authors/")[1];
+                    axios
+                        .post("https://team-sixteen.herokuapp.com/authors/" + postAuthorID + "/inbox", data, {
+                            headers: {
+                                Authorization: "Basic " + process.env.REACT_APP_T19BASICAUTH,
+                                ContentType: "application/json",
+                            },
+                        })
+                        .then(() => {
+                            setIsCommentSubmitted(!isCommentsSubmitted);
+                            e.target.value = "";
+                        })
+                        .catch((err) => {
+                            console.log(err);
+                        });
+                }
             }
         }
         setAnchor(null);

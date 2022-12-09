@@ -133,7 +133,7 @@ function LoginPage() {
                         </span>
                     </div>
                     <div className="error-container" style={showValues.showError ? {visibility: "visible"} : {visibility: "hidden"}}>
-                        <p className="error-message">{errorMessage}</p>
+                        <p data-testid="login-error-message" className="error-message">{errorMessage}</p>
                     </div>
                     <div className="remember-container">
                         <FormControlLabel
