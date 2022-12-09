@@ -55,8 +55,18 @@ export const PostTextbox = (props) => {
             .then((response) => {
                 return response
             })
-        console.log("response")
-        console.log(createdPost)
+            .catch(() => setAlert("Could not submit post."))
+            .finally(() => {
+                setAlert("Post submitted!");
+                setTitle("");
+                setContent("");
+                setVisibility("PUBLIC");
+                setTags("");
+                setDescription("");
+                setContentType("text/plain");
+                setUnlisted(false);
+                setOpen(true);
+            });
         props.setPosts([createdPost, ...props.posts]);
         let postWithAuthor = createdPost;
         postWithAuthor["author"] = userJSON;
@@ -70,6 +80,7 @@ export const PostTextbox = (props) => {
         let hostArray = [
             "https://true-friends-404.herokuapp.com/",
             "https://cmput404-team13.herokuapp.com/",
+            "https://team-sixteen-social-scene.herokuapp.com/",
         ];
         allFollowers.forEach((user) => {
             let faID = user.id.split("/authors/")[1];
@@ -85,16 +96,8 @@ export const PostTextbox = (props) => {
                 hostArray = hostArray.filter(
                     (item) => !item.includes("https://true-friends-404.herokuapp.com")
                 );
-                let team12Data = JSON.parse(JSON.stringify(createdPost));
-                // author is not required since it is sent with the URI
-                delete team12Data["author"];
-                // Do not include categories
-                // https://discord.com/channels/1042662487025274962/1042662487025274965/1046152315641528380
-                delete team12Data["categories"];
-                team12Data.id = team12Data.id.split("/posts/")[1];
-                RemoteAuthService.createRemotePost("Team 12", team12Data);
+                RemoteAuthService.createRemotePost("Team 12", createdPost);
             }
-
             // // Team 13 implementation
             else if (
                 user.host.includes("https://cmput404-team13.herokuapp.com") &&
@@ -105,41 +108,20 @@ export const PostTextbox = (props) => {
                 hostArray = hostArray.filter(
                     (item) => !item.includes("https://cmput404-team13.herokuapp.com")
                 );
-                let team13data = JSON.parse(JSON.stringify(createdPost));
-                // clean up data of post
-                delete team13data["categories"];
-                delete team13data["count"];
-                team13data.author = { id: aID, displayName: userJSON.displayName };
-                team13data.originalAuthor = { id: aID, displayName: userJSON.displayName };
-                team13data.id = createdPost.id.split("/posts/")[1];
-                console.log(team13data)
-                console.log("team13data")
-                // team13data.originalAuthor = {
-                //     id: aID,
-                //     displayName: userJSON.displayName,
-                // };
-                // get the user info if it is not the current user
-                // if (createdPost.origin !== createdPost.id) {
-                // ex: {source: "http://127.0.0.1:5454/authors/9de11658e/posts/76bd9e"}
-                // I am assuming that the source I recieve follows this format
-                // {host}/authors/{aid}/posts/{pid}
-                // team13 requires originalAuthor displayName which we have to call the origin's authors server which we might not have access to.
-                // TODO: this call is irrelevant because originalAuthor will always be us for this component/scenario.
-                // axios
-                //     .get(createdPost.origin, {
-                //         headers: {
-                //             Authorization: "Bearer " + getAccessToken(),
-                //         },
-                //     })
-                //     .then((res) => {
-                //         team13data.originalAuthor = {
-                //             id: res.data.author.id,
-                //             displayName: res.data.author.displayName,
-                //         };
-                RemoteAuthService.createRemotePost("Team 13", team13data, data.visibility)
+                RemoteAuthService.createRemotePost("Team 13", createdPost, data.visibility)
             }
-
             // Team 16 - keep condition for consistency for now.
+            else if (
+                user.host.includes("https://team-sixteen-social-scene.herokuapp.com/") &&
+                hostArray.find((item) => item.includes("https://team-sixteen-social-scene.herokuapp.com/")) !==
+                    undefined
+            ) {
+                // clear team13 from hostArray
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://team-sixteen-social-scene.herokuapp.com/")
+                );
+                RemoteAuthService.createRemotePost("Team 16", createdPost, data.visibility)
+            }
             else if (
                 user.host.includes("https://social-distribution-404.herokuapp.com") ||
                 user.host.includes("http://127.0.0.1:8000") ||

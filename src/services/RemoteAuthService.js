@@ -301,14 +301,29 @@ class RemoteAuthService {
     async createRemotePost(remoteNode, post, visibility="") {
         await this.getRemoteJWT(remoteNode);
         let authorID = getCurrentAuthorID();
+        let currentAuthor = retrieveCurrentAuthor();
         let authorUsername = sessionStorage.getItem("username");
         let headers = {"Content-Type": "application/json"}
         try {
             if (remoteNode === "Team 12") {
-                await team12Instance.post(`/authors/${authorID}/${authorUsername}/posts/`, post, {headers})
+                let team12Data = {...post};
+                // author is not required since it is sent with the URI
+                delete team12Data["author"];
+                // Do not include categories
+                // https://discord.com/channels/1042662487025274962/1042662487025274965/1046152315641528380
+                delete team12Data["categories"];
+                team12Data.id = team12Data.id.split("/posts/")[1];
+                await team12Instance.post(`/authors/${authorID}/${authorUsername}/posts/`, team12Data, {headers})
             } else if (remoteNode === "Team 13") {
+                let team13data = {...post};
+                // clean up data of post
+                delete team13data["categories"];
+                delete team13data["count"];
+                team13data.author = { id: authorID, displayName: currentAuthor.displayName };
+                team13data.originalAuthor = { id: post.author.id.split("/authors/")[1], displayName: post.author.displayName };
+                team13data.id = post.id.split("/posts/")[1];
                 //create post on their server
-                const createdPost = await team13Instance.put(`/authors/${authorID}/posts`, post, {headers})
+                const createdPost = await team13Instance.put(`/authors/${authorID}/posts`, team13data, {headers})
                 //call endpoint depending on visibility for distribution
                 if (visibility.includes("PUBLIC")) {
                     await team13Instance.post(`/inbox/public/${authorID}/${createdPost.data.id}`, {}, {headers})
@@ -316,7 +331,7 @@ class RemoteAuthService {
                     await team13Instance.post(`/inbox/friend/${authorID}/${createdPost.data.id}`, {}, {headers})
                 }
             } else if (remoteNode === "Team 16") {
-
+                await team16Instance.post(`/authors/${authorID}/posts/`, post, {headers})
             }
         } catch (error) {
             if (error.response) {

@@ -225,14 +225,13 @@ export const Post = (props) => {
     const handleShare = async (event) => {
         handleCloseShare();
         let visibility = event.target.outerText;
-        console.log("share")
-        console.log(props.data)
         // Share to self
         AuthService.sendInboxItem("post", aID, {post:props.data});
         const allFollowers = await AuthService.getAuthorFollowers();
         let hostArray = [
             "https://true-friends-404.herokuapp.com/",
             "https://cmput404-team13.herokuapp.com/",
+            "https://team-sixteen-social-scene.herokuapp.com/"
         ];
         for (const follower of allFollowers) {
             let followerID = follower.id.split("/authors/")[1];
@@ -266,11 +265,7 @@ export const Post = (props) => {
                 hostArray = hostArray.filter(
                     (item) => !item.includes("https://true-friends-404.herokuapp.com")
                 );
-                let team12Data = {...props.data};
-                delete team12Data["author"];
-                delete team12Data["categories"];
-                team12Data.id = team12Data.id.split("/posts/")[1];
-                await RemoteAuthService.createRemotePost("Team 12", team12Data);
+                await RemoteAuthService.createRemotePost("Team 12", props.data);
             } else if (
                 follower.host.includes("https://cmput404-team13.herokuapp.com") &&
                 hostArray.find((item) => item.includes("https://cmput404-team13.herokuapp.com")) !==
@@ -279,14 +274,18 @@ export const Post = (props) => {
                 hostArray = hostArray.filter(
                     (item) => !item.includes("https://cmput404-team13.herokuapp.com")
                 );
-                let team13data = {...props.data};
-                delete team13data["categories"];
-                delete team13data["count"];
-                team13data.author = { id: aID, displayName: currentUser.displayName };
-                team13data.originalAuthor = { id: props.data.author.id.split("/authors/")[1], displayName: props.data.author.displayName };
-                team13data.id = props.data.id.split("/posts/")[1];
-                await RemoteAuthService.createRemotePost("Team 13", team13data, visibility)
-            } 
+                await RemoteAuthService.createRemotePost("Team 13", props.data, visibility)
+            } else if (
+                user.host.includes("https://team-sixteen-social-scene.herokuapp.com/") &&
+                hostArray.find((item) => item.includes("https://team-sixteen-social-scene.herokuapp.com/")) !==
+                    undefined
+            ) {
+                // clear team13 from hostArray
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://team-sixteen-social-scene.herokuapp.com/")
+                );
+                await RemoteAuthService.createRemotePost("Team 16", createdPost, data.visibility)
+            }
         }
     }
 
