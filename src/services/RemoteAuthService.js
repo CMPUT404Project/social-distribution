@@ -1,7 +1,6 @@
 import axios from "axios";
 
 import { getCurrentAuthorID, retrieveCurrentAuthor } from "../utils";
-import AuthService from "./AuthService";
 
 const team12Instance = axios.create({
     baseURL: "https://true-friends-404.herokuapp.com"
@@ -170,10 +169,10 @@ class RemoteAuthService {
             })
         } 
         else if (remoteNode === "Team 16"){
-            return await AuthService.getAuthorDetails(foreignID).then((res) => {
+            return await this.getRemoteAuthor("Team 16", foreignID).then((res) => {
                 const team16Data = {
                     type: "Follow",
-                    summary: currentAuthor.displayName + "wants to follow you",
+                    summary: currentAuthor.displayName + " wants to follow you",
                     actor: currentAuthor,
                     object: res.data
                 }
@@ -181,6 +180,10 @@ class RemoteAuthService {
                 .then((response) => {
                     return response.data
                 })
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
             })
         }
     }
@@ -248,6 +251,15 @@ class RemoteAuthService {
             })
         } else if (remoteNode === "Team 13"){
             return await team13Instance.put(`/authors/${authorID}/followers/${foreignID}`)
+            .then((response) => {
+                return response.data
+            }).catch((error) => {
+                if (error.response) {
+                    console.log(error.response)
+                }
+            })
+        } else if (remoteNode === "Team 16") {
+            return await team16Instance.put("/authors/" + foreignID + "/followers/" + authorID)
             .then((response) => {
                 return response.data
             }).catch((error) => {
