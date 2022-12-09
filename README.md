@@ -1,3 +1,10 @@
+# Changes Made After Demo
+1. Complete sharing feature
+2. Image png and jpeg feature complete
+3. Complete integration with team 16
+
+All of our features are complete, ez :), we are gigachads :) <3
+
 # Backend Setup
 ## Setup/start VENV and Install Requirements
 ### For Linux and Mac Users (this will create a virtual environment in the current directory, and install all the requirements, as well as activate the newly created VENV):

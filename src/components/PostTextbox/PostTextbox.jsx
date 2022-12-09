@@ -320,6 +320,8 @@ export const PostTextbox = (props) => {
                 setContentType("text/plain");
                 setUnlisted(false);
                 setOpen(true);
+                setbase64file(null);
+                setimageURL(null);
             });
     };
 
