@@ -67,10 +67,8 @@ function FollowersPage() {
                     if (team === "Team 12") {
                         setAllTeam12Authors([...allTeam12Authors, ...data])
                     } else if (team === "Team 13") {
-                        console.log(data)
                         setAllTeam13Authors([...allTeam13Authors, ...data])
                     } else if (team === "Team 16") {
-                        console.log(data)
                         setAllTeam16Authors([...allTeam16Authors, ...data])
                     }
                 }
