@@ -170,13 +170,12 @@ class RemoteAuthService {
         } 
         else if (remoteNode === "Team 16"){
             return await this.getRemoteAuthor("Team 16", foreignID).then((res) => {
-                const team16Data = {
+                team16Instance.post("/authors/" + foreignID + "/inbox/", {
                     type: "Follow",
                     summary: currentAuthor.displayName + " wants to follow you",
                     actor: currentAuthor,
-                    object: res.data
-                }
-                team16Instance.post("/authors/" + foreignID + "/inbox/", team16Data)
+                    object: res
+                })
                 .then((response) => {
                     return response.data
                 })
