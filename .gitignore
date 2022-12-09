@@ -50,3 +50,6 @@ yarn-debug.log*
 yarn-error.log*
 
 staticfiles/
+/test-results/
+/playwright-report/
+/playwright/.cache/

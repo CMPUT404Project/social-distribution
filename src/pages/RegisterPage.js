@@ -144,7 +144,7 @@ function RegisterPage() {
                             REGISTER
                         </span>
                         <div className="error-container" style={showValues.showError ? { visibility: "visible" } : { visibility: "hidden" }}>
-                            <p className="error-message">{errorMessage}</p>
+                            <p data-testid="register-error-message" className="error-message">{errorMessage}</p>
                         </div>
                         <form className="register-form" onSubmit={handleSubmit}>
                             <div className="input-container username">
