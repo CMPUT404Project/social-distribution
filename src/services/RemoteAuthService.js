@@ -2,6 +2,8 @@ import axios from "axios";
 
 import { getCurrentAuthorID, retrieveCurrentAuthor } from "../utils";
 
+import AuthService from "./AuthService";
+
 const team12Instance = axios.create({
     baseURL: "https://true-friends-404.herokuapp.com"
 })
@@ -36,6 +38,7 @@ class RemoteAuthService {
             })
         }
     }
+}
 
     async getRemoteAuthor(remoteNode, authorID) {
         await this.getRemoteJWT(remoteNode);
