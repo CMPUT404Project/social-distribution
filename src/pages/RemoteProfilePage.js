@@ -35,11 +35,15 @@ function ProfilePage() {
     })
     const remoteNode = `${capitalizeFirstLetter(team.slice(0,4))} ${team.slice(4)}`
 
-    const [isFollowing, setIsFollowing] = useState(false);
-    const [isFollowed, setIsFollowed] = useState(false);
+    const [isFollowing, setIsFollowing] = useState();
+    const [isFollowed, setIsFollowed] = useState();
     const [isFriend, setIsFriend] = useState(false);
 
     const [isLoading, setLoading] = useState(true);
+    const [doneLoading, setDoneLoading] = useState({
+        followStatus: false,
+        authorDetails: false
+    });
     const [open, setOpen] = useState(false);
 
     const [alertDetails, setAlertDetails] = useState({
@@ -49,42 +53,46 @@ function ProfilePage() {
 
     useEffect(() => {
         const checkFollowStatus = async (currentAuthorID) => {
-            const allAuthors = await AuthService.getAllAuthors().then((data) => {
-                return data.items
-            })
-            var response;
-            let following = false;
-            let followed = false;
-            await AuthService.getFollowStatus(authorID, currentAuthorID).then((data) => {
-                console.log("Local Data")
-                console.log(data)
-                setIsFollowed(data);
-                followed = data;
-            })
-            await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID).then((data) => {
-                console.log("Remote Data")
-                console.log(data)
-                following = data;
-                setIsFollowing(data)
-            })
-            console.log(followed, following)
-            setIsFriend(followed && following)
+            const response = await RemoteAuthService.getRemoteFollowStatus(remoteNode, authorID);
+            setIsFollowing(response)
+            if (response) {
+                setIsFollowed(await AuthService.getFollowStatus(authorID, currentAuthorID));
+            } else {
+                setDoneLoading(doneLoading => {return {...doneLoading, followStatus: true}});
+            }
         }
         const getAuthorDetails = async () => {
             const response = await RemoteAuthService.getRemoteAuthor(remoteNode, authorID);
             setAuthorValues({
                 displayName: response.displayName || response.username,
-                github: response.github?.split(".com/")[1] || response.github || "",
+                github: response.github.replace(/https?:\/\/(www\.)?github\.com\/?/, "") || "",
                 profileImage: response.profileImage,
             })
-            setLoading(false);
         }
         let currentAuthorID = getCurrentAuthorID();
-        setLoading(true);
         checkFollowStatus(currentAuthorID);
         getAuthorDetails();
-    }, [authorID])
+    }, [authorID, remoteNode])
 
+    useEffect(() => {
+        setIsFriend(isFollowed && isFollowing)
+    }, [isFollowed, isFollowing])
+
+    useEffect(() => {
+        setDoneLoading(doneLoading => {return {...doneLoading, followStatus: true}});
+    }, [isFriend])
+
+    useEffect(() => {
+        if (authorValues.displayName) {
+            setDoneLoading(doneLoading => {return {...doneLoading, authorDetails: true}});
+        }
+    }, [authorValues])
+
+    useEffect(() => {
+        setLoading(!Object.values(doneLoading).every(
+            value => value === true
+        ));
+    }, [doneLoading])
 
     const handleFollow = async (event) => {
         try {

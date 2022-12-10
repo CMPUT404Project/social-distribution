@@ -6,11 +6,11 @@ import ReactMarkdown from 'react-markdown'
 import ClipLoader from 'react-spinners/ClipLoader';
 import { v4 as uuidv4 } from 'uuid';
 import { 
-    Alert, AlertTitle, Avatar, Box, Button, Card,
-    CardHeader, Divider, Grid, IconButton, Link,
-    Menu, MenuItem, TextField, Typography, Snackbar, Slide,
+    Alert, AlertTitle, Avatar, Box, Button, Card, Dialog, DialogContent,
+    DialogAction, DialogTitle, CardHeader, Divider, Grid, IconButton, Link,
+    Menu, MenuItem, TextField, Typography, Snackbar, Slide, 
 } from "@mui/material";
-import { ThumbUp, MoreVert } from "@mui/icons-material";
+import { ThumbUp, MoreVert, Share, Close } from "@mui/icons-material";
 
 import { getAccessToken, retrieveCurrentAuthor, getCurrentAuthorID, capitalizeFirstLetter } from "../../utils";
 import { PostTextbox } from "../PostTextbox/PostTextbox";
@@ -28,6 +28,7 @@ export const Post = (props) => {
     // const [show, setShow] = useState(false);
     const navigate = useNavigate();
     const [anchor, setAnchor] = useState(null);
+    const [openShare, setOpenShare] = useState(false);
     const [comments, setComments] = useState([]);
     const [likeablePost, setLikeablePost] = useState(true);
     const [likes, setLikes] = useState(0);
@@ -37,7 +38,7 @@ export const Post = (props) => {
     const currentUser = retrieveCurrentAuthor();
     const [isAuthor, setIsAuthor] = useState(false);
 
-    const options = ["share", "edit", "delete"]
+    const options = ["edit", "delete"]
 
     // cannot get from AuthService since author can be remote
     const aID = props.data.id.split("/authors/")[1].split("/posts/")[0];
@@ -67,6 +68,11 @@ export const Post = (props) => {
         } else if (props.data.id.includes("https://true-friends-404.herokuapp.com")) {
             RemoteAuthService.getRemoteComments("Team 12", aID, pID)
                 .then((response) => {
+                    // This forEach to delete the extra fields needs to be done
+                    // because Team 12 gives all this extra information in their response
+                    // and if these fields are not deleted, React throws a Error Decoder Link
+                    // saying that passing these fields to a child component is prohibited
+                    // Their endpoints were to far gone to change, so we had to adapt to them
                     response.forEach((comment) => {
                         comment.author.displayName = comment.author.username
                         delete comment.author.password
@@ -162,7 +168,10 @@ export const Post = (props) => {
             setPostTeam("Team 12")
         } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com")) {
             setPostTeam("Team 13")
+        } else if (props.data.id.includes("https://team-sixteen.herokuapp.com")) {
+            setPostTeam("Team 16")
         }
+
 
 
     }, [])
@@ -171,7 +180,7 @@ export const Post = (props) => {
       console.log("inside handleLikeOnClick");
         var data = {
             type: "Like",
-            context: "http://TODO.com/",
+            context: "https://social-distribution-404.herokuapp.com/",
             summary: currentUser.displayName + " Likes your post",
             author: currentUser,
             object: props.data.id,
@@ -209,6 +218,79 @@ export const Post = (props) => {
         }
     };
 
+    const handleOpenShare = () => {
+        setOpenShare(true);
+    };
+    const handleCloseShare = () => {
+        setOpenShare(false);
+    };
+
+    const handleShare = async (event) => {
+        handleCloseShare();
+        let visibility = event.target.outerText;
+        const allFollowers = await AuthService.getAuthorFollowers();
+        let hostArray = [
+            "https://true-friends-404.herokuapp.com/",
+            "https://cmput404-team13.herokuapp.com/",
+            "https://team-sixteen.herokuapp.com/"
+        ];
+        
+        for (const follower of allFollowers) {
+            let followerID = follower.id.split("/authors/")[1];
+            if (
+                follower.host.includes("https://social-distribution-404.herokuapp.com") ||
+                follower.host.includes("http://127.0.0.1:8000") ||
+                follower.host.includes("localhost")
+            ) {
+                let response = {status: 500};
+                if (visibility === "PUBLIC") {
+                    response = response.data ? response : await AuthService.sendInboxItem("post", followerID, {post:props.data});
+                } else if (visibility === "FRIENDS") {
+                    const isFollowing = await AuthService.getFollowStatus(aID, followerID);
+                    if (isFollowing) {
+                        response = response.data ? response : await AuthService.sendInboxItem("post", followerID, {post:props.data});
+                    }
+                }
+                if (response.status === 201 || response.status === 409) {
+                    props.setAlertDetails({alertSeverity: "success", 
+                        errorMessage: "Successfully shared post"})
+                } else {
+                    props.setAlertDetails({alertSeverity: "error", 
+                        errorMessage: "Failed to share post"})
+                }
+                handleOpen();
+            } else if (
+                follower.host.includes("https://true-friends-404.herokuapp.com") &&
+                hostArray.find((item) => item.includes("https://true-friends-404.herokuapp.com")) !==
+                    undefined
+            ) {
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://true-friends-404.herokuapp.com")
+                );
+                await RemoteAuthService.createRemotePost("Team 12", props.data);
+            } else if (
+                follower.host.includes("https://cmput404-team13.herokuapp.com") &&
+                hostArray.find((item) => item.includes("https://cmput404-team13.herokuapp.com")) !==
+                    undefined
+            ) {
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://cmput404-team13.herokuapp.com")
+                );
+                await RemoteAuthService.createRemotePost("Team 13", props.data, visibility)
+            } else if (
+                follower.host.includes("https://team-sixteen.herokuapp.com/") &&
+                hostArray.find((item) => item.includes("https://team-sixteen.herokuapp.com/")) !==
+                    undefined
+            ) {
+                // clear team13 from hostArray
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://team-sixteen.herokuapp.com/")
+                );
+                await RemoteAuthService.createRemotePost("Team 16", props.data, visibility)
+            }
+        }
+    }
+
     /* 
     When making a comment, pressing the "Enter" key will be the trigger for posting a comment.
     */
@@ -223,7 +305,6 @@ export const Post = (props) => {
                     props.data.id.includes("127.0.0.1") ||
                     props.data.id.includes("https://social-distribution-404.herokuapp.com")
                 ) {
-                // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
                 let data = {
                     type: "comment",
                     author: retrieveCurrentAuthor(),
@@ -275,7 +356,6 @@ export const Post = (props) => {
                         let currentAuthorInfo = retrieveCurrentAuthor();
                         let currentAuthorUsername = currentAuthorInfo.displayName;
                         let currentAuthorID = currentAuthorInfo.id.split("/authors/")[1];
-                        console.log(team12CommentData);
                         axios.post(
                             `https://true-friends-404.herokuapp.com/authors/${currentAuthorID}/${currentAuthorUsername}/posts/${pID}/comments/`,
                             team12CommentData,
@@ -337,7 +417,7 @@ export const Post = (props) => {
 
                     const postAuthorID = props.data.author.id.split("/authors/")[1];
                     axios
-                        .post("https://team-sixteen.herokuapp.com/authors/" + postAuthorID + "/inbox", data, {
+                        .post("https://team-sixteen.herokuapp.com/authors/" + postAuthorID + "/inbox/", data, {
                             headers: {
                                 Authorization: "Basic " + process.env.REACT_APP_T19BASICAUTH,
                                 ContentType: "application/json",
@@ -361,9 +441,7 @@ export const Post = (props) => {
     };
 
     const handleCloseUserMenu = async (event) => {
-        if (event.target.innerText === "share") {
-            console.log("share");
-        } else if (event.target.innerText === "edit") {
+        if (event.target.innerText === "edit") {
             navigate(`/author/${aID}/post/${pID}/edit`)
         } else if (event.target.innerText === "delete") {
             try {
@@ -382,7 +460,7 @@ export const Post = (props) => {
                 if (response) {
                     throw response
                 }
-                Promise.all(promises).then(async () => {
+                Promise.all(promises).then(() => {
                     handleOpen();
                     if (props.posts) {
                         props.setPosts(props.posts.filter((post) => post !== props.data));
@@ -404,6 +482,22 @@ export const Post = (props) => {
         props.setOpen(true);
     };
 
+    const handleUsernameClick = (event) => {
+        let team = "local"
+        if (props.data.id.includes("https://true-friends-404.herokuapp.com/")) {
+            team = "team12"
+        } else if (props.data.id.includes("https://cmput404-team13.herokuapp.com/")) {
+            team = "team13"
+        } else if (props.data.id.includes("https://team-sixteen.herokuapp.com/")) {
+            team = "team16"
+        }
+        if (team === "local") {
+            navigate("/profile/" + aID)
+        } else {
+            navigate("/profile/remote/" + team + "/" + aID)
+        }
+    }
+
     function isImagePost(){
         return (props.data.contentType === contentTypes[2]) || (props.data.contentType === contentTypes[3]) || (props.data.contentType === contentTypes[4])
     }
@@ -412,6 +506,51 @@ export const Post = (props) => {
 
     return (
         <>
+        <Dialog onClose={handleCloseShare} open={openShare}>
+            <DialogTitle variant="h5">
+                Share to:
+            </DialogTitle>
+            <DialogContent sx={{paddingBottom: "0"}}>
+                <Typography variant="h6">Who would you like to share the post to?</Typography>
+            </DialogContent>
+            <Box 
+                style={{
+                    display: "flex",
+                    flexDirection: "row",
+                    gap: "10px",
+                    margin: "1em 1em",
+                }}
+            >
+                <Button
+                    style={{width: "100%", minWidth: "150px",padding: "10px",fontSize: "15px",}}
+                    sx={{':hover': {backgroundColor: "#dc4191"}}}
+                    variant="contained"
+                    onClick={handleShare}
+                >
+                    Public
+                </Button>
+                <Divider orientation="vertical" variant="middle"  sx={{backgroundColor: "rgba(25, 118, 210, 0.2)"}} flexItem/>
+                <Button
+                    style={{width: "100%", minWidth: "150px",padding: "10px",fontSize: "15px",}}
+                    sx={{':hover': {backgroundColor: "#dc4191"}}}
+                    variant="contained"
+                    onClick={handleShare}
+                >
+                    Friends
+                </Button>
+            </Box>
+            <IconButton
+                onClick={handleCloseShare}
+                sx={{
+                    position: 'absolute',
+                    right: 8,
+                    top: 8,
+                    color: (theme) => theme.palette.grey[500],
+                }}
+            >
+                <Close />
+            </IconButton>
+        </Dialog>
         <Box style={{ display: "flex", flexDirection: "column", width: "70%" }}>
             <Card
                 style={{
@@ -422,19 +561,19 @@ export const Post = (props) => {
                 }}
                 elevation={10}
             >
-
-                <Box
-                    style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        alignItems: "center",
-                    }}
+                <Box style={{ display: "flex", flexDirection: "row", alignItems: "center", }}
                 >
                 </Box>
                 <CardHeader
                     style={{marginLeft: "auto", padding: "0"}}
                     avatar={
-                        <Avatar alt="user image" src={props.data.author.profileImage} sx={{ width: 70, height: 70 }} style={{ margin: "0 0 0 1ex" }} />
+                        <Avatar 
+                            alt="user image"
+                            src={props.data.author.profileImage}
+                            sx={{ width: 70, height: 70, cursor: "pointer" }}
+                            style={{ margin: "0 0 0 1ex" }}
+                            onClick={handleUsernameClick}
+                        />
                     }
                     action={isAuthor ? (
                             <>
@@ -475,7 +614,7 @@ export const Post = (props) => {
                         )
                     }
                     title={
-                        <Typography variant="h5">{props.data.author.displayName}</Typography>
+                        <Typography onClick={handleUsernameClick} variant="h5" sx={{cursor: "pointer"}}>{props.data.author.displayName}</Typography>
                     }
                 />
                 <Box style={{display: "flex",justifyContent: 'center',}}>
@@ -508,21 +647,45 @@ export const Post = (props) => {
                 </Box>
                 <Box 
                     style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        gap: "10px",
                         margin: "1em 1em",
-                        backgroundColor: "#ccc"
                     }}
                 >
                     <Button
                         style={{
                             width: "100%",
-                            padding: "1em"
+                            padding: "10px 0"
                         }}
-                        variant={likeablePost ? "contained" : "disabled"}
+                        sx={{
+                            borderRadius: "0",
+                            ':hover': {
+                                backgroundColor: "rgba(25, 118, 210, 0.2)"
+                            }
+                        }}
+                        variant={likeablePost ? "text" : "disabled"}
                         onClick={handleLikeOnClick}
                         endIcon={<ThumbUp />}
                     >
                         {likes}
                     </Button>
+                    <Divider orientation="vertical" variant="middle"  sx={{backgroundColor: "rgba(25, 118, 210, 0.2)"}} flexItem/>
+                    <Button
+                        style={{
+                            width: "100%",
+                            padding: "10px 0"
+                        }}
+                        sx={{
+                            borderRadius: "0",
+                            ':hover': {
+                                backgroundColor: "rgba(25, 118, 210, 0.2)"
+                            }
+                        }}
+                        variant="text"
+                        onClick={handleOpenShare}
+                        endIcon={<Share />}
+                    />
                 </Box>
             </Card>
             {/* slice is to prevent mutation of the original array of comments */}

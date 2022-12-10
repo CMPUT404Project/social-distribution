@@ -2,8 +2,6 @@ import axios from "axios";
 
 import { getCurrentAuthorID, retrieveCurrentAuthor } from "../utils";
 
-import AuthService from "./AuthService";
-
 const team12Instance = axios.create({
     baseURL: "https://true-friends-404.herokuapp.com"
 })
@@ -60,7 +58,7 @@ class RemoteAuthService {
                 return error
             });
         } else if (remoteNode === "Team 16") {
-            return await team16Instance.get("/authors/" + authorID).then((response) => {
+            return await team16Instance.get(`/authors/${authorID}`).then((response) => {
                 return response.data;
             }).catch((error) => {
                 if (error.response) {
@@ -110,12 +108,7 @@ class RemoteAuthService {
             return await team12Instance.get(`/authors/${foreignID}/followers/`)
             .then((response) => {
                 return response.data.some((follower) => {
-                    console.log("follower.sender_id")
-                    console.log(follower.sender_id)
-                    console.log("authorID")
-                    console.log(authorID)
                     if (follower.sender_id === authorID) {
-                        console.log("sender_id === authorID; returns true")
                         return true
                     }
                     return false
@@ -194,7 +187,7 @@ class RemoteAuthService {
         let authorID = getCurrentAuthorID();
         await this.getRemoteJWT(remoteNode);
         if (remoteNode === "Team 12") {
-            return await team12Instance.post(`/${authorID}/unfollow/${foreignID}`)
+            return await team12Instance.post(`/${authorID}/unfollow/${foreignID}/`)
             .then((response) => {
                 return response.data
             }).catch((error) => {
@@ -203,7 +196,6 @@ class RemoteAuthService {
                 }
             })
         } else if (remoteNode === "Team 13"){
-            // /authors/{author_id}/followers/{foreign_author_id}
             return await team13Instance.delete(`/authors/${authorID}/followers/${foreignID}`)
             .then((response) => {
                 return response.data
@@ -294,6 +286,48 @@ class RemoteAuthService {
             })
         }
     }
+
+    async createRemotePost(remoteNode, post, visibility="") {
+        await this.getRemoteJWT(remoteNode);
+        let authorID = getCurrentAuthorID();
+        let currentAuthor = retrieveCurrentAuthor();
+        let authorUsername = sessionStorage.getItem("username");
+        let headers = {"Content-Type": "application/json"}
+        try {
+            if (remoteNode === "Team 12") {
+                let team12Data = {...post};
+                // author is not required since it is sent with the URI
+                delete team12Data["author"];
+                // Do not include categories
+                // https://discord.com/channels/1042662487025274962/1042662487025274965/1046152315641528380
+                delete team12Data["categories"];
+                team12Data.id = team12Data.id.split("/posts/")[1];
+                await team12Instance.post(`/authors/${authorID}/${authorUsername}/posts/`, team12Data, {headers})
+            } else if (remoteNode === "Team 13") {
+                let team13data = {...post};
+                // clean up data of post
+                delete team13data["categories"];
+                delete team13data["count"];
+                team13data.author = { id: authorID, displayName: currentAuthor.displayName };
+                team13data.originalAuthor = { id: post.author.id.split("/authors/")[1], displayName: post.author.displayName };
+                team13data.id = post.id.split("/posts/")[1];
+                //create post on their server
+                const createdPost = await team13Instance.put(`/authors/${authorID}/posts`, team13data, {headers})
+                //call endpoint depending on visibility for distribution
+                if (visibility.includes("PUBLIC")) {
+                    await team13Instance.post(`/inbox/public/${authorID}/${createdPost.data.id}`, {}, {headers})
+                } else if (visibility.includes("FRIEND")) {
+                    await team13Instance.post(`/inbox/friend/${authorID}/${createdPost.data.id}`, {}, {headers})
+                }
+            } else if (remoteNode === "Team 16") {
+                await team16Instance.post(`/authors/${authorID}/posts/`, post, {headers})
+            }
+        } catch (error) {
+            if (error.response) {
+                console.log(error.response.status, error.response.data);
+            }
+        }
+    }
     
     async updateRemotePost(remoteNode, authorID, postID, body) {
         await this.getRemoteJWT(remoteNode);
@@ -381,11 +415,8 @@ class RemoteAuthService {
     }
 
     async getRemoteLikesOnComment(remoteNode, authorID, postID, commentID) {
-        const currentAuthorID = getCurrentAuthorID()
-        const currentAuthorUsername = sessionStorage.getItem('username') 
         await this.getRemoteJWT(remoteNode)
         if (remoteNode === "Team 12"){
-            // return await team12Instance.get("/authors/" + currentAuthorID + "/" + currentAuthorUsername + "/posts/" + commentID + "/likes/")
             return await team12Instance.get("/comments/" + commentID + "/likes/")
             .then((response) => {
                 return response.data
@@ -419,7 +450,6 @@ class RemoteAuthService {
         else if (remoteNode === "Team 13"){
             return await team13Instance.post("/authors/" + authorID + "/posts/" + postID + "/likes/" + currentAuthorID)
             .then((response) => {
-                // return response.data
                 console.log(response)
             }).catch((error) => {
                 console.log(error)
@@ -430,7 +460,7 @@ class RemoteAuthService {
                 "@context": "https://social-distribution-404.herokuapp.com/",
                 summary: `${currentAuthorUsername} Likes your post`,
                 type: "Like",
-                author: AuthService.getAuthorDetails(),
+                author: retrieveCurrentAuthor(),
                 object: `https://team-sixteen-social-scene.herokuapp.com/${authorID}/posts/${postID}`
             })
         }
@@ -451,7 +481,6 @@ class RemoteAuthService {
             const currentAuthorID = getCurrentAuthorID()
             return await team13Instance.post("/authors/" + authorID + "/posts/" + postID + "/comments/" + commentID + "/likes/" + currentAuthorID)
             .then((response) => {
-                // console.log(response)
                 return response.data
             }).catch((error) => {
                 console.log(error)

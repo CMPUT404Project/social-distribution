@@ -1,13 +1,15 @@
-import { Button, Card, CardMedia, FormControl, MenuItem, Snackbar, TextField } from "@mui/material";
+import { Button, Card, CardMedia, FormControl, MenuItem, Snackbar, TextField, IconButton } from "@mui/material";
+import { FileUpload } from "@mui/icons-material"
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 
+import AuthService from "../../services/AuthService";
+import RemoteAuthService from "../../services/RemoteAuthService";
 import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 
 export const PostTextbox = (props) => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    // TODO: Get markdown/base64 example to try.
     const [contentType, setContentType] = useState("text/plain");
     const [visibility, setVisibility] = useState("PUBLIC");
     const [tags, setTags] = useState("");
@@ -50,7 +52,7 @@ export const PostTextbox = (props) => {
         };
     }
 
-    const onFormSubmit = (e) => {
+    const onFormSubmit = async (e) => {
         let tokens = [];
         if (tags !== "") {
             tokens = tags.split(",").map((word) => word.trim());
@@ -70,244 +72,9 @@ export const PostTextbox = (props) => {
         const userJSON = retrieveCurrentAuthor();
         const aID = userJSON.id.split("/authors/")[1];
         // create post
-        axios
-            .post(`/authors/${aID}/posts`, data, {
-                headers: {
-                    Authorization: "Bearer " + getAccessToken(),
-                    "Content-Type": "application/json",
-                },
-            })
-            // the createdPost.data should be the whole post, which then is sent to the users.
-            .then(async(createdPost) => {
-                // first send to current user's inbox
-                props.setPosts([createdPost.data, ...props.posts]);
-                let postWithAuthor = createdPost.data;
-                postWithAuthor["author"] = userJSON;
-                await axios
-                    .post(`/authors/${aID}/inbox`, postWithAuthor, {
-                        headers: {
-                            Authorization: "Bearer " + getAccessToken(),
-                            "Content-Type": "application/json",
-                        },
-                    })
-                    .catch((res) => console.log(res));
-                if (createdPost.data.unlisted === true) {
-                    return;
-                }
-                // then to everyone else
-                axios
-                    .get(`/authors/${aID}/followers`, {
-                        headers: {
-                            Authorization: "Bearer " + getAccessToken(),
-                        },
-                    })
-                    .then((res) => {
-                        let followers = res.data.items;
-                        // Team 12 and 13 must be here since they only require 1 call per post.
-                        let hostArray = [
-                            "https://true-friends-404.herokuapp.com/",
-                            "https://cmput404-team13.herokuapp.com/",
-                        ];
-                        followers.forEach((user) => {
-                            let faID = user.id.split("/authors/")[1];
-
-                            // Team 12 implementation
-                            if (
-                                user.host.includes("https://true-friends-404.herokuapp.com") &&
-                                hostArray.find((item) => item.includes("https://true-friends-404.herokuapp.com")) !==
-                                    undefined
-                            ) {
-                                // remove team 12 from hostArray since they should only be called once per post in case they have multiple
-                                //   users that follow the current user
-                                hostArray = hostArray.filter(
-                                    (item) => !item.includes("https://true-friends-404.herokuapp.com")
-                                );
-                                // get jwt token
-                                axios
-                                    .post(
-                                        "https://true-friends-404.herokuapp.com/api/token/obtain/",
-                                        {
-                                            email: process.env.REACT_APP_T12USER,
-                                            password: process.env.REACT_APP_T12PASS,
-                                        },
-                                        {
-                                            headers: {
-                                                "Content-Type": "application/json",
-                                                "Access-Control-Allow-Origin": "*",
-                                            },
-                                        }
-                                    )
-                                    .then((res) => {
-                                        let team12Data = JSON.parse(JSON.stringify(createdPost.data));
-                                        // author is not required since it is sent with the URI
-                                        delete team12Data["author"];
-                                        // Do not include categories
-                                        // https://discord.com/channels/1042662487025274962/1042662487025274965/1046152315641528380
-                                        delete team12Data["categories"];
-                                        team12Data.id = team12Data.id.split("/posts/")[1];
-
-                                        axios.post(
-                                            `https://true-friends-404.herokuapp.com/authors/${aID}/${sessionStorage.getItem(
-                                                "username"
-                                            )}/posts/`,
-                                            team12Data,
-                                            {
-                                                headers: {
-                                                    Authorization: "Bearer " + res.data.access,
-                                                    "Content-Type": "application/json",
-                                                },
-                                            }
-                                        );
-                                    });
-                            }
-
-                            // // Team 13 implementation
-                            else if (
-                                user.host.includes("https://cmput404-team13.herokuapp.com") &&
-                                hostArray.find((item) => item.includes("https://cmput404-team13.herokuapp.com")) !==
-                                    undefined
-                            ) {
-                                // clear team13 from hostArray
-                                hostArray = hostArray.filter(
-                                    (item) => !item.includes("https://cmput404-team13.herokuapp.com")
-                                );
-
-                                // if the current user is where the post originated
-
-                                // get jwt token
-                                axios
-                                    .put("https://cmput404-team13.herokuapp.com/users", {
-                                        username: process.env.REACT_APP_T13USER,
-                                        password: process.env.REACT_APP_T13PASS,
-                                    })
-                                    .then((res) => {
-                                        const jwt = process.env.REACT_APP_T13JWT;
-                                        let team13data = JSON.parse(JSON.stringify(createdPost.data));
-                                        // clean up data of post
-                                        delete team13data["categories"];
-                                        delete team13data["count"];
-                                        // is not need since unlisted will never be sent to users.
-                                        team13data.visibility =
-                                            team13data.unlisted === false ? team13data.visibility : "UNLISTED";
-                                        team13data.author = { id: aID, displayName: userJSON.displayName };
-                                        team13data.originalAuthor = { id: aID, displayName: userJSON.displayName };
-                                        team13data.id = createdPost.data.id.split("/posts/")[1];
-                                        // team13data.originalAuthor = {
-                                        //     id: aID,
-                                        //     displayName: userJSON.displayName,
-                                        // };
-                                        // get the user info if it is not the current user
-                                        // if (createdPost.data.origin !== createdPost.data.id) {
-                                        // ex: {source: "http://127.0.0.1:5454/authors/9de11658e/posts/76bd9e"}
-                                        // I am assuming that the source I recieve follows this format
-                                        // {host}/authors/{aid}/posts/{pid}
-                                        // team13 requires originalAuthor displayName which we have to call the origin's authors server which we might not have access to.
-                                        // TODO: this call is irrelevant because originalAuthor will always be us for this component/scenario.
-                                        // axios
-                                        //     .get(createdPost.data.origin, {
-                                        //         headers: {
-                                        //             Authorization: "Bearer " + getAccessToken(),
-                                        //         },
-                                        //     })
-                                        //     .then((res) => {
-                                        //         team13data.originalAuthor = {
-                                        //             id: res.data.author.id,
-                                        //             displayName: res.data.author.displayName,
-                                        //         };
-
-                                        //create post on their server
-                                        axios
-                                            .put(
-                                                `https://cmput404-team13.herokuapp.com/authors/${aID}/posts`,
-                                                team13data,
-                                                {
-                                                    headers: {
-                                                        Authorization: "Bearer " + jwt,
-                                                        "Content-Type": "application/json",
-                                                    },
-                                                }
-                                            )
-                                            .then((res) => {
-                                                //call endpoint depending on visibility for distribution
-                                                if (data.visibility.includes("PUBLIC")) {
-                                                    axios
-                                                        .post(
-                                                            `https://cmput404-team13.herokuapp.com/inbox/public/${aID}/${res.data.id}`,
-                                                            {},
-                                                            {
-                                                                headers: {
-                                                                    Authorization: "Bearer " + jwt,
-                                                                    "Content-Type": "application/json",
-                                                                },
-                                                            }
-                                                        )
-                                                        .then(() => console.log("PUBLIC POST SUCCESSFUL"));
-                                                } else if (data.visibility.includes("FRIEND")) {
-                                                    axios
-                                                        .post(
-                                                            `https://cmput404-team13.herokuapp.com/inbox/friend/${aID}/${
-                                                                // createdPost.data.id.split("/posts/")[1]
-                                                                res.data.id
-                                                            }`,
-                                                            {},
-                                                            {
-                                                                headers: {
-                                                                    Authorization: "Bearer " + jwt,
-                                                                    "Content-Type": "application/json",
-                                                                },
-                                                            }
-                                                        )
-                                                        .then(() => console.log("FRIEND POST SUCCESSFUL"));
-                                                }
-                                            })
-                                            .catch((err) => console.log(err));
-                                        // })
-                                        // .catch((err) => {
-                                        //     console.log(err);
-                                        // });
-                                        // }
-                                    })
-                                    .catch((err) => console.log(err));
-                            }
-
-                            // Team 16 - keep condition for consistency for now.
-                            else if (
-                                user.host.includes("https://social-distribution-404.herokuapp.com") ||
-                                user.host.includes("http://127.0.0.1:8000") ||
-                                user.host.includes("localhost")
-                            ) {
-                                // if PUBLIC send to all of current user's followers' inboxes
-                                if (data.visibility === "PUBLIC") {
-                                    axios.post(`/authors/${faID}/inbox`, createdPost.data, {
-                                        headers: {
-                                            Authorization: "Bearer " + getAccessToken(),
-                                            "Content-Type": "application/json",
-                                        },
-                                    });
-                                }
-                                // if FRIEND then check if I follow the follower, if true then send to inbox
-                                if (data.visibility.includes("FRIEND")) {
-                                    axios
-                                        .get(`${user.host}/authors/${faID}/followers/${aID}`, {
-                                            headers: {
-                                                Authorization: "Bearer " + getAccessToken(),
-                                            },
-                                        })
-                                        .then((statusString) => {
-                                            // if true, then send. else ignore.
-                                            if (statusString.data === true) {
-                                                axios.post(`/authors/${faID}/inbox`, createdPost.data, {
-                                                    headers: {
-                                                        Authorization: "Bearer " + getAccessToken(),
-                                                        "Content-Type": "application/json",
-                                                    },
-                                                });
-                                            }
-                                        });
-                                }
-                            }
-                        });
-                    });
+        const createdPost = await AuthService.createPost(data)
+            .then((response) => {
+                return response
             })
             .catch(() => setAlert("Could not submit post."))
             .finally(() => {
@@ -323,6 +90,83 @@ export const PostTextbox = (props) => {
                 setbase64file(null);
                 setimageURL(null);
             });
+        if (!createdPost) {
+            return;
+        }
+        props.setPosts([createdPost, ...props.posts]);
+        let postWithAuthor = createdPost;
+        postWithAuthor["author"] = userJSON;
+        // first send to current user's inbox
+        await AuthService.sendInboxItem("post", aID, {post:postWithAuthor});
+        if (createdPost.unlisted === true) {
+            return;
+        }
+        const allFollowers = await AuthService.getAuthorFollowers();
+        // Team 12 and 13 must be here since they only require 1 call per post.
+        let hostArray = [
+            "https://true-friends-404.herokuapp.com/",
+            "https://cmput404-team13.herokuapp.com/",
+            "https://team-sixteen.herokuapp.com/",
+        ];
+        allFollowers.forEach((user) => {
+            let faID = user.id.split("/authors/")[1];
+
+            // Team 12 implementation
+            if (
+                user.host.includes("https://true-friends-404.herokuapp.com") &&
+                hostArray.find((item) => item.includes("https://true-friends-404.herokuapp.com")) !==
+                    undefined
+            ) {
+                // remove team 12 from hostArray since they should only be called once per post in case they have multiple
+                //   users that follow the current user
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://true-friends-404.herokuapp.com")
+                );
+                RemoteAuthService.createRemotePost("Team 12", createdPost);
+            }
+            // // Team 13 implementation
+            else if (
+                user.host.includes("https://cmput404-team13.herokuapp.com") &&
+                hostArray.find((item) => item.includes("https://cmput404-team13.herokuapp.com")) !==
+                    undefined
+            ) {
+                // clear team13 from hostArray
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://cmput404-team13.herokuapp.com")
+                );
+                RemoteAuthService.createRemotePost("Team 13", createdPost, data.visibility)
+            }
+            // Team 16 - keep condition for consistency for now.
+            else if (
+                user.host.includes("https://team-sixteen.herokuapp.com/") &&
+                hostArray.find((item) => item.includes("https://team-sixteen.herokuapp.com/")) !==
+                    undefined
+            ) {
+                // clear team13 from hostArray
+                hostArray = hostArray.filter(
+                    (item) => !item.includes("https://team-sixteen.herokuapp.com/")
+                );
+                RemoteAuthService.createRemotePost("Team 16", createdPost)
+            }
+            else if (
+                user.host.includes("https://social-distribution-404.herokuapp.com") ||
+                user.host.includes("http://127.0.0.1:8000") ||
+                user.host.includes("localhost")
+            ) {
+                // if PUBLIC send to all of current user's followers' inboxes
+                if (data.visibility === "PUBLIC") {
+                    AuthService.sendInboxItem("post", faID, {post:createdPost});
+                }
+                // if FRIEND then check if I follow the follower, if true then send to inbox
+                if (data.visibility.includes("FRIEND")) {
+                    AuthService.getFollowStatus(aID, faID).then((response) => {
+                        if (response) {
+                            AuthService.sendInboxItem("post", faID, {post:createdPost});
+                        }
+                    });
+                }
+            }
+        });
     };
 
     const handleContentTypeChange = (e) => {
@@ -334,7 +178,7 @@ export const PostTextbox = (props) => {
         return (contentType === contentTypes[2]) || (contentType === contentTypes[3]) || (contentType === contentTypes[4])
     }
 
-    const contentTypes = ["text/plain", "text/markdown", "application/base64", "image/png;base64", "image/jpeg;base64"];
+    const contentTypes = ["text/plain", "text/markdown", "image/png;base64", "image/jpeg;base64"];
 
     return (
         <Card style={{height:"auto"}}>
@@ -356,12 +200,34 @@ export const PostTextbox = (props) => {
                     required
                 />
                 {isFileUploadPost() ?
-                    <CardMedia 
-                        component="img" 
-                        image={imageURL} 
-                        alt={"File Preview"} 
-                        height="150"
-                        sx={{maxWidth: "150px", display: "flex", alignContent: "center" }}/> :
+                    (
+                        <>
+                        <CardMedia 
+                            component="img" 
+                            image={imageURL} 
+                            alt={"File Preview"}
+                            sx={{
+                                display: "flex", 
+                                minHeight: "150px",
+                                maxHeight: "300px",
+                                alignItems: "center", 
+                                justifyContent: "center", 
+                                objectFit: "contain"
+                            }}
+                        />
+                        <Button variant="text" component="label" endIcon={<FileUpload />} 
+                            sx={{
+                                borderTop: "1px solid black", 
+                                borderRadius: "0",
+                                ':hover': {
+                                    backgroundColor: "rgba(25, 118, 210, 0.2)"
+                                }
+                            }}>
+                            Upload image
+                            <input hidden accept="image/*" type="file" onChange={handleFileChange}/>
+                        </Button>
+                        </>
+                    ) : (
                         <TextField
                             label="Enter your main text here! (required)"
                             variant="filled"
@@ -369,7 +235,7 @@ export const PostTextbox = (props) => {
                             multiline
                             onInput={(e) => setContent(e.target.value)}
                             required
-                        />
+                        />)
                 }
                 <TextField
                     label="Enter your description here!"
@@ -426,19 +292,6 @@ export const PostTextbox = (props) => {
                     <MenuItem value={true}>Yes</MenuItem>
                     <MenuItem value={false}>No</MenuItem>
                 </TextField>
-                {isFileUploadPost()
-                    ? (<Button
-                        variant="contained"
-                        component="label"
-                    >
-                        Upload File
-                        <input
-                            type="file" onChange={handleFileChange}
-                            hidden
-                        />
-                    </Button>)
-                    : null
-                }
                 <Button variant="contained" sx={{ borderRadius: 0, padding: 1.7 }} onClick={onFormSubmit}>
                     Distribute
                 </Button>

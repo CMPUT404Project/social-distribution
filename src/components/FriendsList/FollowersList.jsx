@@ -83,7 +83,6 @@ export default class FollowersList extends Component {
 
     renderEvents() {
         return this.props.followers.map(follower => {
-            console.log(follower)
             return <User key={follower.id} data={follower}></User>;
         })
     }

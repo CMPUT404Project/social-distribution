@@ -63,6 +63,7 @@ function LoginPage() {
                 const response = await AuthService.login(values.username, values.password, rememberMe)
                     .then(() => {
                         setLoading(false);
+                        localStorage.setItem('username', values.username)
                         navigate(from, {replace: true})
                     }, error => {
                         return error
@@ -160,7 +161,7 @@ function LoginPage() {
                         Register
                     </Link>
                 </div>
-            </div>)};
+            </div>)}
         </div>
     )
 }

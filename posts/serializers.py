@@ -22,26 +22,6 @@ class PostsViewSerializer(serializers.ModelSerializer):
         'unlisted'
         ]
 
-class PostsInboxSerializer(serializers.ModelSerializer):
-    id = serializers.URLField()
-    categories = serializers.CharField(required=True, allow_blank=True)
-    class Meta:
-        model = Post
-        fields = [
-        'title', 
-        'id', 
-        'source', 
-        'origin', 
-        'description', 
-        'contentType', 
-        'content',
-        'author', 
-        'categories',
-        'published', 
-        'visibility', 
-        'unlisted'
-        ]
-
 class PostsSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     items = serializers.SerializerMethodField()
@@ -154,7 +134,6 @@ class PostCreationSerializer(serializers.ModelSerializer):
 class PostCreationWithIDSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
     id = serializers.UUIDField()
-    categories = serializers.CharField(required=True, allow_blank=False)
     class Meta:
         model = Post
         fields = ['type', 
@@ -166,7 +145,6 @@ class PostCreationWithIDSerializer(serializers.ModelSerializer):
         'contentType', 
         'content',
         'author', 
-        'categories',
         'published', 
         'visibility', 
         'unlisted'
@@ -174,11 +152,6 @@ class PostCreationWithIDSerializer(serializers.ModelSerializer):
 
     def get_type(self, obj):
         return "post"
-
-    def validate_categories(self, value):
-        if "[" not in value and "]" not in value:
-            raise serializers.ValidationError("Please enter a list of values.")
-        return value
 
 class PostSwaggerResponseSerializer(serializers.ModelSerializer):
     type = serializers.SerializerMethodField()
