@@ -302,7 +302,6 @@ export const Post = (props) => {
                     props.data.id.includes("127.0.0.1") ||
                     props.data.id.includes("https://social-distribution-404.herokuapp.com")
                 ) {
-                // TODO: data variable should be sent, postTextBox.value is the text that should be sent.
                 let data = {
                     type: "comment",
                     author: retrieveCurrentAuthor(),

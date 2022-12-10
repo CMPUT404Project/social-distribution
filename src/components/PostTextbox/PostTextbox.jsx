@@ -10,7 +10,6 @@ import { getAccessToken, retrieveCurrentAuthor } from "../../utils";
 export const PostTextbox = (props) => {
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
-    // TODO: Get markdown/base64 example to try.
     const [contentType, setContentType] = useState("text/plain");
     const [visibility, setVisibility] = useState("PUBLIC");
     const [tags, setTags] = useState("");
